@@ -1,4 +1,4 @@
-# Emergency Alert System (Web)
+# Emergency Alert System
 
 ## Project Overview
 This is a simple web-based Emergency Alert System developed as a final year project.
