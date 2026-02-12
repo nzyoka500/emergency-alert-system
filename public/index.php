@@ -1,57 +1,74 @@
 <?php
-// Login page - main entry point for the application
+    // import files
+    include '../includes/header.php';
 
-
-// echo "Welcome to the Login Page! Please enter your credentials to continue.";
-
-// App logic for handling login can be implemented here, such as validating user input, 
-// checking credentials against a database, and managing user sessions.
+    // Capture and clear flash error if present
+    $flashError = '';
+    if (session_status() === PHP_SESSION_NONE) session_start();
+    if (!empty($_SESSION['error'])) {
+        $flashError = $_SESSION['error'];
+        unset($_SESSION['error']);
+    }
 
 ?>
 
-<!-- 
-    Now i need to create a login form that allows users to enter their username and password.
-
-    Application name is: Responda – A Community Emergency Alert and Response System.
-
-    Need a simple and user-friendly login form that includes fields for username and password, as well as a submit button. 
-    The form should also have a link for users who forgot their password and an option to register for new users.
-
-    ../includes/header.php should be included at the top of the page to maintain a consistent look and feel across the application.
-    ../includes/footer.php should be included at the bottom of the page to maintain a consistent look and feel across the application.
-
-    ../assets/css/styles.css should be linked in the header to apply the necessary styling to the login form and overall page layout.
-
-    ../assets/js/scripts.js should be linked in the footer to handle any necessary JavaScript functionality for the login form, 
-        such as form validation or handling user interactions.
-    
-    ../assets/images/logo.png should be used as the logo for the application and should be displayed prominently on the login page.
-
--->
-<?php include '../includes/header.php'; ?>
-
-<div class="login-container">
-    <img src="../assets/images/logo.png" alt="Responda Logo" class="logo">
-    <h2>Welcome to Responda</h2>
-    <p>Please enter your credentials to continue.</p>
-    <form action="login_process.php" method="POST" class="login-form">
-        <div class="form-group">
-            <label for="username">Username:</label>
-            <input type="text" id="username" name="username" required>
+<div class="container d-flex justify-content-center align-items-center min-vh-100">
+    <div class="card shadow-lg p-5" style="width: 100%; max-width: 400px; border-radius: 12px;">
+        <div class="text-center mb-4">
+            <img src="../assets/images/logo.png" alt="Responda Logo" class="img-fluid rounded-circle" style="width: 80px; height: 80px; background: #f0f0f0; padding: 10px;">
         </div>
-        <div class="form-group">
-            <label for="password">Password:</label>
-            <input type="password" id="password" name="password" required>
+
+        <h2 class="text-center text-primary mb-2" style="font-size: 28px; font-weight: 600;">Welcome to Responda</h2>
+        <p class="text-center text-muted mb-4">Please enter your credentials to continue.</p>
+
+        <form action="login-process.php" method="POST">
+            <div class="mb-3">
+                <label for="username" class="form-label fw-500">Username:</label>
+                <input type="text" id="username" name="username" class="form-control" placeholder="Enter your username" required>
+            </div>
+            <div class="mb-4">
+                <label for="password" class="form-label fw-500">Password:</label>
+                <input type="password" id="password" name="password" class="form-control" placeholder="Enter your password" required>
+            </div>
+            <button type="submit" class="btn btn-primary w-100" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border: none; padding: 12px; font-weight: 600;">Login</button>
+        </form>
+
+        <div class="d-flex justify-content-center align-items-center gap-3 mt-4 pt-4 border-top">
+            <a href="forgot-password.php" class="text-decoration-none text-primary fw-500 small">Forgot Password?</a>
+            <span class="text-muted">|</span>
+            <a href="register.php" class="text-decoration-none text-primary fw-500 small">Register</a>
         </div>
-        <button type="submit" class="btn">Login</button>
-    </form>
-    <div class="additional-options">
-        <a href="forgot_password.php">Forgot Password?</a>
-        <span>|</span>
-        <a href="register.php">Register</a>
     </div>
 </div>
 
+
 <?php include '../includes/footer.php'; ?>
+
+<!-- Flash Error Modal -->
+<?php if (!empty($flashError)): ?>
+        <div class="modal fade" id="flashErrorModal" tabindex="-1" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content">
+                    <div class="modal-header bg-danger text-white">
+                        <h5 class="modal-title">Login Error</h5>
+                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <p class="mb-0"><?php echo htmlspecialchars($flashError, ENT_QUOTES, 'UTF-8'); ?></p>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <script>
+        document.addEventListener('DOMContentLoaded', function () {
+                var myModal = new bootstrap.Modal(document.getElementById('flashErrorModal'));
+                myModal.show();
+        });
+        </script>
+<?php endif; ?>
 
 
