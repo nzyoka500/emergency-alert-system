@@ -49,7 +49,7 @@ Responda is designed to:
 ## Screenshots
 
 ### 🔐 Login Page
-![Login Page](assets/images/screenshots/login.png)
+![Login Page](./assets/screenshots/login.png)
 
 ### 📊 Dashboard
 ![Dashboard](assets/images/screenshots/dashboard.png)
