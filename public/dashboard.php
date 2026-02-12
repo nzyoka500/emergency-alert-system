@@ -74,7 +74,7 @@ include __DIR__ . '/../includes/header.php';
         <?php include __DIR__ . '/../includes/sidebar.php'; ?>
 
         <!-- Main Content -->
-        <div class="col-lg-10">
+        <div class="col-lg-10" style="min-height: calc(100vh - 40px); overflow:auto; padding: 24px 32px;">
             <!-- Header Section -->
             <div class="row mb-5 align-items-center">
                 <div class="col-md-8">
