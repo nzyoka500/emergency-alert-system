@@ -7,7 +7,7 @@
 <!-- Custom JS -->
 <script src="../assets/js/script.js"></script>
 
-<footer class="text-center mt-5 mb-3">
+<footer class="text-center mt-0 mb-3 fw-800">
     <small>&copy; <?php echo date("Y"); ?> Responda. All rights reserved.</small>
 </footer>
 
