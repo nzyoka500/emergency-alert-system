@@ -15,19 +15,22 @@
 <div class="container d-flex justify-content-center align-items-center min-vh-100">
     <div class="card shadow-lg p-5" style="width: 100%; max-width: 400px; border-radius: 12px;">
         <div class="text-center mb-4">
-            <img src="../assets/images/logo.png" alt="Responda Logo" class="img-fluid rounded-circle" style="width: 80px; height: 80px; background: #f0f0f0; padding: 10px;">
+            <svg width="80" height="80" viewBox="0 0 80 80" class="rounded-circle" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 10px;">
+                <circle cx="40" cy="40" r="35" fill="#fff" opacity="0.1"/>
+                <text x="40" y="50" font-size="40" font-weight="bold" fill="#fff" text-anchor="middle" font-family="Arial, sans-serif">R</text>
+            </svg>
         </div>
 
-        <h2 class="text-center text-primary mb-2" style="font-size: 28px; font-weight: 600;">Welcome to Responda</h2>
-        <p class="text-center text-muted mb-4">Please enter your credentials to continue.</p>
+        <h2 class="text-center mb-2" style="font-size: 28px; color:#764ba2; font-weight: 600;">Responda</h2>
+        <!-- <p class="text-center text-muted mb-4">Please enter your credentials to continue.</p> -->
 
         <form action="login-process.php" method="POST">
             <div class="mb-3">
-                <label for="username" class="form-label fw-500">Username:</label>
+                <label for="username" class="form-label fw-700">Username</label>
                 <input type="text" id="username" name="username" class="form-control" placeholder="Enter your username" required>
             </div>
             <div class="mb-4">
-                <label for="password" class="form-label fw-500">Password:</label>
+                <label for="password" class="form-label fw-700">Password</label>
                 <input type="password" id="password" name="password" class="form-control" placeholder="Enter your password" required>
             </div>
             <button type="submit" class="btn btn-primary w-100" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border: none; padding: 12px; font-weight: 600;">Login</button>
