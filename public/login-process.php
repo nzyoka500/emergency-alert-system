@@ -25,8 +25,9 @@ try {
 	$pdo = getPDO();
 
 	// Allow users to login using email, full_name, or phone
-	$stmt = $pdo->prepare('SELECT id, full_name, email, phone, password, role_id, status FROM users WHERE email = :identifier OR full_name = :identifier OR phone = :identifier LIMIT 1');
-	$stmt->execute([':identifier' => $username]);
+	// Use positional placeholders to avoid driver issues with repeated named parameters
+	$stmt = $pdo->prepare('SELECT id, full_name, email, phone, password, role_id, status FROM users WHERE email = ? OR full_name = ? OR phone = ? LIMIT 1');
+	$stmt->execute([$username, $username, $username]);
 	$user = $stmt->fetch();
 
 	if (!$user) {
@@ -37,6 +38,8 @@ try {
 		} else {
 			$_SESSION['error'] = 'No account found with that username or phone number.';
 		}
+		// Log for debugging (do not expose to user)
+		error_log(sprintf('Login attempt: identifier="%s" - user not found', $username));
 		header('Location: index.php');
 		exit;
 	}
@@ -84,6 +87,12 @@ try {
 	}
 
 	// If we reach here, password verification failed
+	// Log debug info about the failed auth attempt (mask sensitive parts)
+	$stored = $user['password'] ?? '';
+	$stored_preview = substr($stored, 0, 10); // preview only
+	$pv = password_verify($password, $stored) ? 'true' : 'false';
+	error_log(sprintf('Login failed: identifier="%s", user_id=%s, password_verify=%s, stored_preview=%s', $username, $user['id'], $pv, $stored_preview));
+
 	// Friendly message for users
 	$_SESSION['error'] = 'Incorrect password. Please try again.';
 	header('Location: index.php');
