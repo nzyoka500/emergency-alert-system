@@ -31,6 +31,9 @@ $recent_alerts = [];
 
 try {
     $pdo = getPDO();
+        // Fetch a slightly larger set for the table view
+        $stmt = $pdo->query("SELECT a.id, a.title, a.status, a.created_at, at.name as alert_type FROM alerts a LEFT JOIN alert_types at ON a.alert_type_id = at.id ORDER BY a.created_at DESC LIMIT 15");
+        $table_alerts = $stmt->fetchAll() ?? [];
 
     // Count active alerts (status: pending, verified, broadcasted)
     $stmt = $pdo->query("SELECT COUNT(*) as count FROM alerts WHERE status IN ('pending', 'verified', 'broadcasted')");
@@ -238,6 +241,36 @@ include __DIR__ . '/../includes/header.php';
         </div>
     </div>
 </div>
+
+<!-- Chart.js and inline chart initialization -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.3.2/dist/chart.umd.js" integrity="sha384-eI7PSr3L1XLISH8JdDII5YN/njoSsxfbrkCTnJrzXt+ENP5MOVBxD+l6sEG4zoLp" crossorigin="anonymous"></script>
+<script>
+    (function(){
+        const labels = <?php echo json_encode(['Active Alerts','Pending Review','Responses','Users']); ?>;
+        const data = <?php echo json_encode([ (int)$stats['active_alerts'], (int)$stats['pending_alerts'], (int)$stats['responses'], (int)$stats['total_users'] ]); ?>;
+
+        const ctx = document.getElementById('myChart');
+        if (ctx) {
+            new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: 'Summary',
+                        data: data,
+                        backgroundColor: ['#667eea','#764ba2','#28a745','#ffc107'],
+                        borderRadius: 6
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {legend: {display:false}},
+                    scales: {y: {beginAtZero:true}}
+                }
+            });
+        }
+    })();
+</script>
 
 <?php include __DIR__ . '/../includes/footer.php'; ?>
 
