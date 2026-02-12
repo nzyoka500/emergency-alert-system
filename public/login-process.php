@@ -24,18 +24,46 @@ require_once __DIR__ . '/../includes/config.php';
 try {
 	$pdo = getPDO();
 
-	// Allow users to login using email or full name
-	$stmt = $pdo->prepare('SELECT id, full_name, email, password FROM users WHERE email = :identifier OR full_name = :identifier LIMIT 1');
+	// Allow users to login using email, full_name, or phone
+	$stmt = $pdo->prepare('SELECT id, full_name, email, phone, password, role_id, status FROM users WHERE email = :identifier OR full_name = :identifier OR phone = :identifier LIMIT 1');
 	$stmt->execute([':identifier' => $username]);
 	$user = $stmt->fetch();
 
+	if (!$user) {
+		// No user found for the provided identifier
+		$isEmail = filter_var($username, FILTER_VALIDATE_EMAIL);
+		if ($isEmail) {
+			$_SESSION['error'] = 'No account found with that email address.';
+		} else {
+			$_SESSION['error'] = 'No account found with that username or phone number.';
+		}
+		header('Location: index.php');
+		exit;
+	}
+
+	// If we have a user, enforce active status first
+	if (isset($user['status']) && $user['status'] !== 'active') {
+		$_SESSION['error'] = 'Account is not active. Please contact administrator.';
+		header('Location: index.php');
+		exit;
+	}
+
+	// At this point we have a user
+	// For debugging: temporarily store whether stored password looks hashed
+	$stored = $user['password'] ?? '';
+	$looks_hashed = (strpos($stored, '$2y$') === 0 || strpos($stored, '$2a$') === 0 || strpos($stored, '$argon2') === 0);
+
+	// Continue to password checks
+
 	if ($user) {
 		// Assume passwords are hashed with password_hash(). Use password_verify().
-		if (password_verify($password, $user['password'])) {
+		if (!empty($user['password']) && password_verify($password, $user['password'])) {
 			session_regenerate_id(true);
 			$_SESSION['user_id'] = $user['id'];
-			// prefer full_name, fall back to email
 			$_SESSION['username'] = $user['full_name'] ?? $user['email'];
+			$_SESSION['email'] = $user['email'];
+			$_SESSION['role_id'] = $user['role_id'];
+			$_SESSION['status'] = $user['status'];
 			$_SESSION['logged_in'] = true;
 			header('Location: dashboard.php');
 			exit;
@@ -46,20 +74,29 @@ try {
 			session_regenerate_id(true);
 			$_SESSION['user_id'] = $user['id'];
 			$_SESSION['username'] = $user['full_name'] ?? $user['email'];
+			$_SESSION['email'] = $user['email'];
+			$_SESSION['role_id'] = $user['role_id'];
+			$_SESSION['status'] = $user['status'];
 			$_SESSION['logged_in'] = true;
 			header('Location: dashboard.php');
 			exit;
 		}
 	}
 
-	// Authentication failed
-	$_SESSION['error'] = 'Invalid username or password.';
+	// If we reach here, password verification failed
+	// Friendly message for users
+	$_SESSION['error'] = 'Incorrect password. Please try again.';
 	header('Location: index.php');
 	exit;
 
-} catch (PDOException $e) {
-	error_log('Login error: ' . $e->getMessage());
-	$_SESSION['error'] = 'An internal error occurred. Please try again later.';
+} catch (Exception $e) {
+	// Log full error for debugging/support
+	$ref = strtoupper(substr(sha1(uniqid('', true)), 0, 8));
+	error_log("Login error [ref:{$ref}]: " . $e->getMessage());
+
+	// Show a credential-focused message so users know what to check
+	$_SESSION['error'] = 'Unable to verify credentials right now. Please check your username/email and password and try again.';
+
 	header('Location: index.php');
 	exit;
 }
