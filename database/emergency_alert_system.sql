@@ -149,3 +149,13 @@ CREATE TABLE system_logs (
     ON DELETE SET NULL
     ON UPDATE CASCADE
 );
+
+-- ==========================================
+-- DUMMY USER (for local testing)
+-- WARNING: For production, store hashed passwords (use PHP password_hash())
+-- The following inserts a test user with a plain-text password 'test123'.
+-- If your login uses password_verify(), either hash the password before inserting
+-- or update the record later with a hashed password.
+-- ==========================================
+INSERT INTO users (id, full_name, email, phone, password, role_id, status, created_at) 
+VALUES (NULL, 'Test', 'test@gmail.com', '123456789', 'test123', 1, 'active', current_timestamp());
