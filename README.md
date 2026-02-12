@@ -1,15 +1,26 @@
-# Emergency Alert System 
+# Responda
 
 ## Project Overview
-This is a simple web-based Emergency Alert System developed as a final year project.
+**Responda** is a simple web-based Community Emergency Alert and Response System developed as a final year project.
 
-- The system allows administrators and responders to:
-    - Create emergency alerts
-    - Target specific locations
-    - Monitor alert activity
-    - Manage users
+The system allows administrators and responders to:
 
-> This project focuses on simplicity, reliability, and clean architecture.
+- Create emergency alerts
+- Target specific locations
+- Monitor alert activity
+- Manage users
+
+> The project focuses on simplicity, reliability, and clean system architecture.
+
+
+## System Purpose
+
+Responda is designed to:
+
+- Provide early warning during emergencies
+- Improve coordination between responders
+- Enhance community safety
+- Support future mobile alert integration
 
 
 ## Tech Stack
@@ -17,37 +28,97 @@ This is a simple web-based Emergency Alert System developed as a final year proj
 ### Frontend
 - HTML
 - CSS
-- Bootstrap
-- Vanilla JavaScript
+- Bootstrap 5
+- JavaScript (Vanilla)
 
 ### Backend
 - PHP (Vanilla)
 - MySQL
 
-## Features
-- Role-based login (Admin, Responder)
-- Create and manage alerts
-- View active and past alerts
-- Location-based alert tagging
-- Dashboard for monitoring
 
-## Future Extension
-- Flutter Mobile App
-- Push notifications (Firebase)
-- GPS integration
-- REST API for mobile integration
+## Core Features
 
-## Project Structure (Planned)
+- Role-based authentication (Admin, Responder)
+- Create and manage emergency alerts
+- Alert status lifecycle (Pending → Verified → Resolved)
+- Location-based alert tracking
+- Dashboard for monitoring system activity
+- Responder action tracking
 
-- /public
-- /config
-- /controllers
-- /models
-- /views
-- /api
-- /assets
+
+## Screenshots
+
+### 🔐 Login Page
+![Login Page](assets/images/screenshots/login.png)
+
+### 📊 Dashboard
+![Dashboard](assets/images/screenshots/dashboard.png)
+
+### 🚨 Create Alert Page
+![Create Alert](assets/images/screenshots/create-alert.png)
+
+### 📋 Alert Management
+![Manage Alerts](assets/images/screenshots/manage-alerts.png)
+
+> Screenshots will be added after UI implementation.
+
+
+## Future Extensions
+
+- Flutter Mobile Application (Android)
+- Firebase Push Notifications (FCM)
+- GPS Location Integration
+- REST API for mobile communication
+- Real-time alert broadcasting
+
+
+## Project Structure
+
+```bash
+
+responda/
+│
+├── public/                     # Main web pages (Admin & Responder)
+│   ├── index.php               # Login page
+│   ├── dashboard.php           # Dashboard
+│   ├── create_alert.php        # Create alert
+│   ├── alerts.php              # View alerts
+│   ├── users.php               # Manage users
+│   └── logout.php
+│
+├── api/                        # Mobile App API (JSON responses)
+│   ├── login.php               # Mobile login
+│   ├── get_alerts.php          # Fetch alerts
+│   ├── create_alert.php        # Report alert (mobile)
+│   ├── update_status.php       # Responder updates
+│   └── config.php              # API DB connection
+│
+├── includes/                   # Reusable components
+│   ├── header.php
+│   ├── footer.php
+│   ├── sidebar.php
+│   └── db.php                  # Database connection
+│
+├── assets/                     # Static files
+│   ├── css/
+│   ├── js/
+│   └── images/
+│
+├── database/
+│   └── responda.sql            # Full database schema
+│
+├── screenshots/                # README screenshots
+│
+├── README.md
+└── .gitignore
+
+
+```
+
 
 ## Author
-> Alexander Ramadan Tarjan
 
+**Alexander Ramadan Tarjan**  
+
+> Final Year Project – 2026
 
