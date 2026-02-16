@@ -155,10 +155,10 @@ include __DIR__ . '/../includes/header.php';
         <div class="col-lg-10" style="min-height: calc(100vh - 40px); overflow:auto; padding: 24px 32px;">
             
             <!-- Header Section -->
-            <div class="row mb-4 align-items-center">
+            <div class="row mb-3 align-items-center" style="padding-bottom: 16px; border-bottom: 1px solid #e8ebf2;">
                 <div class="col-md-8">
-                    <h1 class="display-5 fw-bold">Dashboard</h1>
-                    <p class="text-muted">
+                    <h2 class="fw-bold mb-1" style="font-size: 28px; color: #2d3748;">Dashboard</h2>
+                    <small class="text-muted" style="font-size: 13px;">
                         <?php 
                         if ($role_id == 1) {
                             echo 'System Overview & Management';
@@ -166,15 +166,15 @@ include __DIR__ . '/../includes/header.php';
                             echo 'Your Alert Response Center';
                         }
                         ?>
-                    </p>
+                    </small>
                 </div>
                 <div class="col-md-4 text-end">
-                    <div class="card bg-light border-0">
-                        <div class="card-body">
-                            <p class="mb-0"><small class="text-muted">Welcome back,</small></p>
-                            <h6 class="mb-1"><?php echo $username; ?></h6>
-                            <small class="text-muted">Role: <strong><?php echo $role_name; ?></strong></small>
-                        </div>
+                    <div style="background: linear-gradient(135deg, #667eea 0%, #a36ed8 100%); border-radius: 8px; padding: 12px 16px; color: white;">
+                        <small style="display: block; opacity: 0.9; font-size: 12px;">Welcome back,</small>
+                        <h6 class="mb-1 fw-bold" style="font-size: 16px; margin: 4px 0;"><?php echo $username; ?></h6>
+                        <small style="display: block; opacity: 0.95; font-size: 12px;">
+                            <?php echo ($role_id == 1) ? '👤 Administrator' : '📋 Responder'; ?>
+                        </small>
                     </div>
                 </div>
             </div>
@@ -183,14 +183,14 @@ include __DIR__ . '/../includes/header.php';
                 <!-- ADMIN DASHBOARD -->
                 
                 <!-- Stats Cards Row -->
-                <div class="row g-4 mb-5">
+                <div class="row g-3 mt-3 mb-4">
                     <div class="col-lg-3 col-md-6">
                         <div class="card border-0 shadow-sm h-100" style="border-left: 4px solid #667eea;">
-                            <div class="card-body">
+                            <div class="card-body p-3">
                                 <div class="d-flex justify-content-between align-items-start">
                                     <div>
-                                        <p class="text-muted small mb-1">Active Alerts</p>
-                                        <h2 class="fw-bold mb-0" style="color: #667eea;"><?php echo $stats['active_alerts']; ?></h2>
+                                        <p class="text-muted small mb-1" style="font-size: 12px;">Active Alerts</p>
+                                        <h3 class="fw-bold mb-0" style="color: #667eea; font-size: 24px;"><?php echo $stats['active_alerts']; ?></h3>
                                     </div>
                                     <svg width="40" height="40" viewBox="0 0 40 40" fill="none" style="opacity: 0.2;">
                                         <circle cx="20" cy="20" r="18" stroke="#667eea" stroke-width="2"/>
@@ -204,11 +204,11 @@ include __DIR__ . '/../includes/header.php';
 
                     <div class="col-lg-3 col-md-6">
                         <div class="card border-0 shadow-sm h-100" style="border-left: 4px solid #ffc107;">
-                            <div class="card-body">
+                            <div class="card-body p-3">
                                 <div class="d-flex justify-content-between align-items-start">
                                     <div>
-                                        <p class="text-muted small mb-1">Pending Review</p>
-                                        <h2 class="fw-bold mb-0" style="color: #ffc107;"><?php echo $stats['pending_alerts']; ?></h2>
+                                        <p class="text-muted small mb-1" style="font-size: 12px;">Pending Review</p>
+                                        <h3 class="fw-bold mb-0" style="color: #ffc107; font-size: 24px;"><?php echo $stats['pending_alerts']; ?></h3>
                                     </div>
                                     <svg width="40" height="40" viewBox="0 0 40 40" fill="none" style="opacity: 0.2;">
                                         <rect x="8" y="10" width="24" height="20" stroke="#ffc107" stroke-width="2" rx="2"/>
@@ -221,11 +221,11 @@ include __DIR__ . '/../includes/header.php';
 
                     <div class="col-lg-3 col-md-6">
                         <div class="card border-0 shadow-sm h-100" style="border-left: 4px solid #28a745;">
-                            <div class="card-body">
+                            <div class="card-body p-3">
                                 <div class="d-flex justify-content-between align-items-start">
                                     <div>
-                                        <p class="text-muted small mb-1">Total Responses</p>
-                                        <h2 class="fw-bold mb-0" style="color: #28a745;"><?php echo $stats['total_responses']; ?></h2>
+                                        <p class="text-muted small mb-1" style="font-size: 12px;">Total Responses</p>
+                                        <h3 class="fw-bold mb-0" style="color: #28a745; font-size: 24px;"><?php echo $stats['total_responses']; ?></h3>
                                     </div>
                                     <svg width="40" height="40" viewBox="0 0 40 40" fill="none" style="opacity: 0.2;">
                                         <path d="M12 20h16M20 12v16" stroke="#28a745" stroke-width="2"/>
@@ -238,11 +238,11 @@ include __DIR__ . '/../includes/header.php';
 
                     <div class="col-lg-3 col-md-6">
                         <div class="card border-0 shadow-sm h-100" style="border-left: 4px solid #0dcaf0;">
-                            <div class="card-body">
+                            <div class="card-body p-3">
                                 <div class="d-flex justify-content-between align-items-start">
                                     <div>
-                                        <p class="text-muted small mb-1">Active Users</p>
-                                        <h2 class="fw-bold mb-0" style="color: #0dcaf0;"><?php echo $stats['active_users']; ?>/<?php echo $stats['total_users']; ?></h2>
+                                        <p class="text-muted small mb-1" style="font-size: 12px;">Active Users</p>
+                                        <h3 class="fw-bold mb-0" style="color: #0dcaf0; font-size: 24px;"><?php echo $stats['active_users']; ?>/<?php echo $stats['total_users']; ?></h3>
                                     </div>
                                     <svg width="40" height="40" viewBox="0 0 40 40" fill="none" style="opacity: 0.2;">
                                         <circle cx="14" cy="14" r="4" stroke="#0dcaf0" stroke-width="2"/>
@@ -256,7 +256,7 @@ include __DIR__ . '/../includes/header.php';
                 </div>
 
                 <!-- Charts and Content Row -->
-                <div class="row g-4 mb-5">
+                <div class="row g-4 mb-4">
                     <!-- Chart Section -->
                     <div class="col-lg-6">
                         <div class="card border-0 shadow-sm">
@@ -316,16 +316,18 @@ include __DIR__ . '/../includes/header.php';
                         <div class="card border-0 shadow-sm bg-light">
                             <div class="card-body">
                                 <h6 class="mb-3">Quick Actions</h6>
-                                <a href="create-alert.php" class="btn btn-primary btn-sm w-100 mb-2">Create New Alert</a>
-                                <a href="alerts.php" class="btn btn-outline-primary btn-sm w-100 mb-2">View All Alerts</a>
-                                <a href="users.php" class="btn btn-outline-secondary btn-sm w-100">Manage Users</a>
+                                <div class="d-flex flex-row gap-2">
+                                    <a href="create-alert.php" class="btn btn-primary btn-sm" style="width: 140px;">Create New Alert</a>
+                                    <a href="alerts.php" class="btn btn-outline-primary btn-sm" style="width: 140px;">View All Alerts</a>
+                                    <a href="users.php" class="btn btn-outline-secondary btn-sm" style="width: 140px;">Manage Users</a>
+                                </div>
                             </div>
                         </div>
                     </div>
                 </div>
 
                 <!-- Recent Alerts Section -->
-                <div class="card border-0 shadow-sm mb-5">
+                <div class="card border-0 shadow-sm mb-4">
                     <div class="card-header bg-white border-bottom">
                         <div class="d-flex justify-content-between align-items-center">
                             <h5 class="mb-0">Recent System Alerts</h5>
@@ -376,14 +378,14 @@ include __DIR__ . '/../includes/header.php';
                 <!-- RESPONDER DASHBOARD -->
                 
                 <!-- Personal Stats Cards -->
-                <div class="row g-4 mb-5">
+                <div class="row g-3 mt-3 mb-4">
                     <div class="col-lg-4 col-md-6">
                         <div class="card border-0 shadow-sm h-100" style="border-left: 4px solid #667eea;">
-                            <div class="card-body">
+                            <div class="card-body p-3">
                                 <div class="d-flex justify-content-between align-items-start">
                                     <div>
-                                        <p class="text-muted small mb-1">My Responses</p>
-                                        <h2 class="fw-bold mb-0" style="color: #667eea;"><?php echo $stats['personal_responses']; ?></h2>
+                                        <p class="text-muted small mb-1" style="font-size: 12px;">My Responses</p>
+                                        <h3 class="fw-bold mb-0" style="color: #667eea; font-size: 24px;"><?php echo $stats['personal_responses']; ?></h3>
                                     </div>
                                     <svg width="40" height="40" viewBox="0 0 40 40" fill="none" style="opacity: 0.2;">
                                         <path d="M12 20h16M20 12v16" stroke="#667eea" stroke-width="2"/>
@@ -396,11 +398,11 @@ include __DIR__ . '/../includes/header.php';
 
                     <div class="col-lg-4 col-md-6">
                         <div class="card border-0 shadow-sm h-100" style="border-left: 4px solid #ffc107;">
-                            <div class="card-body">
+                            <div class="card-body p-3">
                                 <div class="d-flex justify-content-between align-items-start">
                                     <div>
-                                        <p class="text-muted small mb-1">Pending Actions</p>
-                                        <h2 class="fw-bold mb-0" style="color: #ffc107;"><?php echo $stats['pending_responses']; ?></h2>
+                                        <p class="text-muted small mb-1" style="font-size: 12px;">Pending Actions</p>
+                                        <h3 class="fw-bold mb-0" style="color: #ffc107; font-size: 24px;"><?php echo $stats['pending_responses']; ?></h3>
                                     </div>
                                     <svg width="40" height="40" viewBox="0 0 40 40" fill="none" style="opacity: 0.2;">
                                         <rect x="8" y="10" width="24" height="20" stroke="#ffc107" stroke-width="2" rx="2"/>
@@ -413,11 +415,11 @@ include __DIR__ . '/../includes/header.php';
 
                     <div class="col-lg-4 col-md-6">
                         <div class="card border-0 shadow-sm h-100" style="border-left: 4px solid #28a745;">
-                            <div class="card-body">
+                            <div class="card-body p-3">
                                 <div class="d-flex justify-content-between align-items-start">
                                     <div>
-                                        <p class="text-muted small mb-1">Active Alerts</p>
-                                        <h2 class="fw-bold mb-0" style="color: #28a745;"><?php echo $stats['active_alerts']; ?></h2>
+                                        <p class="text-muted small mb-1" style="font-size: 12px;">Active Alerts</p>
+                                        <h3 class="fw-bold mb-0" style="color: #28a745; font-size: 24px;"><?php echo $stats['active_alerts']; ?></h3>
                                     </div>
                                     <svg width="40" height="40" viewBox="0 0 40 40" fill="none" style="opacity: 0.2;">
                                         <circle cx="20" cy="20" r="18" stroke="#28a745" stroke-width="2"/>
@@ -431,7 +433,7 @@ include __DIR__ . '/../includes/header.php';
                 </div>
 
                 <!-- Response Status Chart -->
-                <div class="row g-4 mb-5">
+                <div class="row g-4 mb-4">
                     <div class="col-lg-6">
                         <div class="card border-0 shadow-sm">
                             <div class="card-header bg-white border-bottom">
@@ -477,15 +479,17 @@ include __DIR__ . '/../includes/header.php';
                         <div class="card border-0 shadow-sm bg-light">
                             <div class="card-body">
                                 <h6 class="mb-3">Quick Actions</h6>
-                                <a href="alerts.php" class="btn btn-primary btn-sm w-100 mb-2">View Alerts</a>
-                                <a href="alerts.php?filter=pending" class="btn btn-warning btn-sm w-100">See Pending</a>
+                                <div class="d-flex flex-column gap-2">
+                                    <a href="alerts.php" class="btn btn-primary btn-sm" style="width: 140px;">View Alerts</a>
+                                    <a href="alerts.php?filter=pending" class="btn btn-warning btn-sm" style="width: 140px;">See Pending</a>
+                                </div>
                             </div>
                         </div>
                     </div>
                 </div>
 
                 <!-- Alerts Available for Response -->
-                <div class="card border-0 shadow-sm mb-5">
+                <div class="card border-0 shadow-sm mb-4">
                     <div class="card-header bg-white border-bottom">
                         <div class="d-flex justify-content-between align-items-center">
                             <h5 class="mb-0">Alerts Awaiting Your Response</h5>

@@ -23,7 +23,7 @@ body {
     display: flex;
     flex-direction: column;
     justify-content: space-between;
-    overflow-y: hidden;
+    /* overflow-y: hidden; */
 }
 
 /* Dashboard background styling */
