@@ -17,16 +17,18 @@ function is_active_section($pages) {
 <!-- Sidebar Column -->
 <aside class="col-lg-2 d-none d-lg-block">
     <div class="position-sticky" style="top:20px;">
-        <div class="card border-0 shadow-sm text-white" style="background: linear-gradient(180deg,#3b82f6 0%, #7c3aed 100%); border-radius:12px; height: 100vh; overflow: hidden;">
+        <div class="card border-0 shadow-sm text-white" style="background: linear-gradient(180deg,#3b82f6 0%, #9155fa 100%); border-radius:12px; height: 100vh; overflow: hidden;">
             <div class="card-body d-flex flex-column p-3 h-100" style="overflow: hidden;">
                 <div class="d-flex align-items-center mb-3">
+                    
+                    <!-- Logo -->
                     <div class="me-2">
-                        <div style="width:44px; height:44px; border-radius:8px; background: rgba(255,255,255,0.12);display:flex;align-items:center;justify-content:center;font-weight:700;">R</div>
+                        <div style="width:44px; height:44px; border-radius:50%; background: rgba(255,255,255,0.12);display:flex;align-items:center;justify-content:center;font-weight:700;">
+                            <img src="assets/images/logo.svg" alt="Responda Logo" style="width:32px; height:32px; border-radius:6px; object-fit:cover; opacity:0.95;">
+                        </div>
                     </div>
                     <div>
-                        <!-- <div class="fw-bold">Responda</div> -->
-                         <!-- Logo images: in assets folder -->
-                        <img src="assets/images/logo.svg" alt="Responda Logo" style="width:32px; height:32px; border-radius:6px; object-fit:cover; opacity:0.95;">
+                        <strong class="h5 mb-0" style="color:#fff;">Responda</strong>
                         <small class="d-block text-white-50">Emergency Alerts</small>
                     </div>
                 </div>
@@ -34,7 +36,7 @@ function is_active_section($pages) {
                 <div class="mb-3">
                     <div class="card bg-white-10 border-0 mb-2" style="background: rgba(255,255,255,0.06);">
                         <div class="card-body p-2 d-flex align-items-center">
-                            <!-- <img src="/../assets/images/transparent-logo.png" alt="logo" style="width:36px;height:36px;border-radius:6px;object-fit:cover;opacity:0.95;margin-right:8px;"/> -->
+                            
                             <div>
                                 <div class="text-white fw-semibold" style="font-size:0.95rem"><?php echo htmlspecialchars($_SESSION['username'] ?? 'User', ENT_QUOTES, 'UTF-8'); ?></div>
                                 <small class="text-white-50"><?php echo htmlspecialchars($_SESSION['email'] ?? '', ENT_QUOTES, 'UTF-8'); ?></small>
