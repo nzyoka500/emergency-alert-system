@@ -15,10 +15,16 @@
 <div class="container d-flex justify-content-center align-items-center min-vh-100">
     <div class="card shadow-lg p-5" style="width: 100%; max-width: 400px; border-radius: 12px;">
         <div class="text-center mb-4">
-            <svg width="80" height="80" viewBox="0 0 80 80" class="rounded-circle" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 10px;">
+
+            <!-- <svg width="80" height="80" viewBox="0 0 80 80" class="rounded-circle" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 10px;">
                 <circle cx="40" cy="40" r="35" fill="#fff" opacity="0.1"/>
                 <text x="40" y="50" font-size="40" font-weight="bold" fill="#fff" text-anchor="middle" font-family="Arial, sans-serif">R</text>
-            </svg>
+            </svg> -->
+
+
+            <img src="../assets/images/logo.png" alt="Responda Logo" class="mb-3" style="width: 80px; height: 80px;">
+
+
         </div>
 
         <h2 class="text-center mb-2" style="font-size: 28px; color:#764ba2; font-weight: 600;">Responda</h2>

@@ -71,7 +71,7 @@ try {
 include __DIR__ . '/../includes/header.php';
 ?>
 
-<div class="container-fluid mt-5 mb-5">
+<div class="container-fluid mt-2 mb-0">
     <div class="row">
         <!-- Sidebar Navigation -->
         <?php include __DIR__ . '/../includes/sidebar.php'; ?>
