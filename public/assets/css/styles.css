@@ -6,7 +6,6 @@
     margin: 0;
     padding: 0;
     box-sizing: border-box;
-    /* background-color: red; */
 }
 
 /* Global styles */
@@ -17,37 +16,52 @@ html {
 
 body {
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    background: linear-gradient(135deg, #667eea 0%, #e7d0ff 100%);
+    background: #f8f9fd;
     min-height: 100vh;
-    display: flex;
-    justify-content: center;
-    align-items: center;
     color: #333;
     line-height: 1.6;
-    /* background: red; */
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    overflow-y: hidden;
+}
 
+/* Dashboard background styling */
+.container-fluid {
+    background: linear-gradient(135deg, #f8f9fd 0%, #f3f4f9 100%);
+    min-height: 100vh;
+}
+
+/* Footer Styling */
+footer {
+    background: linear-gradient(135deg, rgba(102, 126, 234, 0.05) 0%, rgba(118, 75, 162, 0.05) 100%);
+    border-top: 1px solid #e8ebf2;
+    padding: 24px 20px;
+    margin-top: auto;
+    text-align: center;
+    color: #5a6474;
+    font-size: 13px;
+}
+
+footer small {
+    color: #8892a4;
+    font-weight: 500;
 }
 
 /* Login Page Styles */
 .login-container {
     background: white;
-    border-radius: 12px;
-    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
-    padding: 40px;
+    border-radius: 16px;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
+    padding: 50px;
     width: 100%;
-    max-width: 400px;
-    animation: slideIn 0.5s ease-out;
-}
-
-@keyframes slideIn {
-    from {
-        opacity: 0;
-        transform: translateY(-30px);
-    }
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
+    max-width: 450px;
+    position: relative;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    flex-direction: column;
 }
 
 .login-container .logo {
@@ -99,7 +113,6 @@ body {
     border: 2px solid #e0e0e0;
     border-radius: 8px;
     font-size: 14px;
-    transition: all 0.3s ease;
     font-family: inherit;
 }
 
@@ -124,17 +137,15 @@ body {
     font-size: 16px;
     font-weight: 600;
     cursor: pointer;
-    transition: all 0.3s ease;
     margin-top: 10px;
 }
 
 .btn:hover {
-    transform: translateY(-2px);
     box-shadow: 0 5px 20px rgba(102, 126, 234, 0.4);
 }
 
 .btn:active {
-    transform: translateY(0);
+    opacity: 0.95;
 }
 
 /* Additional Options Styles */
@@ -166,6 +177,234 @@ body {
     font-size: 14px;
 }
 
+/* ============================================ */
+/* DASHBOARD STYLES */
+/* ============================================ */
+
+/* Main Content Area */
+.col-lg-10 {
+    background: transparent !important;
+    padding: 28px 36px !important;
+}
+
+/* Header Section Styling */
+.display-5 {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    font-weight: 700 !important;
+    letter-spacing: -0.5px;
+}
+
+h1 {
+    margin-bottom: 8px !important;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+.text-muted {
+    color: #8892a4 !important;
+    font-size: 15px;
+}
+
+/* Stats Cards Styling */
+.card {
+    border: 1px solid #e8ebf2 !important;
+    border-radius: 12px !important;
+    overflow: hidden;
+}
+
+.card:hover {
+    box-shadow: 0 20px 50px rgba(102, 126, 234, 0.15) !important;
+    border-color: #dfe5f0 !important;
+}
+
+.card.shadow-sm {
+    box-shadow: 0 8px 24px rgba(50, 50, 100, 0.08) !important;
+}
+
+/* Stat Card Specific Styles */
+.card[style*="border-left: 4px solid"] {
+    position: relative;
+}
+
+.card[style*="border-left: 4px solid"] .card-body {
+    position: relative;
+    z-index: 1;
+}
+
+.card[style*="border-left: 4px solid"]::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 100%;
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.1) 0%, rgba(255, 255, 255, 0) 100%);
+    pointer-events: none;
+}
+
+/* Card Body Improvements */
+.card-body {
+    padding: 24px !important;
+}
+
+.card-header {
+    background: white !important;
+    padding: 20px 24px !important;
+    border-bottom: 1px solid #e8ebf2 !important;
+}
+
+.card-header h5 {
+    font-weight: 600;
+    color: #2d3748;
+    font-size: 18px;
+    margin: 0;
+}
+
+/* Stat Numbers */
+.card-body h2 {
+    font-weight: 700;
+    font-size: 36px;
+    line-height: 1.2;
+    margin: 8px 0 !important;
+}
+
+.card-body p.text-muted {
+    font-size: 13px;
+    font-weight: 500;
+    letter-spacing: 0.3px;
+    text-transform: uppercase;
+}
+
+.card-body small {
+    font-size: 12px;
+    color: #a8b1c3;
+}
+
+/* Badge Styles */
+.badge {
+    padding: 6px 12px !important;
+    font-weight: 500 !important;
+    font-size: 12px !important;
+    border-radius: 6px !important;
+    letter-spacing: 0.3px;
+}
+
+.bg-warning {
+    background: linear-gradient(135deg, #ffa500, #ff8c00) !important;
+}
+
+.bg-info {
+    background: linear-gradient(135deg, #667eea, #764ba2) !important;
+}
+
+.bg-success {
+    background: linear-gradient(135deg, #28a745, #20c997) !important;
+}
+
+.bg-secondary {
+    background: linear-gradient(135deg, #6c757d, #5a6268) !important;
+}
+
+/* List Group Styling */
+.list-group {
+    border: none !important;
+}
+
+.list-group-item {
+    border: none !important;
+    border-bottom: 1px solid #e8ebf2 !important;
+    padding: 20px 24px !important;
+    background: white;
+}
+
+.list-group-item:last-child {
+    border-bottom: none !important;
+}
+
+.list-group-item:hover {
+    background: linear-gradient(135deg, #f8f9fd 0%, #f3f4f9 100%);
+}
+
+.list-group-item h6 {
+    color: #2d3748;
+    font-weight: 600;
+    font-size: 15px;
+    margin-bottom: 8px;
+}
+
+/* Quick Actions Section */
+.btn-primary {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+    border: none !important;
+    padding: 12px 16px !important;
+    font-weight: 600;
+    font-size: 14px;
+    border-radius: 8px !important;
+    color: white !important;
+}
+
+.btn-primary:hover {
+    box-shadow: 0 12px 30px rgba(102, 126, 234, 0.3) !important;
+}
+
+.btn-outline-primary {
+    color: #667eea !important;
+    border: 2px solid #667eea !important;
+    background: white !important;
+    padding: 10px 16px !important;
+    font-weight: 600;
+}
+
+.btn-outline-primary:hover {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+    color: white !important;
+    border-color: transparent !important;
+    box-shadow: 0 12px 30px rgba(102, 126, 234, 0.2) !important;
+}
+
+.btn-outline-secondary {
+    color: #764ba2 !important;
+    border: 2px solid #764ba2 !important;
+    background: white !important;
+    padding: 10px 16px !important;
+    font-weight: 600;
+}
+
+.btn-outline-secondary:hover {
+    background: linear-gradient(135deg, #764ba2 0%, #667eea 100%) !important;
+    color: white !important;
+    border-color: transparent !important;
+    box-shadow: 0 12px 30px rgba(118, 75, 162, 0.2) !important;
+}
+
+.bg-light {
+    background: linear-gradient(135deg, #f8f9fd 0%, #f3f4f9 100%) !important;
+    border: 1px solid #e8ebf2 !important;
+}
+
+.bg-light .card-body {
+    padding: 20px !important;
+}
+
+.bg-light h6 {
+    color: #2d3748;
+    font-weight: 600;
+    font-size: 14px;
+    letter-spacing: 0.3px;
+}
+
+.bg-light small {
+    color: #5a6474;
+    line-height: 1.8;
+}
+
+.bg-light strong {
+    color: #2d3748;
+    font-weight: 600;
+}
+
 /* Responsive Design */
 @media (max-width: 480px) {
     .login-container {
@@ -186,4 +425,123 @@ body {
         padding: 11px;
         font-size: 15px;
     }
+
+    .col-lg-10 {
+        padding: 16px 20px !important;
+    }
+
+    .display-5 {
+        font-size: 28px !important;
+    }
+
+    .card-body {
+        padding: 16px !important;
+    }
+
+    .card-body h2 {
+        font-size: 28px;
+    }
+
+    .list-group-item {
+        padding: 16px !important;
+    }
+
+    .col-lg-4 {
+        margin-top: 20px;
+    }
 }
+
+/* ============================================ */
+/* FORM CONTROLS & INPUT STYLING */
+/* ============================================ */
+
+.form-control {
+    border: 2px solid #e8ebf2 !important;
+    border-radius: 8px !important;
+    padding: 12px 14px !important;
+    font-size: 14px !important;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04) !important;
+}
+
+.form-control:focus {
+    border-color: #667eea !important;
+    box-shadow: 0 4px 16px rgba(102, 126, 234, 0.15) !important;
+    background-color: #f9f9ff !important;
+    outline: none !important;
+}
+
+.form-control::placeholder {
+    color: #a8b1c3 !important;
+    font-size: 13px;
+}
+
+.form-label {
+    color: #2d3748 !important;
+    font-weight: 600 !important;
+    margin-bottom: 8px !important;
+    font-size: 13px !important;
+    letter-spacing: 0.3px;
+}
+
+/* ============================================ */
+/* SVG ICON STYLING */
+/* ============================================ */
+
+svg {
+    opacity: 1;
+}
+
+.card:hover svg {
+    opacity: 0.4 !important;
+}
+
+/* ============================================ */
+/* SCROLLBAR STYLING */
+/* ============================================ */
+
+::-webkit-scrollbar {
+    width: 8px;
+}
+
+::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: linear-gradient(135deg, #764ba2 0%, #667eea 100%);
+}
+
+/* ============================================ */
+/* UTILITY CLASSES */
+/* ============================================ */
+
+.fw-600 {
+    font-weight: 600 !important;
+}
+
+.fw-700 {
+    font-weight: 700 !important;
+}
+
+.text-primary {
+    color: #667eea !important;
+}
+
+.text-primary:hover {
+    color: #764ba2 !important;
+}
+
+/* Box Shadow Utilities */
+.shadow-sm {
+    box-shadow: 0 8px 24px rgba(50, 50, 100, 0.08) !important;
+}
+
+.shadow-lg {
+    box-shadow: 0 20px 60px rgba(102, 126, 234, 0.15) !important;
+}
+

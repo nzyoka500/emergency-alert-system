@@ -15,9 +15,9 @@ function is_active_section($pages) {
 ?>
 
 <!-- Sidebar Column -->
-<aside class="col-lg-2 d-none d-lg-block">
-    <div class="position-sticky" style="top:20px;">
-        <div class="card border-0 shadow-sm text-white" style="background: linear-gradient(180deg,#3b82f6 0%, #9155fa 100%); border-radius:12px; height: 100vh; overflow: hidden;">
+<aside class="col-lg-2 d-none d-lg-block" style="padding-left: 0; margin-left: 0;">
+    <div class="position-sticky" style="top:0px;">
+        <div class="card border-0 shadow-sm text-white" style="background: linear-gradient(180deg,#3b82f6 0%, #9155fa 100%); border-radius:12px; height: 100vh; overflow: hidden; margin: 0;">
             <div class="card-body d-flex flex-column p-3 h-100" style="overflow: hidden;">
                 <div class="d-flex align-items-center mb-3">
                     
@@ -43,14 +43,7 @@ function is_active_section($pages) {
                             </div>
                         </div>
                     </div>
-                    <div class="input-group mb-2">
-                        <input type="search" class="form-control form-control-sm rounded-3" placeholder="Search..." aria-label="Search" />
-                        <button class="btn btn-sm btn-light" type="button">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-search" viewBox="0 0 16 16">
-                                <path d="M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398h-.001q.044.06.098.115l3.85 3.85a1 1 0 0 0 1.415-1.414l-3.85-3.85a1 1 0 0 0-.115-.1zM12 6.5a5.5 5.5 0 1 1-11 0 5.5 5.5 0 0 1 11 0"/>
-                            </svg>
-                        </button>
-                    </div>
+                    
                 </div>
 
                 <nav class="nav flex-column mb-3" style="overflow:auto; max-height: calc(100vh - 220px);">
@@ -64,26 +57,14 @@ function is_active_section($pages) {
                         </span>
                     </a>
 
-                    <button class="btn btn-sm btn-transparent text-white text-start w-100 d-flex justify-content-between align-items-center py-2 px-2 rounded collapsed" data-bs-toggle="collapse" data-bs-target="#alertsMenu" aria-expanded="false">
-                    
+                    <a href="alerts.php" class="nav-link text-white py-2 px-2 rounded <?php echo is_active_section(['alerts.php','alert-details.php','create-alert.php']) ? 'active' : ''; ?>">
                         <span>
                             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-exclamation-circle me-2" viewBox="0 0 16 16">
                                 <path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14m0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16"/>
                                 <path d="M7.002 11a1 1 0 1 1 2 0 1 1 0 0 1-2 0M7.1 4.995a.905.905 0 1 1 1.8 0l-.35 3.507a.552.552 0 0 1-1.1 0z"/>
                             </svg>Alerts
                         </span>
-
-                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-chevron-down" viewBox="0 0 16 16">
-                            <path fill-rule="evenodd" d="M1.646 4.646a.5.5 0 0 1 .708 0L8 10.293l5.646-5.647a.5.5 0 0 1 .708.708l-6 6a.5.5 0 0 1-.708 0l-6-6a.5.5 0 0 1 0-.708"/>
-                        </svg>
-                    </button>
-
-                    <div class="collapse <?php echo is_active_section(['alerts.php','alert-details.php','create-alert.php']) ? 'show' : ''; ?> mt-2" id="alertsMenu">
-                        <div class="nav flex-column ms-2">
-                            <a href="alerts.php" class="nav-link small text-white-50 py-1 <?php echo is_active('alerts.php'); ?>">View All</a>
-                            <a href="create-alert.php" class="nav-link small text-white-50 py-1 <?php echo is_active('create-alert.php'); ?>">Create Alert</a>
-                        </div>
-                    </div>
+                    </a>
 
                     <?php if ($role_id == 1): ?>
                         <a href="users.php" class="nav-link text-white py-2 px-2 rounded <?php echo is_active('users.php'); ?>">

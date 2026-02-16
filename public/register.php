@@ -12,34 +12,68 @@ if (!empty($_SESSION['error'])) {
 
 ?>
 
-<div class="container d-flex justify-content-center align-items-center min-vh-100">
-    <div class="card shadow-lg p-4" style="width:100%; max-width:560px; border-radius:12px;">
-        <h3 class="mb-3 text-center">Register for Responda</h3>
+<style>
+    html, body {
+        height: 100%;
+        margin: 0;
+        padding: 0;
+    }
+
+    body {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #e7d0ff 100%);
+        display: flex;
+        flex-direction: column;
+        justify-content: flex-start;
+    }
+
+    .register-wrapper {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        flex: 1;
+        padding: 40px 20px;
+        width: 100%;
+           margin-top: 2rem;
+    }
+
+    footer {
+        text-align: center;
+        padding: 20px;
+        margin-top: auto;
+        width: 100%;
+    }
+</style>
+
+<div class="register-wrapper">
+    <div class="card shadow-lg p-5" style="width:100%; max-width:500px; border-radius:16px; border: 1px solid rgba(255,255,255,0.2); background: white; box-shadow: 0 20px 60px rgba(0,0,0,0.15);">
+        <h3 class="mb-2 text-center fw-bold" style="color: #2d3748;">Create Account</h3>
+        <p class="text-center text-muted mb-4" style="font-size: 13px;">Join Responda Emergency System</p>
+        
         <form action="register-process.php" method="POST">
             <div class="mb-3">
-                <label class="form-label">Full name</label>
-                <input type="text" name="full_name" class="form-control" required>
+                <label class="form-label fw-600" style="color: #2d3748;">Full Name</label>
+                <input type="text" name="full_name" class="form-control" placeholder="Enter your full name" required style="padding: 12px 14px; border: 2px solid #e8ebf2; border-radius: 8px; transition: all 0.3s ease;">
             </div>
             <div class="mb-3">
-                <label class="form-label">Email address</label>
-                <input type="email" name="email" class="form-control" required>
+                <label class="form-label fw-600" style="color: #2d3748;">Email Address</label>
+                <input type="email" name="email" class="form-control" placeholder="Enter your email" required style="padding: 12px 14px; border: 2px solid #e8ebf2; border-radius: 8px; transition: all 0.3s ease;">
             </div>
             <div class="mb-3">
-                <label class="form-label">Phone</label>
-                <input type="text" name="phone" class="form-control">
+                <label class="form-label fw-600" style="color: #2d3748;">Phone</label>
+                <input type="text" name="phone" class="form-control" placeholder="Enter your phone number" style="padding: 12px 14px; border: 2px solid #e8ebf2; border-radius: 8px; transition: all 0.3s ease;">
             </div>
             <div class="mb-3">
-                <label class="form-label">Password</label>
-                <input type="password" name="password" class="form-control" required>
+                <label class="form-label fw-600" style="color: #2d3748;">Password</label>
+                <input type="password" name="password" class="form-control" placeholder="Create a password" required style="padding: 12px 14px; border: 2px solid #e8ebf2; border-radius: 8px; transition: all 0.3s ease;">
             </div>
-            <div class="mb-3">
-                <label class="form-label">Confirm Password</label>
-                <input type="password" name="password_confirm" class="form-control" required>
+            <div class="mb-4">
+                <label class="form-label fw-600" style="color: #2d3748;">Confirm Password</label>
+                <input type="password" name="password_confirm" class="form-control" placeholder="Confirm your password" required style="padding: 12px 14px; border: 2px solid #e8ebf2; border-radius: 8px; transition: all 0.3s ease;">
             </div>
-            <button type="submit" class="btn btn-primary w-100" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border: none;">Create account</button>
+            <button type="submit" class="btn btn-primary w-100" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border: none; padding: 12px; font-weight: 600; border-radius: 8px; transition: all 0.3s ease;">Create Account</button>
         </form>
-        <div class="text-center mt-3">
-            <a href="index.php">Back to login</a>
+        <div class="text-center mt-4 pt-4 border-top">
+            <p class="text-muted mb-0" style="font-size: 13px;">Already have an account? <a href="index.php" class="text-primary fw-600 text-decoration-none">Login here</a></p>
         </div>
     </div>
 </div>
