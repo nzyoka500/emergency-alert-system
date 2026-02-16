@@ -26,7 +26,7 @@ function is_active_section($pages) {
                     <div>
                         <!-- <div class="fw-bold">Responda</div> -->
                          <!-- Logo images: in assets folder -->
-                        <img src="../assets/images/logo.svg" alt="Responda Logo" style="width:32px; height:32px; border-radius:6px; object-fit:cover; opacity:0.95;">
+                        <img src="assets/images/logo.svg" alt="Responda Logo" style="width:32px; height:32px; border-radius:6px; object-fit:cover; opacity:0.95;">
                         <small class="d-block text-white-50">Emergency Alerts</small>
                     </div>
                 </div>
