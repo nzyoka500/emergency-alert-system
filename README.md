@@ -22,6 +22,22 @@ Responda is designed to:
 - Enhance community safety
 - Support future mobile alert integration
 
+## Screenshots
+
+### 🔐 Login Page
+![Login Page](./public/assets/screenshots/login.png)
+
+### 📊 Dashboard
+![Dashboard](./public/assets/screenshots/responder-dashboard.png)
+
+### 🚨 Create Alert Page
+![Create Alert](./public/assets/screenshots/create-alert.png)
+
+### 📋 Alert Management
+![Manage Alerts](./public/assets/screenshots/alerts.png)
+
+> More Screenshots will be added after UI implementation.
+
 
 ## Tech Stack
 
@@ -44,23 +60,6 @@ Responda is designed to:
 - Location-based alert tracking
 - Dashboard for monitoring system activity
 - Responder action tracking
-
-
-## Screenshots
-
-### 🔐 Login Page
-![Login Page](./assets/screenshots/login.png)
-
-### 📊 Dashboard
-![Dashboard](assets/images/screenshots/dashboard.png)
-
-### 🚨 Create Alert Page
-![Create Alert](assets/images/screenshots/create-alert.png)
-
-### 📋 Alert Management
-![Manage Alerts](assets/images/screenshots/manage-alerts.png)
-
-> Screenshots will be added after UI implementation.
 
 
 ## Future Extensions
