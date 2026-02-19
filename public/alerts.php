@@ -156,13 +156,13 @@ include __DIR__ . '/../includes/header.php';
                     <p class="text-muted">Manage and monitor emergency alerts</p>
                 </div>
                 <div class="col-md-6 text-end">
-                    <a href="create-alert.php" class="btn btn-primary">
+                    <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#createAlertModal">
                         <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="currentColor" class="bi bi-plus-circle me-2" viewBox="0 0 16 16" style="display: inline;">
                             <path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14zm0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16z"/>
                             <path d="M8 4a.5.5 0 0 1 .5.5v3h3a.5.5 0 0 1 0 1h-3v3a.5.5 0 0 1-1 0v-3h-3a.5.5 0 0 1 0-1h3v-3A.5.5 0 0 1 8 4z"/>
                         </svg>
                         Create Alert
-                    </a>
+                    </button>
                 </div>
             </div>
 
@@ -306,6 +306,12 @@ include __DIR__ . '/../includes/header.php';
                                                         <path d="M8 5.5a2.5 2.5 0 1 0 0 5 2.5 2.5 0 0 0 0-5zM4.5 8a3.5 3.5 0 1 1 7 0 3.5 3.5 0 0 1-7 0z"/>
                                                     </svg>
                                                 </a>
+                                                <?php if ($role_id == 2 && ($alert['status'] === 'pending' || $alert['status'] === 'verified')): ?>
+                                                    <button type="button" class="btn btn-sm btn-outline-info ms-1" title="Respond to Alert" 
+                                                        onclick="openRespondModal(<?php echo $alert['id']; ?>, '<?php echo htmlspecialchars($alert['title'], ENT_QUOTES); ?>', '<?php echo htmlspecialchars(substr($alert['description'], 0, 100), ENT_QUOTES); ?>...', '<?php echo htmlspecialchars($alert['alert_type'], ENT_QUOTES); ?>', '<?php echo $alert['status']; ?>', '<?php echo $alert['created_at']; ?>')">
+                                                        <i class="fas fa-reply"></i> Respond
+                                                    </button>
+                                                <?php endif; ?>
                                             </td>
                                         </tr>
                                     <?php endforeach; ?>
@@ -345,5 +351,8 @@ include __DIR__ . '/../includes/header.php';
         </div>
     </div>
 </div>
+
+<?php include __DIR__ . '/../includes/modals/create-alert-modal.html'; ?>
+<?php if ($role_id == 2): include __DIR__ . '/../includes/modals/respond-alert-modal.html'; endif; ?>
 
 <?php include __DIR__ . '/../includes/footer.php'; ?>

@@ -1,0 +1,243 @@
+<!-- Create Alert Modal -->
+<div class="modal fade" id="createAlertModal" tabindex="-1" aria-labelledby="createAlertModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content border-0 shadow-lg">
+            <!-- Modal Header -->
+            <div class="modal-header border-bottom-1 bg-light">
+                <h5 class="modal-title fw-bold" id="createAlertModalLabel">
+                    <i class="fas fa-bell-plus text-primary me-2"></i>Create Emergency Alert
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+
+            <!-- Modal Body -->
+            <div class="modal-body p-4">
+                <!-- Alert Messages -->
+                <div id="alertModalMessage" style="display: none;"></div>
+
+                <!-- Form -->
+                <form id="createAlertForm" novalidate>
+                    <div class="row">
+                        <!-- Alert Type -->
+                        <div class="col-md-6 mb-3">
+                            <label for="modalAlertType" class="form-label fw-semibold">
+                                Alert Type <span class="text-danger">*</span>
+                            </label>
+                            <select class="form-select" name="alert_type_id" id="modalAlertType" required>
+                                <option value="" selected disabled>Choose an alert type...</option>
+                            </select>
+                            <small class="form-text text-muted">Select the type of emergency</small>
+                        </div>
+
+                        <!-- Title -->
+                        <div class="col-md-6 mb-3">
+                            <label for="modalAlertTitle" class="form-label fw-semibold">
+                                Alert Title <span class="text-danger">*</span>
+                            </label>
+                            <input type="text" class="form-control" name="title" id="modalAlertTitle" 
+                                placeholder="e.g., Fire at Market Street" required maxlength="150">
+                            <small class="form-text text-muted">Brief description of the emergency</small>
+                        </div>
+                    </div>
+
+                    <!-- Description -->
+                    <div class="mb-3">
+                        <label for="modalAlertDescription" class="form-label fw-semibold">
+                            Description <span class="text-danger">*</span>
+                        </label>
+                        <textarea class="form-control" name="description" id="modalAlertDescription" rows="4" 
+                            placeholder="Provide detailed information about the emergency..." required></textarea>
+                        <small class="form-text text-muted">Include relevant details (affected areas, injuries, etc.)</small>
+                    </div>
+
+                    <div class="row">
+                        <!-- Latitude -->
+                        <div class="col-md-6 mb-3">
+                            <label for="modalAlertLatitude" class="form-label fw-semibold">
+                                Latitude <span class="text-danger">*</span>
+                            </label>
+                            <input type="number" class="form-control" name="latitude" id="modalAlertLatitude" 
+                                placeholder="-90 to 90" required step="0.00000001" min="-90" max="90">
+                            <small class="form-text text-muted">e.g., 37.7749</small>
+                        </div>
+
+                        <!-- Longitude -->
+                        <div class="col-md-6 mb-3">
+                            <label for="modalAlertLongitude" class="form-label fw-semibold">
+                                Longitude <span class="text-danger">*</span>
+                            </label>
+                            <input type="number" class="form-control" name="longitude" id="modalAlertLongitude" 
+                                placeholder="-180 to 180" required step="0.00000001" min="-180" max="180">
+                            <small class="form-text text-muted">e.g., -122.4194</small>
+                        </div>
+                    </div>
+
+                    <!-- Help Text -->
+                    <div class="alert alert-info alert-sm mb-0">
+                        <i class="fas fa-info-circle me-2"></i>
+                        <small>Need coordinates? Use <a href="https://www.latlong.net/" target="_blank" class="alert-link">latlong.net</a></small>
+                    </div>
+                </form>
+            </div>
+
+            <!-- Modal Footer -->
+            <div class="modal-footer bg-light border-top-1">
+                <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">
+                    <i class="fas fa-times me-1"></i>Cancel
+                </button>
+                <button type="button" class="btn btn-primary" id="submitCreateAlertBtn">
+                    <i class="fas fa-paper-plane me-1"></i>Create Alert
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+// Store alert types globally
+let alertTypesCache = [];
+
+// Load alert types on page load
+document.addEventListener('DOMContentLoaded', function() {
+    loadAlertTypes();
+});
+
+// Fetch and cache alert types
+function loadAlertTypes() {
+    fetch('create-alert.php', {
+        method: 'GET',
+        headers: {
+            'X-Requested-With': 'XMLHttpRequest'
+        }
+    })
+    .then(response => {
+        if (!response.ok) {
+            throw new Error('HTTP error, status = ' + response.status);
+        }
+        return response.json();
+    })
+    .then(data => {
+        if (data.alert_types && Array.isArray(data.alert_types) && data.alert_types.length > 0) {
+            alertTypesCache = data.alert_types;
+            console.log('Alert types loaded:', alertTypesCache);
+        } else {
+            console.warn('No alert types received from server');
+        }
+    })
+    .catch(error => {
+        console.error('Error loading alert types:', error);
+    });
+}
+
+// Initialize alert types when modal is shown
+document.getElementById('createAlertModal').addEventListener('show.bs.modal', function() {
+    const alertTypeSelect = document.getElementById('modalAlertType');
+    
+    // Clear existing options except the placeholder
+    while (alertTypeSelect.options.length > 1) {
+        alertTypeSelect.remove(1);
+    }
+    
+    // Populate from cached data
+    if (alertTypesCache && alertTypesCache.length > 0) {
+        alertTypesCache.forEach(type => {
+            const option = document.createElement('option');
+            option.value = type.id;
+            option.textContent = type.name + ' - ' + type.description;
+            alertTypeSelect.appendChild(option);
+        });
+    } else {
+        // If cache is empty, try to load immediately
+        loadAlertTypes();
+        // Give it a moment to load, then populate
+        setTimeout(() => {
+            while (alertTypeSelect.options.length > 1) {
+                alertTypeSelect.remove(1);
+            }
+            if (alertTypesCache && alertTypesCache.length > 0) {
+                alertTypesCache.forEach(type => {
+                    const option = document.createElement('option');
+                    option.value = type.id;
+                    option.textContent = type.name + ' - ' + type.description;
+                    alertTypeSelect.appendChild(option);
+                });
+            }
+        }, 500);
+    }
+});
+
+// Handle form submission
+document.getElementById('submitCreateAlertBtn').addEventListener('click', function() {
+    const form = document.getElementById('createAlertForm');
+    const messageDiv = document.getElementById('alertModalMessage');
+    messageDiv.style.display = 'block';
+    
+    // Validate form
+    if (!form.checkValidity()) {
+        form.reportValidity();
+        return;
+    }
+
+    // Validate coordinates
+    const latitude = parseFloat(document.getElementById('modalAlertLatitude').value);
+    const longitude = parseFloat(document.getElementById('modalAlertLongitude').value);
+    
+    if (latitude < -90 || latitude > 90) {
+        messageDiv.innerHTML = '<div class="alert alert-danger alert-dismissible fade show" role="alert"><i class="fas fa-exclamation-circle me-2"></i>Latitude must be between -90 and 90<button type="button" class="btn-close" data-bs-dismiss="alert"></button></div>';
+        return;
+    }
+    
+    if (longitude < -180 || longitude > 180) {
+        messageDiv.innerHTML = '<div class="alert alert-danger alert-dismissible fade show" role="alert"><i class="fas fa-exclamation-circle me-2"></i>Longitude must be between -180 and 180<button type="button" class="btn-close" data-bs-dismiss="alert"></button></div>';
+        return;
+    }
+
+    // Submit form via AJAX
+    const formData = new FormData(form);
+    
+    fetch('create-alert.php', {
+        method: 'POST',
+        headers: {
+            'X-Requested-With': 'XMLHttpRequest'
+        },
+        body: formData
+    })
+    .then(response => {
+        if (!response.ok) {
+            throw new Error('HTTP error, status = ' + response.status);
+        }
+        return response.json();
+    })
+    .then(data => {
+        if (data.success) {
+            messageDiv.innerHTML = '<div class="alert alert-success alert-dismissible fade show" role="alert"><i class="fas fa-check-circle me-2"></i>' + data.message + ' (Alert ID: #' + data.alert_id + ')<button type="button" class="btn-close" data-bs-dismiss="alert"></button></div>';
+            
+            // Reset form
+            form.reset();
+            
+            // Close modal after 2 seconds
+            setTimeout(() => {
+                bootstrap.Modal.getInstance(document.getElementById('createAlertModal')).hide();
+                // Reload alerts list if it exists
+                if (typeof loadAlerts === 'function') {
+                    loadAlerts();
+                }
+                // Reload page to show new alert
+                location.reload();
+            }, 2000);
+        } else {
+            messageDiv.innerHTML = '<div class="alert alert-danger alert-dismissible fade show" role="alert"><i class="fas fa-exclamation-circle me-2"></i>' + data.message + '<button type="button" class="btn-close" data-bs-dismiss="alert"></button></div>';
+        }
+    })
+    .catch(error => {
+        messageDiv.innerHTML = '<div class="alert alert-danger alert-dismissible fade show" role="alert"><i class="fas fa-exclamation-circle me-2"></i>Error creating alert. Please try again.<button type="button" class="btn-close" data-bs-dismiss="alert"></button></div>';
+        console.error('Error:', error);
+    });
+});
+
+// Clear message when modal is hidden
+document.getElementById('createAlertModal').addEventListener('hide.bs.modal', function() {
+    document.getElementById('alertModalMessage').style.display = 'none';
+    document.getElementById('alertModalMessage').innerHTML = '';
+});
+</script>

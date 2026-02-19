@@ -1,0 +1,208 @@
+<!-- Respond to Alert Modal -->
+<div class="modal fade" id="respondAlertModal" tabindex="-1" aria-labelledby="respondAlertModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content border-0 shadow-lg">
+            <!-- Modal Header -->
+            <div class="modal-header border-bottom bg-light">
+                <h5 class="modal-title fw-bold" id="respondAlertModalLabel">
+                    <i class="fas fa-reply text-info me-2"></i>Respond to Alert
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+
+            <!-- Modal Body -->
+            <div class="modal-body p-4">
+                <!-- Alert Messages -->
+                <div id="respondAlertMessage" style="display: none;"></div>
+
+                <!-- Alert Summary (Read-only) -->
+                <div class="alert alert-light border mb-4" id="alertSummary" style="display: none;">
+                    <div class="row">
+                        <div class="col-md-8">
+                            <h6 class="fw-bold mb-2" id="alertTitle"></h6>
+                            <p class="mb-2 text-muted small" id="alertDescription"></p>
+                            <div class="d-flex gap-3">
+                                <div>
+                                    <small class="text-muted">Type:</small>
+                                    <p class="mb-0 fw-semibold" id="alertType"></p>
+                                </div>
+                                <div>
+                                    <small class="text-muted">Status:</small>
+                                    <p class="mb-0 fw-semibold" id="alertStatus"></p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-4 text-end">
+                            <small class="text-muted d-block">Created:</small>
+                            <p class="mb-0 small" id="alertCreatedAt"></p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Response Form -->
+                <form id="respondAlertForm" novalidate>
+                    <input type="hidden" name="alert_id" id="responseAlertId">
+
+                    <!-- Response Status -->
+                    <div class="mb-3">
+                        <label for="responseStatus" class="form-label fw-semibold">
+                            Response Status <span class="text-danger">*</span>
+                        </label>
+                        <select class="form-select" name="status" id="responseStatus" required>
+                            <option value="" selected disabled>Select your response...</option>
+                            <option value="accepted">
+                                <i class="fas fa-check-circle"></i> Accepted - I will respond
+                            </option>
+                            <option value="in_progress">
+                                <i class="fas fa-spinner"></i> In Progress - Currently responding
+                            </option>
+                            <option value="completed">
+                                <i class="fas fa-check-double"></i> Completed - Response finished
+                            </option>
+                        </select>
+                        <small class="form-text text-muted">Choose your response status</small>
+                    </div>
+
+                    <!-- Response Note/Comment -->
+                    <div class="mb-3">
+                        <label for="responseNote" class="form-label fw-semibold">
+                            Response Notes & Comments <span class="text-danger">*</span>
+                        </label>
+                        <textarea 
+                            class="form-control" 
+                            name="note" 
+                            id="responseNote" 
+                            rows="5" 
+                            placeholder="Describe your response actions, findings, or updates..."
+                            required></textarea>
+                        <small class="form-text text-muted">
+                            Include details about: arrival time, actions taken, people affected, resources used, recommendations, etc.
+                        </small>
+                    </div>
+
+                    <!-- Character count -->
+                    <div class="mb-3">
+                        <small class="text-muted">
+                            Characters: <span id="charCount">0</span>/1000
+                        </small>
+                    </div>
+                </form>
+            </div>
+
+            <!-- Modal Footer -->
+            <div class="modal-footer bg-light border-top">
+                <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">
+                    <i class="fas fa-times me-1"></i>Cancel
+                </button>
+                <button type="button" class="btn btn-info" id="submitRespondAlertBtn">
+                    <i class="fas fa-paper-plane me-1"></i>Submit Response
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+// Function to open respond modal
+function openRespondModal(alertId, alertTitle, alertDesc, alertType, alertStatus, alertCreatedAt, existingResponse = null) {
+    const form = document.getElementById('respondAlertForm');
+    const summary = document.getElementById('alertSummary');
+    
+    // Populate hidden alert ID
+    document.getElementById('responseAlertId').value = alertId;
+    
+    // Populate summary
+    document.getElementById('alertTitle').textContent = alertTitle;
+    document.getElementById('alertDescription').textContent = alertDesc;
+    document.getElementById('alertType').textContent = alertType;
+    document.getElementById('alertStatus').innerHTML = '<span class="badge bg-warning text-dark">' + alertStatus + '</span>';
+    document.getElementById('alertCreatedAt').textContent = new Date(alertCreatedAt).toLocaleString();
+    summary.style.display = 'block';
+    
+    // Reset form
+    form.reset();
+    document.getElementById('charCount').textContent = '0';
+    
+    // If responder already responded, populate with existing data
+    if (existingResponse) {
+        document.getElementById('responseStatus').value = existingResponse.status;
+        document.getElementById('responseNote').value = existingResponse.note;
+        document.getElementById('charCount').textContent = existingResponse.note.length;
+    }
+    
+    // Show modal
+    const modal = new bootstrap.Modal(document.getElementById('respondAlertModal'));
+    modal.show();
+}
+
+// Character counter for notes
+document.getElementById('responseNote').addEventListener('input', function() {
+    let length = this.value.length;
+    if (length > 1000) {
+        this.value = this.value.substring(0, 1000);
+        length = 1000;
+    }
+    document.getElementById('charCount').textContent = length;
+});
+
+// Handle form submission
+document.getElementById('submitRespondAlertBtn').addEventListener('click', function() {
+    const form = document.getElementById('respondAlertForm');
+    const messageDiv = document.getElementById('respondAlertMessage');
+    messageDiv.style.display = 'block';
+    
+    // Validate form
+    if (!form.checkValidity()) {
+        form.reportValidity();
+        return;
+    }
+
+    // Validate note length
+    const note = document.getElementById('responseNote').value;
+    if (note.trim().length < 10) {
+        messageDiv.innerHTML = '<div class="alert alert-danger alert-dismissible fade show" role="alert"><i class="fas fa-exclamation-circle me-2"></i>Response notes must be at least 10 characters.<button type="button" class="btn-close" data-bs-dismiss="alert"></button></div>';
+        return;
+    }
+
+    // Submit form via AJAX
+    const formData = new FormData(form);
+    
+    fetch('respond-alert.php', {
+        method: 'POST',
+        headers: {
+            'X-Requested-With': 'XMLHttpRequest'
+        },
+        body: formData
+    })
+    .then(response => {
+        if (!response.ok) {
+            throw new Error('HTTP error, status = ' + response.status);
+        }
+        return response.json();
+    })
+    .then(data => {
+        if (data.success) {
+            messageDiv.innerHTML = '<div class="alert alert-success alert-dismissible fade show" role="alert"><i class="fas fa-check-circle me-2"></i>' + data.message + '<button type="button" class="btn-close" data-bs-dismiss="alert"></button></div>';
+            
+            // Close modal after 2 seconds
+            setTimeout(() => {
+                bootstrap.Modal.getInstance(document.getElementById('respondAlertModal')).hide();
+                // Reload page to update alert status
+                location.reload();
+            }, 2000);
+        } else {
+            messageDiv.innerHTML = '<div class="alert alert-danger alert-dismissible fade show" role="alert"><i class="fas fa-exclamation-circle me-2"></i>' + data.message + '<button type="button" class="btn-close" data-bs-dismiss="alert"></button></div>';
+        }
+    })
+    .catch(error => {
+        messageDiv.innerHTML = '<div class="alert alert-danger alert-dismissible fade show" role="alert"><i class="fas fa-exclamation-circle me-2"></i>Error submitting response. Please try again.<button type="button" class="btn-close" data-bs-dismiss="alert"></button></div>';
+        console.error('Error:', error);
+    });
+});
+
+// Clear message when modal is hidden
+document.getElementById('respondAlertModal').addEventListener('hide.bs.modal', function() {
+    document.getElementById('respondAlertMessage').style.display = 'none';
+    document.getElementById('respondAlertMessage').innerHTML = '';
+});
+</script>
