@@ -28,6 +28,9 @@ Responda is designed to:
 ![Login Page](./public/assets/screenshots/login.png)
 
 ### 📊 Dashboard
+![Dashboard](./public/assets/screenshots/dashboard.png)
+
+> ### Responder Dashboard
 ![Dashboard](./public/assets/screenshots/responder-dashboard.png)
 
 ### 🚨 Create Alert Page
