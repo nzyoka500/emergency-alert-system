@@ -20,6 +20,9 @@ if (session_status() === PHP_SESSION_NONE) {
 
     <!-- Custom CSS -->
     <link rel="stylesheet" href="assets/css/styles.css">
+
+    <!-- Chart.js Library -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body>
 

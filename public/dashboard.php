@@ -317,7 +317,7 @@ include __DIR__ . '/../includes/header.php';
                             <div class="card-body">
                                 <h6 class="mb-3">Quick Actions</h6>
                                 <div class="d-flex flex-row gap-2">
-                                    <a href="alerts.php" class="btn btn-primary btn-sm" style="text-align:center; width: 140px;">New Alert</a>
+                                    <a type="button" data-bs-toggle="modal" data-bs-target="#createAlertModal" class="btn btn-primary btn-sm" style="text-align:center; width: 140px;">New Alert</a>
                                     <a href="alerts.php" class="btn btn-outline-primary btn-sm" style="width: 140px;">View Alerts</a>
                                     <a href="users.php" class="btn btn-outline-secondary btn-sm" style="width: 140px;">Manage Users</a>
                                 </div>
@@ -357,7 +357,9 @@ include __DIR__ . '/../includes/header.php';
                                                     </a>
                                                 </h6>
                                                 <span class="badge bg-<?php echo $status_color; ?>"><?php echo ucfirst($alert['status']); ?></span>
-                                                <span class="badge bg-light text-dark ms-2"><?php echo htmlspecialchars($alert['alert_type'], ENT_QUOTES, 'UTF-8'); ?></span>
+                                                <span class="badge bg-light text-dark ms-2">
+                                                    <?php echo htmlspecialchars($alert['alert_type'], ENT_QUOTES, 'UTF-8'); ?>
+                                                </span>
                                                 <small class="text-muted ms-2">by <?php echo htmlspecialchars($alert['created_by'] ?? 'System', ENT_QUOTES, 'UTF-8'); ?></small>
                                             </div>
                                             <small class="text-muted"><?php echo $time_ago; ?></small>
@@ -372,20 +374,6 @@ include __DIR__ . '/../includes/header.php';
                             </div>
                         <?php endif; ?>
                     </div>
-
-                    <span class="badge bg-light text-dark ms-2">
-                    <?php echo htmlspecialchars($alert['alert_type'], ENT_QUOTES, 'UTF-8'); ?>
-                    </span>
-
-                    <?php if(isset($alert['severity'])): ?>
-                    <span class="badge bg-danger ms-2">
-                    <?php echo ucfirst($alert['severity']); ?>
-                    </span>
-                    <?php endif; ?>
-
-
-
-
                 </div>
 
             <?php else: ?>
@@ -639,7 +627,7 @@ include __DIR__ . '/../includes/header.php';
         }
     })();
 </script>
-
+<?php include __DIR__ . '/../includes/modals/create-alert-modal.html'; ?>
 <?php include __DIR__ . '/../includes/footer.php'; ?>
 
 
