@@ -138,25 +138,28 @@ include __DIR__ . '/../includes/header.php';
                                             <td><?= htmlspecialchars($user['phone']) ?></td>
 
                                             <!-- Role Badge -->
-                                            <td>
+                                            <!-- Role Badge -->
+<td>
 
-                                                <?php
-                                                $roles = [
-                                                    1 => ['Admin', 'danger'],
-                                                    2 => ['Responder', 'primary'],
-                                                    3 => ['Community', 'secondary']
-                                                ];
+<?php
 
-                                                $role_id = (int)$user['role_id'];
+$roleName = strtolower($user['role'] ?? 'unknown');
 
-                                                $role = $roles[$role_id] ?? ['Unknown', 'dark'];
-                                                ?>
+$roleStyles = [
+    'admin' => 'danger',
+    'responder' => 'primary',
+    'community' => 'secondary'
+];
 
-                                                <span class="badge bg-<?= $role[1]; ?>">
-                                                    <?= $role[0]; ?>
-                                                </span>
+$badge = $roleStyles[$roleName] ?? 'dark';
 
-                                            </td>
+?>
+
+<span class="badge bg-<?= $badge ?>">
+    <?= htmlspecialchars($user['role'] ?? 'Unknown') ?>
+</span>
+
+</td>
 
                                             <!-- Status -->
                                             <td>
