@@ -39,31 +39,57 @@ include __DIR__ . '/../includes/header.php';
         <div class="col-lg-10" style="min-height: calc(100vh - 40px); overflow:auto; padding: 24px 32px;">
 
             <!-- Header Section -->
-            <div class="row mb-4 align-items-center">
+            <div class="row mb-4 align-items-center border-bottom pb-3">
                 <div class="col-md-6">
-                    <h1 class="display-5 fw-bold">User Management</h1>
-                    <p class="text-muted">Manage and monitor user accounts</p>
+                    <h1 class="display-6 fw-bold mb-1">User Management</h1>
+                    <p class="text-muted mb-0">Manage and monitor system users</p>
                 </div>
                 <div class="col-md-6 text-end">
-                    <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#createUserModal">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="currentColor" class="bi bi-plus-circle me-2" viewBox="0 0 16 16" style="display: inline;">
-                            <path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14zm0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16z" />
-                            <path d="M8 4a.5.5 0 0 1 .5.5v3h3a.5.5 0 0 1 0 1h-3v3a.5.5 0 0 1-1 0v-3h-3a.5.5 0 0 1 0-1h3v-3A.5.5 0 0 1 8 4z" />
-                        </svg>
-                        Create User
+                    <button type="button" class="btn btn-primary shadow-sm px-4" data-bs-toggle="modal" data-bs-target="#createUserModal">
+                        + Create User
                     </button>
                 </div>
             </div>
 
-            <!-- User stats -->
+            <!-- User stats: to show how many users exist, per role, and active  -->
+            <div class="row mb-4">
+                <div class="col-md-4">
+                    <div class="card border-0 shadow-sm">
+                        <div class="card-body">
+                            <h6 class="card-title mb-2 text-muted small mb-1">Total Users</h6>
+                            <h3 class="card-text fw-bold mb-0" style="color: #6c757d;"><?php echo count($users); ?></h3>
+                            <small class="text-muted">All Users</small>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="card border-0 shadow-sm">
+                        <div class="card-body">
+                            <h6 class="card-title mb-2 text-muted small mb-1">Admins</h6>
+                            <h3 class="card-text fw-bold mb-0" style="color: #6c757d;"><?php echo count(array_filter($users, fn($u) => $u['role'] === 'Admin')); ?></h3>
+                            <small class="text-muted">System Administrators</small>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="card border-0 shadow-sm">
+                        <div class="card-body">
+                            <h6 class="card-title mb-2 text-muted small mb-1">Responders</h6>
+                            <h3 class="card-text fw-bold mb-0" style="color: #6c757d;"><?php echo count(array_filter($users, fn($u) => $u['role'] === 'Responder')); ?></h3>
+                            <small class="text-muted">Emergency Responders</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
 
 
-            <div class="card border-0 shadow-sm mb-4">
+            <!-- User Listing Table -->
+            <div class="card border-0 shadow-lg rounded-3 mb-4">
                 <div class="card-body">
-                    <h5 class="card-title mb-4">User Management</h5>
+                    <h5 class="fw-semibold mb-3">All Users</h5>
                     <div class="table-responsive">
-                        <table class="table table-hover align-middle">
-                            <thead>
+                        <table class="table table-hover table-striped align-middle">
+                            <thead class="table-light">
                                 <tr>
                                     <th scope="col">Username</th>
                                     <th scope="col">Email</th>
@@ -72,33 +98,45 @@ include __DIR__ . '/../includes/header.php';
                                 </tr>
                             </thead>
                             <tbody>
-                                <?php foreach ($users as $user): ?>
+                                <?php if (count($users) > 0): ?>
+                                    <?php foreach ($users as $user): ?>
+                                        <tr>
+                                            <td><?php echo htmlspecialchars($user['full_name'], ENT_QUOTES, 'UTF-8'); ?></td>
+                                            <td><?php echo htmlspecialchars($user['email'], ENT_QUOTES, 'UTF-8'); ?></td>
+                                            <td>
+                                                <span class="badge bg-success">
+                                                    <?php echo htmlspecialchars($user['role'], ENT_QUOTES, 'UTF-8'); ?>
+                                                </span>
+                                            </td>
+                                            <td>
+                                                <!-- User dropdown menu for actions, view, edit and delete -->
+
+                                                <div class="dropdown">
+                                                    <button class="btn btn-sm btn-light border dropdown-toggle" type="button" id="dropdownMenuButton<?php echo $user['id']; ?>" data-bs-toggle="dropdown" aria-expanded="false">
+                                                        Actions
+                                                    </button>
+                                                    <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton<?php echo $user['id']; ?>">
+                                                        <li><a class="dropdown-item" href="view-user.php?id=<?php echo $user['id']; ?>">View</a></li>
+                                                        <li><a class="dropdown-item disabled" href="edit-user.php?id=<?php echo $user['id']; ?>">Edit</a></li>
+                                                        <?php if ($user['id'] != $_SESSION['user_id']): // Prevent self-deletion 
+                                                        ?>
+                                                            <li><a class="dropdown-item disabled" href="delete-user.php?id=<?php echo $user['id']; ?>">Delete</a></li>
+                                                        <?php endif; ?>
+                                                    </ul>
+                                                </div>
+
+
+
+                                            </td>
+                                        </tr>
+                                    <?php endforeach; ?>
+                                <?php else: ?>
                                     <tr>
-                                        <td><?php echo htmlspecialchars($user['full_name'], ENT_QUOTES, 'UTF-8'); ?></td>
-                                        <td><?php echo htmlspecialchars($user['email'], ENT_QUOTES, 'UTF-8'); ?></td>
-                                        <td><?php echo htmlspecialchars($user['role'], ENT_QUOTES, 'UTF-8'); ?></td>
-                                        <td>
-                                            <!-- User dropdown menu for actions, view, edit and delete -->
-
-                                            <div class="dropdown">
-                                                <button class="btn btn-sm btn-outline-secondary dropdown-toggle" type="button" id="dropdownMenuButton<?php echo $user['id']; ?>" data-bs-toggle="dropdown" aria-expanded="false">
-                                                    Actions
-                                                </button>
-                                                <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton<?php echo $user['id']; ?>">
-                                                    <li><a class="dropdown-item" href="view-user.php?id=<?php echo $user['id']; ?>">View</a></li>
-                                                    <li><a class="dropdown-item disabled" href="edit-user.php?id=<?php echo $user['id']; ?>">Edit</a></li>
-                                                    <?php if ($user['id'] != $_SESSION['user_id']): // Prevent self-deletion 
-                                                    ?>
-                                                    <li><a class="dropdown-item disabled" href="delete-user.php?id=<?php echo $user['id']; ?>">Delete</a></li>
-                                                    <?php endif; ?>
-                                                </ul>
-                                            </div>
-
-
-                                           
+                                        <td colspan="4" class="text-center text-muted py-4">
+                                            No users found.
                                         </td>
                                     </tr>
-                                <?php endforeach; ?>
+                                    <?php endif; ?>
                             </tbody>
                         </table>
                     </div>
@@ -115,13 +153,13 @@ include __DIR__ . '/../includes/header.php';
 <div class="modal fade" id="createUserModal" tabindex="-1" aria-labelledby="createUserModalLabel" aria-hidden="true">
     <div class="modal-dialog">
         <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="createUserModalLabel">Create User</h5>
+            <div class="modal-header bg-light">
+                <h5 class="modal-title fw-semibold" id="createUserModalLabel">Create New User</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
                 <!-- Form for creating new user -->
-                <form id="createUserForm">
+                <form method="POST" action="create-user.php" id="createUserForm">
                     <div class="mb-3">
                         <label for="fullName" class="form-label">Full Name</label>
                         <input type="text" class="form-control" id="fullName" name="full_name" required>
@@ -130,13 +168,18 @@ include __DIR__ . '/../includes/header.php';
                         <label for="email" class="form-label">Email address</label>
                         <input type="email" class="form-control" id="email" name="email" required>
                     </div>
+
+                    <div class="mb-3">
+                        <label for="phone" class="form-label">Phone</label>
+                        <input type="text" class="form-control" id="phone" name="phone" required>
+                    </div>
                     <div class="mb-3">
                         <label for="password" class="form-label">Password</label>
                         <input type="password" class="form-control" id="password" name="password" required>
                     </div>
                     <div class="mb-3">
                         <label for="role" class="form-label">Role</label>
-                        <select class="form-select" id="role" name="role_id" required>
+                        <select class="form-select" id="role" name="role-id" required>
                             <option value="">Select Role</option>
                             <option value="1">Admin</option>
                             <option value="2">Responder</option>
@@ -149,6 +192,38 @@ include __DIR__ . '/../includes/header.php';
         </div>
     </div>
 </div>
+
+
+<script>
+ 
+ document.getElementById("createUserForm").addEventListener("submit", async function(e){
+
+    e.preventDefault();
+
+    const formData = new FormData(this);
+
+    const response = await fetch("create-user.php", {
+        method: "POST",
+        body: formData
+    });
+
+    const result = await response.json();
+
+    if(result.success){
+
+        alert(result.message);
+
+        window.location.href = result.redirect;
+
+    } else {
+
+        alert(result.message);
+
+    }
+
+});
+
+</script>
 
 
 

@@ -150,9 +150,9 @@ include __DIR__ . '/../includes/header.php';
         <div class="col-lg-10" style="min-height: calc(100vh - 40px); overflow:auto; padding: 24px 32px;">
             
             <!-- Header Section -->
-            <div class="row mb-4 align-items-center">
+            <div class="row mb-4 align-items-center border-bottom pb-3">
                 <div class="col-md-6">
-                    <h1 class="display-5 fw-bold">All Alerts</h1>
+                    <h1 class="display-6 fw-bold">All Alerts</h1>
                     <p class="text-muted">Manage and monitor emergency alerts</p>
                 </div>
                 <div class="col-md-6 text-end">
