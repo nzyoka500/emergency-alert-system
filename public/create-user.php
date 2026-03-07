@@ -166,16 +166,13 @@ try {
             'message' => 'User created successfully.',
             'redirect' => 'users.php'
         ]);
-
     } else {
 
         echo json_encode([
             'success' => false,
             'message' => 'Failed to create user.'
         ]);
-
     }
-
 } catch (PDOException $e) {
 
     http_response_code(500);
@@ -185,7 +182,6 @@ try {
         'message' => 'Database error occurred.',
         'error' => $e->getMessage()
     ]);
-
 } catch (Exception $e) {
 
     http_response_code(500);
@@ -195,7 +191,69 @@ try {
         'message' => 'Unexpected error occurred.',
         'error' => $e->getMessage()
     ]);
-
 }
 
 ?>
+
+
+
+
+
+<div class="card border-0 shadow-lg rounded-3 mb-4">
+    <div class="card-body">
+        <h5 class="fw-semibold mb-3">All Users</h5>
+        <div class="table-responsive">
+            <table class="table table-hover table-striped align-middle">
+                <thead class="table-light">
+                    <tr>
+                        <th scope="col">Username</th>
+                        <th scope="col">Email</th>
+                        <th scope="col">Role</th>
+                        <th scope="col" style="width: 150px;">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <?php if (count($users) > 0): ?>
+                        <?php foreach ($users as $user): ?>
+                            <tr>
+                                <td><?php echo htmlspecialchars($user['full_name'], ENT_QUOTES, 'UTF-8'); ?></td>
+                                <td><?php echo htmlspecialchars($user['email'], ENT_QUOTES, 'UTF-8'); ?></td>
+                                <td>
+                                    <span class="badge bg-success">
+                                        <?php echo htmlspecialchars($user['role'], ENT_QUOTES, 'UTF-8'); ?>
+                                    </span>
+                                </td>
+                                <td>
+                                    <!-- User dropdown menu for actions, view, edit and delete -->
+
+                                    <div class="dropdown">
+                                        <button class="btn btn-sm btn-light border dropdown-toggle" type="button" id="dropdownMenuButton<?php echo $user['id']; ?>" data-bs-toggle="dropdown" aria-expanded="false">
+                                            Actions
+                                        </button>
+                                        <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton<?php echo $user['id']; ?>">
+                                            <li><a class="dropdown-item" href="view-user.php?id=<?php echo $user['id']; ?>">View</a></li>
+                                            <li><a class="dropdown-item disabled" href="edit-user.php?id=<?php echo $user['id']; ?>">Edit</a></li>
+                                            <?php if ($user['id'] != $_SESSION['user_id']): // Prevent self-deletion 
+                                            ?>
+                                                <li><a class="dropdown-item disabled" href="delete-user.php?id=<?php echo $user['id']; ?>">Delete</a></li>
+                                            <?php endif; ?>
+                                        </ul>
+                                    </div>
+
+
+
+                                </td>
+                            </tr>
+                        <?php endforeach; ?>
+                    <?php else: ?>
+                        <tr>
+                            <td colspan="4" class="text-center text-muted py-4">
+                                No users found.
+                            </td>
+                        </tr>
+                    <?php endif; ?>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
