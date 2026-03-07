@@ -53,7 +53,7 @@ include __DIR__ . '/../includes/header.php';
 
             <!-- User stats: to show how many users exist, per role, and active  -->
             <div class="row mb-4">
-                <div class="col-md-4">
+                <div class="col-md-3">
                     <div class="card border-0 shadow-sm">
                         <div class="card-body">
                             <h6 class="card-title mb-2 text-muted small mb-1">Total Users</h6>
@@ -62,7 +62,7 @@ include __DIR__ . '/../includes/header.php';
                         </div>
                     </div>
                 </div>
-                <div class="col-md-4">
+                <div class="col-md-3">
                     <div class="card border-0 shadow-sm">
                         <div class="card-body">
                             <h6 class="card-title mb-2 text-muted small mb-1">Admins</h6>
@@ -71,12 +71,21 @@ include __DIR__ . '/../includes/header.php';
                         </div>
                     </div>
                 </div>
-                <div class="col-md-4">
+                <div class="col-md-3">
                     <div class="card border-0 shadow-sm">
                         <div class="card-body">
                             <h6 class="card-title mb-2 text-muted small mb-1">Responders</h6>
                             <h3 class="card-text fw-bold mb-0" style="color: #6c757d;"><?php echo count(array_filter($users, fn($u) => $u['role'] === 'Responder')); ?></h3>
                             <small class="text-muted">Emergency Responders</small>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="card border-0 shadow-sm">
+                        <div class="card-body">
+                            <h6 class="card-title mb-2 text-muted small mb-1">Public</h6>
+                            <h3 class="card-text fw-bold mb-0" style="color: #6c757d;"><?php echo count(array_filter($users, fn($u) => $u['role'] === 'Community')); ?></h3>
+                            <small class="text-muted">Community/ Public Users</small>
                         </div>
                     </div>
                 </div>
@@ -139,27 +148,27 @@ include __DIR__ . '/../includes/header.php';
 
                                             <!-- Role Badge -->
                                             <!-- Role Badge -->
-<td>
+                                            <td>
 
-<?php
+                                                <?php
 
-$roleName = strtolower($user['role'] ?? 'unknown');
+                                                $roleName = strtolower($user['role'] ?? 'unknown');
 
-$roleStyles = [
-    'admin' => 'danger',
-    'responder' => 'primary',
-    'community' => 'secondary'
-];
+                                                $roleStyles = [
+                                                    'admin' => 'danger',
+                                                    'responder' => 'primary',
+                                                    'community' => 'secondary'
+                                                ];
 
-$badge = $roleStyles[$roleName] ?? 'dark';
+                                                $badge = $roleStyles[$roleName] ?? 'dark';
 
-?>
+                                                ?>
 
-<span class="badge bg-<?= $badge ?>">
-    <?= htmlspecialchars($user['role'] ?? 'Unknown') ?>
-</span>
+                                                <span class="badge bg-<?= $badge ?>">
+                                                    <?= htmlspecialchars($user['role'] ?? 'Unknown') ?>
+                                                </span>
 
-</td>
+                                            </td>
 
                                             <!-- Status -->
                                             <td>
@@ -174,11 +183,30 @@ $badge = $roleStyles[$roleName] ?? 'dark';
                                                         Actions
                                                     </button>
                                                     <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton<?php echo $user['id']; ?>">
-                                                        <li><a class="dropdown-item" href="view-user.php?id=<?php echo $user['id']; ?>">View</a></li>
+                                                        <li>
+                                                            <!-- <a class="dropdown-item" href="view-user.php?id=<?php // echo $user['id']; 
+                                                                                                                    ?>">View</a> -->
+
+                                                            <a class="dropdown-item view-user"
+                                                                href="#"
+                                                                data-id="<?= $user['id']; ?>"
+                                                                data-name="<?= htmlspecialchars($user['full_name']); ?>"
+                                                                data-email="<?= htmlspecialchars($user['email']); ?>"
+                                                                data-phone="<?= htmlspecialchars($user['phone']); ?>"
+                                                                data-role="<?= htmlspecialchars($user['role']); ?>"
+                                                                data-bs-toggle="modal"
+                                                                data-bs-target="#viewUserModal">
+
+                                                                View
+
+                                                            </a>
+
+                                                        </li>
                                                         <li><a class="dropdown-item disabled" href="edit-user.php?id=<?php echo $user['id']; ?>">Edit</a></li>
                                                         <?php if ($user['id'] != $_SESSION['user_id']): // Prevent self-deletion 
                                                         ?>
-                                                            <li><a class="dropdown-item disabled" href="delete-user.php?id=<?php echo $user['id']; ?>">Delete</a></li>
+                                                            <li><a class="dropdown-item text-danger delete-user" href="#" data-id="<?= $user['id']; ?>">Delete</a>
+                                                            </li>
                                                         <?php endif; ?>
                                                     </ul>
                                                 </div>
@@ -273,6 +301,38 @@ $badge = $roleStyles[$roleName] ?? 'dark';
     </div>
 </div>
 
+<!-- Modal to view user details -->
+<div class="modal fade" id="viewUserModal" tabindex="-1" aria-labelledby="viewUserModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header bg-light">
+                <h5 class="modal-title fw-semibold" id="viewUserModalLabel">User Details</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <!-- User details will be populated here -->
+                <table class="table table-bordered">
+                    <tr>
+                        <th>Full Name</th>
+                        <td id="viewName"></td>
+                    </tr>
+                    <tr>
+                        <th>Email</th>
+                        <td id="viewEmail"></td>
+                    </tr>
+                    <tr>
+                        <th>Phone</th>
+                        <td id="viewPhone"></td>
+                    </tr>
+                    <tr>
+                        <th>Role</th>
+                        <td id="viewRole"></td>
+                    </tr>
+            </div>
+        </div>
+    </div>
+</div>
+
 
 <script>
     // Table search functionality
@@ -345,6 +405,49 @@ $badge = $roleStyles[$roleName] ?? 'dark';
     displayRows();
     setupPagination();
 
+    // View user details in modal
+    document.querySelectorAll(".view-user").forEach(button => {
+
+        button.addEventListener("click", function() {
+
+            document.getElementById("viewName").textContent = this.dataset.name;
+            document.getElementById("viewEmail").textContent = this.dataset.email;
+            document.getElementById("viewPhone").textContent = this.dataset.phone;
+            document.getElementById("viewRole").textContent = this.dataset.role;
+
+        });
+
+    });
+
+    // Delete user functionality
+    document.querySelectorAll(".delete-user").forEach(button => {
+
+        button.addEventListener("click", function() {
+
+            const userId = this.dataset.id;
+
+            Swal.fire({
+                title: "Delete User?",
+                text: "This action cannot be undone.",
+                icon: "warning",
+                showCancelButton: true,
+                confirmButtonColor: "#d33",
+                cancelButtonColor: "#6c757d",
+                confirmButtonText: "Yes, delete"
+            }).then((result) => {
+
+                if (result.isConfirmed) {
+
+                    window.location.href = "delete-user.php?id=" + userId;
+
+                }
+
+            });
+
+        });
+
+    });
+
 
 
 
@@ -377,8 +480,7 @@ $badge = $roleStyles[$roleName] ?? 'dark';
 
     });
 </script>
-
-
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
 
 <?php include __DIR__ . '/../includes/footer.php'; ?>
