@@ -106,7 +106,7 @@ include __DIR__ . '/../includes/header.php';
 
                     <div class="table-responsive">
 
-                        <table class="table table-hover align-middle" id="usersTable">
+                        <table class="table table-hover table-striped align-middle" id="usersTable">
 
                             <thead class="table-light">
                                 <tr>
@@ -122,66 +122,76 @@ include __DIR__ . '/../includes/header.php';
 
                             <tbody>
 
-                                <?php // if (count($users) > 0): ?>
-                                <?php foreach ($users as $index => $user): ?>
+                                <?php if (count($users) > 0): ?>
+
+
+                                    <?php foreach ($users as $index => $user): ?>
+
+                                        <tr>
+
+                                            <td><?= $index + 1 ?></td>
+
+                                            <td><?= htmlspecialchars($user['full_name']) ?></td>
+
+                                            <td><?= htmlspecialchars($user['email']) ?></td>
+
+                                            <td><?= htmlspecialchars($user['phone']) ?></td>
+
+                                            <!-- Role Badge -->
+                                            <td>
+
+                                                <?php
+                                                $roles = [
+                                                    1 => ['Admin', 'danger'],
+                                                    2 => ['Responder', 'primary'],
+                                                    3 => ['Community', 'secondary']
+                                                ];
+
+                                                $role_id = (int)$user['role_id'];
+
+                                                $role = $roles[$role_id] ?? ['Unknown', 'dark'];
+                                                ?>
+
+                                                <span class="badge bg-<?= $role[1]; ?>">
+                                                    <?= $role[0]; ?>
+                                                </span>
+
+                                            </td>
+
+                                            <!-- Status -->
+                                            <td>
+                                                <span class="badge bg-success">Active</span>
+                                            </td>
+
+                                            <!-- Actions -->
+                                            <td>
+
+                                                <div class="dropdown">
+                                                    <button class="btn btn-sm btn-light border dropdown-toggle" type="button" id="dropdownMenuButton<?php echo $user['id']; ?>" data-bs-toggle="dropdown" aria-expanded="false">
+                                                        Actions
+                                                    </button>
+                                                    <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton<?php echo $user['id']; ?>">
+                                                        <li><a class="dropdown-item" href="view-user.php?id=<?php echo $user['id']; ?>">View</a></li>
+                                                        <li><a class="dropdown-item disabled" href="edit-user.php?id=<?php echo $user['id']; ?>">Edit</a></li>
+                                                        <?php if ($user['id'] != $_SESSION['user_id']): // Prevent self-deletion 
+                                                        ?>
+                                                            <li><a class="dropdown-item disabled" href="delete-user.php?id=<?php echo $user['id']; ?>">Delete</a></li>
+                                                        <?php endif; ?>
+                                                    </ul>
+                                                </div>
+
+                                            </td>
+
+                                        </tr>
+
+                                    <?php endforeach; ?>
+
+                                <?php else: ?>
 
                                     <tr>
-
-                                        <td><?= $index + 1 ?></td>
-
-                                        <td><?= htmlspecialchars($user['full_name']) ?></td>
-
-                                        <td><?= htmlspecialchars($user['email']) ?></td>
-
-                                        <td><?= htmlspecialchars($user['phone']) ?></td>
-
-                                        <!-- Role Badge -->
-                                        <td>
-
-                                            <?php if ($user['role_id'] == 1): ?>
-
-                                                <span class="badge bg-danger">Admin</span>
-
-                                            <?php elseif ($user['role_id'] == 2): ?>
-
-                                                <span class="badge bg-primary">Responder</span>
-
-                                            <?php else: ?>
-
-                                                <span class="badge bg-secondary">Community</span>
-
-                                            <?php endif; ?>
-
-                                        </td>
-
-                                        <!-- Status -->
-                                        <td>
-                                            <span class="badge bg-success">Active</span>
-                                        </td>
-
-                                        <!-- Actions -->
-                                        <td>
-
-                                            <button class="btn btn-sm btn-outline-primary">
-                                                Edit
-                                            </button>
-
-                                            <button class="btn btn-sm btn-outline-danger">
-                                                Delete
-                                            </button>
-
-                                        </td>
-
+                                        <td colspan="7" class="text-center text-muted">No users found.</td>
                                     </tr>
-
-                                <?php endforeach; ?>
-                                <!-- <?php // else: ?>
-
-                                    <tr>
-                                        <td colspan="7" class="text-center text-muted">
-                                            No users found.
-                                        </td>
-                                    </tr> -->
+                                <?php endif; ?>
 
                             </tbody>
 
@@ -262,77 +272,75 @@ include __DIR__ . '/../includes/header.php';
 
 
 <script>
+    // Table search functionality
+    // Search users
+    document.getElementById("userSearch").addEventListener("keyup", function() {
 
+        let filter = this.value.toLowerCase();
 
-// Table search functionality
-// Search users
-document.getElementById("userSearch").addEventListener("keyup", function() {
+        let rows = document.querySelectorAll("#usersTable tbody tr");
 
-    let filter = this.value.toLowerCase();
+        rows.forEach(row => {
 
-    let rows = document.querySelectorAll("#usersTable tbody tr");
+            let text = row.innerText.toLowerCase();
 
-    rows.forEach(row => {
-
-        let text = row.innerText.toLowerCase();
-
-        row.style.display = text.includes(filter) ? "" : "none";
-
-    });
-
-});
-
-// Pagination functionality (client-side)
-const rowsPerPage = 5;
-const rows = document.querySelectorAll("#usersTable tbody tr");
-const pagination = document.getElementById("tablePagination");
-
-let currentPage = 1;
-
-function displayRows() {
-
-    rows.forEach((row, index) => {
-
-        row.style.display =
-            (index >= (currentPage - 1) * rowsPerPage &&
-             index < currentPage * rowsPerPage)
-            ? ""
-            : "none";
-
-    });
-
-}
-
-function setupPagination() {
-
-    const pageCount = Math.ceil(rows.length / rowsPerPage);
-
-    pagination.innerHTML = "";
-
-    for (let i = 1; i <= pageCount; i++) {
-
-        const li = document.createElement("li");
-        li.className = "page-item";
-
-        const btn = document.createElement("button");
-        btn.className = "page-link";
-        btn.innerText = i;
-
-        btn.addEventListener("click", () => {
-
-            currentPage = i;
-            displayRows();
+            row.style.display = text.includes(filter) ? "" : "none";
 
         });
 
-        li.appendChild(btn);
-        pagination.appendChild(li);
+    });
+
+    // Pagination functionality (client-side)
+    const rowsPerPage = 5;
+    const rows = document.querySelectorAll("#usersTable tbody tr");
+    const pagination = document.getElementById("tablePagination");
+
+    let currentPage = 1;
+
+    function displayRows() {
+
+        rows.forEach((row, index) => {
+
+            row.style.display =
+                (index >= (currentPage - 1) * rowsPerPage &&
+                    index < currentPage * rowsPerPage) ?
+                "" :
+                "none";
+
+        });
+
     }
 
-}
+    function setupPagination() {
 
-displayRows();
-setupPagination();
+        const pageCount = Math.ceil(rows.length / rowsPerPage);
+
+        pagination.innerHTML = "";
+
+        for (let i = 1; i <= pageCount; i++) {
+
+            const li = document.createElement("li");
+            li.className = "page-item";
+
+            const btn = document.createElement("button");
+            btn.className = "page-link";
+            btn.innerText = i;
+
+            btn.addEventListener("click", () => {
+
+                currentPage = i;
+                displayRows();
+
+            });
+
+            li.appendChild(btn);
+            pagination.appendChild(li);
+        }
+
+    }
+
+    displayRows();
+    setupPagination();
 
 
 
