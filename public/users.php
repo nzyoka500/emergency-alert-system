@@ -494,42 +494,45 @@ include __DIR__ . '/../includes/header.php';
 
 
 // Handle create user form submission
-document.getElementById("createUserForm").addEventListener("submit", function(e){
+// document.getElementById("createUserForm").addEventListener("submit", function(e){
 
-    e.preventDefault();
+//     e.preventDefault();
 
-    let formData = new FormData(this);
+//     let formData = new FormData(this);
 
-    fetch("create-user.php",{
-        method:"POST",
-        body:formData
-    })
-    .then(res => res.json())
-    .then(data => {
+//     fetch("create-user.php",{
+//         method:"POST",
+//         body:formData
+//     })
+//     .then(res => res.json())
+//     .then(data => {
 
-        if(data.success){
+//         if(data.success){
 
-            Swal.fire({
-                icon:"success",
-                title:"Success",
-                text:data.message
-            }).then(()=>{
-                location.reload();
-            });
+//             Swal.fire({
+//                 icon: "success",
+//                 title: "Success",
+//                 text: data.message
+//             }).then(() => {
 
-        }else{
+//                 // Redirect after success
+//                 window.location.href = data.redirect;
 
-            Swal.fire({
-                icon:"error",
-                title:"Error",
-                text:data.message
-            });
+//             });
 
-        }
+//         } else {
 
-    });
+//             Swal.fire({
+//                 icon: "error",
+//                 title: "Error",
+//                 text: data.message
+//             });
 
-});
+//         }
+
+//     });
+
+// });
 
 </script>
 

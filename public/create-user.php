@@ -69,7 +69,8 @@ try {
 
     echo json_encode([
         "success" => true,
-        "message" => "User created successfully!"
+        "message" => "User created successfully!",
+        "redirect" => "users.php"
     ]);
 
 } catch (Exception $e) {
