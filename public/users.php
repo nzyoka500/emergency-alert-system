@@ -131,8 +131,7 @@ include __DIR__ . '/../includes/header.php';
 
                             <tbody>
 
-                                <?php if (count($users) > 0): ?>
-
+                                <?php if (!empty($users) && count($users) > 0): ?>
 
                                     <?php foreach ($users as $index => $user): ?>
 
@@ -147,11 +146,9 @@ include __DIR__ . '/../includes/header.php';
                                             <td><?= htmlspecialchars($user['phone']) ?></td>
 
                                             <!-- Role Badge -->
-                                            <!-- Role Badge -->
                                             <td>
 
                                                 <?php
-
                                                 $roleName = strtolower($user['role'] ?? 'unknown');
 
                                                 $roleStyles = [
@@ -161,7 +158,6 @@ include __DIR__ . '/../includes/header.php';
                                                 ];
 
                                                 $badge = $roleStyles[$roleName] ?? 'dark';
-
                                                 ?>
 
                                                 <span class="badge bg-<?= $badge ?>">
@@ -179,14 +175,19 @@ include __DIR__ . '/../includes/header.php';
                                             <td>
 
                                                 <div class="dropdown">
-                                                    <button class="btn btn-sm btn-light border dropdown-toggle" type="button" id="dropdownMenuButton<?php echo $user['id']; ?>" data-bs-toggle="dropdown" aria-expanded="false">
-                                                        Actions
-                                                    </button>
-                                                    <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton<?php echo $user['id']; ?>">
-                                                        <li>
-                                                            <!-- <a class="dropdown-item" href="view-user.php?id=<?php // echo $user['id']; 
-                                                                                                                    ?>">View</a> -->
 
+                                                    <button class="btn btn-sm btn-light border dropdown-toggle"
+                                                        type="button"
+                                                        id="dropdownMenuButton<?= $user['id']; ?>"
+                                                        data-bs-toggle="dropdown">
+
+                                                        Actions
+
+                                                    </button>
+
+                                                    <ul class="dropdown-menu">
+
+                                                        <li>
                                                             <a class="dropdown-item view-user"
                                                                 href="#"
                                                                 data-id="<?= $user['id']; ?>"
@@ -198,17 +199,30 @@ include __DIR__ . '/../includes/header.php';
                                                                 data-bs-target="#viewUserModal">
 
                                                                 View
-
                                                             </a>
-
                                                         </li>
-                                                        <li><a class="dropdown-item disabled" href="edit-user.php?id=<?php echo $user['id']; ?>">Edit</a></li>
-                                                        <?php if ($user['id'] != $_SESSION['user_id']): // Prevent self-deletion 
-                                                        ?>
-                                                            <li><a class="dropdown-item text-danger delete-user" href="#" data-id="<?= $user['id']; ?>">Delete</a>
+
+                                                        <li>
+                                                            <a class="dropdown-item disabled"
+                                                                href="edit-user.php?id=<?= $user['id']; ?>">
+                                                                Edit
+                                                            </a>
+                                                        </li>
+
+                                                        <?php if ($user['id'] != $_SESSION['user_id']): ?>
+
+                                                            <li>
+                                                                <a class="dropdown-item text-danger delete-user"
+                                                                    href="#"
+                                                                    data-id="<?= $user['id']; ?>">
+                                                                    Delete
+                                                                </a>
                                                             </li>
+
                                                         <?php endif; ?>
+
                                                     </ul>
+
                                                 </div>
 
                                             </td>
@@ -220,8 +234,11 @@ include __DIR__ . '/../includes/header.php';
                                 <?php else: ?>
 
                                     <tr>
-                                        <td colspan="7" class="text-center text-muted">No users found.</td>
+                                        <td colspan="7" class="text-center text-muted py-4">
+                                            No users found.
+                                        </td>
                                     </tr>
+
                                 <?php endif; ?>
 
                             </tbody>
@@ -267,35 +284,30 @@ include __DIR__ . '/../includes/header.php';
             </div>
             <div class="modal-body">
                 <!-- Form for creating new user -->
-                <form method="POST" action="create-user.php" id="createUserForm">
-                    <div class="mb-3">
-                        <label for="fullName" class="form-label">Full Name</label>
-                        <input type="text" class="form-control" id="fullName" name="full_name" required>
-                    </div>
-                    <div class="mb-3">
-                        <label for="email" class="form-label">Email address</label>
-                        <input type="email" class="form-control" id="email" name="email" required>
-                    </div>
+                 <form id="createUserForm">
 
-                    <div class="mb-3">
-                        <label for="phone" class="form-label">Phone</label>
-                        <input type="text" class="form-control" id="phone" name="phone" required>
-                    </div>
-                    <div class="mb-3">
-                        <label for="password" class="form-label">Password</label>
-                        <input type="password" class="form-control" id="password" name="password" required>
-                    </div>
-                    <div class="mb-3">
-                        <label for="role" class="form-label">Role</label>
-                        <select class="form-select" id="role" name="role-id" required>
-                            <option value="">Select Role</option>
-                            <option value="1">Admin</option>
-                            <option value="2">Responder</option>
-                            <option value="3">Viewer</option>
-                        </select>
-                    </div>
+                    <input type="text" name="full_name" class="form-control mb-2" placeholder="Full Name" required>
+
+                    <input type="email" name="email" class="form-control mb-2" placeholder="Email" required>
+
+                    <input type="text" name="phone" class="form-control mb-2" placeholder="Phone">
+
+                    <input type="password" name="password" class="form-control mb-2" placeholder="Password" required>
+
+                    <select name="role_id" class="form-control mb-3">
+                    <option value="1">Admin</option>
+                    <option value="2">Responder</option>
+                    <option value="3">Community</option>
+                    </select>
+
                     <button type="submit" class="btn btn-primary">Create User</button>
+
                 </form>
+
+
+
+
+               
             </div>
         </div>
     </div>
@@ -479,7 +491,49 @@ include __DIR__ . '/../includes/header.php';
         }
 
     });
+
+
+// Handle create user form submission
+document.getElementById("createUserForm").addEventListener("submit", function(e){
+
+    e.preventDefault();
+
+    let formData = new FormData(this);
+
+    fetch("create-user.php",{
+        method:"POST",
+        body:formData
+    })
+    .then(res => res.json())
+    .then(data => {
+
+        if(data.success){
+
+            Swal.fire({
+                icon:"success",
+                title:"Success",
+                text:data.message
+            }).then(()=>{
+                location.reload();
+            });
+
+        }else{
+
+            Swal.fire({
+                icon:"error",
+                title:"Error",
+                text:data.message
+            });
+
+        }
+
+    });
+
+});
+
 </script>
+
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
 
