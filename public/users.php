@@ -1,4 +1,5 @@
 <?php
+
 /**
  * users.php - Professional User Management
  * Updated with Indigo/Slate Palette & Soft UI Stats
@@ -64,21 +65,21 @@ include __DIR__ . '/../includes/header.php';
 
                     foreach ($roles_count as $title => $data):
                     ?>
-                    <div class="col-md-3">
-                        <div class="card border-0 shadow-sm p-3">
-                            <div class="d-flex align-items-center">
-                                <div class="bg-<?= $data['color'] ?>-subtle text-<?= $data['color'] ?> p-3 rounded-3 me-3">
-                                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                                        <path stroke-linecap="round" stroke-linejoin="round" d="<?= $data['icon'] ?>" />
-                                    </svg>
-                                </div>
-                                <div>
-                                    <h3 class="fw-bold mb-0"><?= $data['count'] ?></h3>
-                                    <small class="text-muted text-uppercase fw-bold" style="font-size: 0.65rem;"><?= $title ?></small>
+                        <div class="col-md-3">
+                            <div class="card border-0 shadow-sm p-3">
+                                <div class="d-flex align-items-center">
+                                    <div class="bg-<?= $data['color'] ?>-subtle text-<?= $data['color'] ?> p-3 rounded-3 me-3">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="<?= $data['icon'] ?>" />
+                                        </svg>
+                                    </div>
+                                    <div>
+                                        <h3 class="fw-bold mb-0"><?= $data['count'] ?></h3>
+                                        <small class="text-muted text-uppercase fw-bold" style="font-size: 0.65rem;"><?= $title ?></small>
+                                    </div>
                                 </div>
                             </div>
                         </div>
-                    </div>
                     <?php endforeach; ?>
                 </div>
 
@@ -92,7 +93,9 @@ include __DIR__ . '/../includes/header.php';
                             <div class="col-md-4">
                                 <div class="input-group input-group-sm">
                                     <span class="input-group-text bg-transparent border-end-0 text-muted">
-                                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z" /></svg>
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z" />
+                                        </svg>
                                     </span>
                                     <input type="text" id="userSearch" class="form-control border-start-0 ps-0" placeholder="Search by name, email or role...">
                                 </div>
@@ -113,58 +116,62 @@ include __DIR__ . '/../includes/header.php';
                                 </tr>
                             </thead>
                             <tbody>
-                                <?php foreach ($users as $index => $user): 
-                                    $roleColor = match(strtolower($user['role'])) {
+                                <?php foreach ($users as $index => $user):
+                                    $roleColor = match (strtolower($user['role'])) {
                                         'admin' => 'danger',
                                         'responder' => 'primary',
                                         'community' => 'success',
                                         default => 'secondary'
                                     };
                                 ?>
-                                <tr>
-                                    <td class="ps-4 text-muted small"><?= $index + 1 ?></td>
-                                    <td>
-                                        <div class="fw-bold text-dark"><?= htmlspecialchars($user['full_name']) ?></div>
-                                        <div class="text-muted small"><?= htmlspecialchars($user['email']) ?></div>
-                                    </td>
-                                    <td>
-                                        <div class="small text-dark"><?= htmlspecialchars($user['phone'] ?: '--') ?></div>
-                                    </td>
-                                    <td>
-                                        <span class="badge bg-<?= $roleColor ?>-subtle text-<?= $roleColor ?>">
-                                            <?= htmlspecialchars($user['role']) ?>
-                                        </span>
-                                    </td>
-                                    <td>
-                                        <span class="badge bg-success-subtle text-success">
-                                            Active
-                                        </span>
-                                    </td>
-                                    <td class="text-end pe-4">
-                                        <div class="dropdown">
-                                            <button class="btn btn-sm btn-white border px-2 py-1" data-bs-toggle="dropdown">
-                                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path d="M9.5 13a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0zm0-5a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0zm0-5a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0z"/></svg>
-                                            </button>
-                                            <ul class="dropdown-menu dropdown-menu-end shadow-sm border-0">
-                                                <li><a class="dropdown-item view-user" href="#" 
-                                                    data-name="<?= htmlspecialchars($user['full_name']) ?>" 
-                                                    data-email="<?= htmlspecialchars($user['email']) ?>" 
-                                                    data-phone="<?= htmlspecialchars($user['phone']) ?>" 
-                                                    data-role="<?= htmlspecialchars($user['role']) ?>" 
-                                                    data-bs-toggle="modal" data-bs-target="#viewUserModal">View Details</a></li>
-                                                <li><hr class="dropdown-divider"></li>
-                                                <?php if ($user['id'] != $_SESSION['user_id']): ?>
-                                                    <li><a class="dropdown-item text-danger delete-user" href="#" data-id="<?= $user['id'] ?>">Delete User</a></li>
-                                                <?php endif; ?>
-                                            </ul>
-                                        </div>
-                                    </td>
-                                </tr>
+                                    <tr>
+                                        <td class="ps-4 text-muted small"><?= $index + 1 ?></td>
+                                        <td>
+                                            <div class="fw-bold text-dark"><?= htmlspecialchars($user['full_name']) ?></div>
+                                            <div class="text-muted small"><?= htmlspecialchars($user['email']) ?></div>
+                                        </td>
+                                        <td>
+                                            <div class="small text-dark"><?= htmlspecialchars($user['phone'] ?: '--') ?></div>
+                                        </td>
+                                        <td>
+                                            <span class="badge bg-<?= $roleColor ?>-subtle text-<?= $roleColor ?>">
+                                                <?= htmlspecialchars($user['role']) ?>
+                                            </span>
+                                        </td>
+                                        <td>
+                                            <span class="badge bg-success-subtle text-success">
+                                                Active
+                                            </span>
+                                        </td>
+                                        <td class="text-end pe-4">
+                                            <div class="dropdown">
+                                                <button class="btn btn-sm btn-white border px-2 py-1" data-bs-toggle="dropdown">
+                                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+                                                        <path d="M9.5 13a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0zm0-5a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0zm0-5a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0z" />
+                                                    </svg>
+                                                </button>
+                                                <ul class="dropdown-menu dropdown-menu-end shadow-sm border-0">
+                                                    <li><a class="dropdown-item view-user" href="#"
+                                                            data-name="<?= htmlspecialchars($user['full_name']) ?>"
+                                                            data-email="<?= htmlspecialchars($user['email']) ?>"
+                                                            data-phone="<?= htmlspecialchars($user['phone']) ?>"
+                                                            data-role="<?= htmlspecialchars($user['role']) ?>"
+                                                            data-bs-toggle="modal" data-bs-target="#viewUserModal">View Details</a></li>
+                                                    <li>
+                                                        <hr class="dropdown-divider">
+                                                    </li>
+                                                    <?php if ($user['id'] != $_SESSION['user_id']): ?>
+                                                        <li><a class="dropdown-item text-danger delete-user" href="#" data-id="<?= $user['id'] ?>">Delete User</a></li>
+                                                    <?php endif; ?>
+                                                </ul>
+                                            </div>
+                                        </td>
+                                    </tr>
                                 <?php endforeach; ?>
                             </tbody>
                         </table>
                     </div>
-                    
+
                     <!-- Pagination Footer -->
                     <div class="card-footer bg-white border-top-0 py-3">
                         <nav id="tablePagination"></nav>
@@ -229,7 +236,7 @@ include __DIR__ . '/../includes/header.php';
                 </div>
                 <h4 class="fw-bold mb-1" id="viewName">John Doe</h4>
                 <p class="text-muted mb-4" id="viewRole">Responder</p>
-                
+
                 <div class="row g-2 text-start">
                     <div class="col-12 p-3 bg-light rounded-3 mb-2">
                         <small class="text-muted d-block mb-1">Email Address</small>
@@ -270,19 +277,72 @@ include __DIR__ . '/../includes/header.php';
     });
 
     // Delete User
-    document.querySelectorAll(".delete-user").forEach(btn => {
+    /**
+     * Global Delete Handler
+     * Works for both Users and Alerts
+     */
+    document.querySelectorAll(".delete-user, .delete-btn").forEach(btn => {
         btn.addEventListener("click", function(e) {
             e.preventDefault();
+
             const id = this.dataset.id;
+            const row = this.closest('tr'); // Capture the row to remove it later
+            const type = this.classList.contains('delete-user') ? 'User' : 'Alert';
+            const targetUrl = type === 'User' ? 'delete-user.php' : 'delete-alert.php';
+
+            // Professional Indigo/Slate Confirmation
             Swal.fire({
-                title: "Are you sure?",
-                text: "This user will lose all system access.",
+                title: `Delete ${type}?`,
+                text: "This action is permanent and cannot be undone.",
                 icon: "warning",
                 showCancelButton: true,
-                confirmButtonColor: "#ef4444",
-                confirmButtonText: "Yes, delete"
+                confirmButtonColor: "#4f46e5", // Indigo Primary
+                cancelButtonColor: "#64748b", // Slate Muted
+                confirmButtonText: "Yes, delete it",
+                background: "#ffffff",
+                customClass: {
+                    title: 'fw-bold text-dark',
+                    popup: 'rounded-4'
+                }
             }).then((result) => {
-                if (result.isConfirmed) window.location.href = "delete-user.php?id=" + id;
+                if (result.isConfirmed) {
+                    // Show loading state
+                    Swal.showLoading();
+
+                    // Perform AJAX deletion
+                    fetch(targetUrl, {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/x-www-form-urlencoded'
+                            },
+                            body: `id=${id}`
+                        })
+                        .then(res => res.json())
+                        .then(data => {
+                            if (data.success) {
+                                // Success Feedback
+                                Swal.fire({
+                                    title: "Deleted!",
+                                    text: data.message,
+                                    icon: "success",
+                                    timer: 2000,
+                                    showConfirmButton: false
+                                });
+
+                                // Smoothly remove the row from the UI without refresh
+                                row.style.transition = "all 0.5s ease";
+                                row.style.opacity = "0";
+                                row.style.transform = "translateX(20px)";
+                                setTimeout(() => row.remove(), 500);
+
+                            } else {
+                                Swal.fire("Error", data.message, "error");
+                            }
+                        })
+                        .catch(err => {
+                            Swal.fire("System Error", "Could not connect to server.", "error");
+                        });
+                }
             });
         });
     });
@@ -290,9 +350,12 @@ include __DIR__ . '/../includes/header.php';
     // Form Submission
     document.getElementById("createUserForm").addEventListener("submit", async function(e) {
         e.preventDefault();
-        const response = await fetch("create-user.php", { method: "POST", body: new FormData(this) });
+        const response = await fetch("create-user.php", {
+            method: "POST",
+            body: new FormData(this)
+        });
         const result = await response.json();
-        
+
         if (result.success) {
             Swal.fire("Success", result.message, "success").then(() => window.location.reload());
         } else {
