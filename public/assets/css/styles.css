@@ -42,6 +42,115 @@ body {
     min-height: 100vh;
 }
 
+/* Sidebar Nav Link Custom Styles */
+.nav-link-custom {
+    display: flex !important;
+    align-items: center !important;
+    padding: 0.75rem 1rem !important;
+    color: rgba(255, 255, 255, 0.7) !important;
+    text-decoration: none !important;
+    border-radius: 8px;
+    margin-bottom: 4px;
+    transition: all 0.2s ease;
+    font-size: 0.9rem;
+    font-weight: 500;
+}
+
+.nav-link-custom svg {
+    width: 20px !important; /* Forces the small size shown in your prompt */
+    height: 20px !important;
+    margin-right: 12px !important;
+    flex-shrink: 0;
+    stroke-width: 2px;
+}
+
+.nav-link-custom:hover {
+    background-color: rgba(255, 255, 255, 0.05) !important;
+    color: #ffffff !important;
+}
+
+.nav-link-custom.active {
+    background-color: #4f46e5 !important; /* Indigo Primary */
+    color: #ffffff !important;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+}
+
+.text-danger-hover:hover {
+    background-color: rgba(239, 68, 68, 0.1) !important;
+    color: #f87171 !important;
+}
+
+/* User profile initial circle */
+aside .rounded-circle {
+    border: 2px solid rgba(255, 255, 255, 0.1);
+}
+
+
+/* Sidebar Container Fixes */
+aside.col-lg-2 {
+    width: 260px; /* Fixed width for standard sidebar look */
+    z-index: 1000;
+}
+
+aside .card {
+    border-radius: 0 !important;
+    background-color: #0f172a !important; /* Deep Slate */
+    height: 100vh !important;
+}
+
+/* Nav Link Alignment & Sizing */
+.nav-link {
+    display: flex !important;
+    align-items: center !important;
+    padding: 10px 16px !important;
+    color: rgba(255, 255, 255, 0.7) !important;
+    text-decoration: none;
+    transition: all 0.2s ease;
+    margin-bottom: 4px;
+    font-size: 0.9rem;
+    white-space: nowrap;
+}
+
+/* THE CRITICAL FIX: SVG ICON CONSTRAINTS */
+.nav-link svg {
+    width: 20px !important;  /* Force small size */
+    height: 20px !important; /* Force small size */
+    margin-right: 12px !important;
+    flex-shrink: 0; /* Prevent icon from squishing */
+    stroke-width: 2px;
+}
+
+/* Hover State */
+.nav-link:hover {
+    background: rgba(255, 255, 255, 0.05) !important;
+    color: #fff !important;
+}
+
+/* Active State */
+.nav-link.active {
+    background: #4f46e5 !important; /* Indigo primary */
+    color: #fff !important;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+/* Section Headers (Insights, Main Menu) */
+aside .text-muted {
+    font-size: 0.65rem !important;
+    font-weight: 700 !important;
+    text-transform: uppercase !important;
+    letter-spacing: 1.2px !important;
+    padding-left: 16px;
+    margin-top: 20px;
+    margin-bottom: 10px;
+    color: #64748b !important; /* Slate gray */
+}
+
+/* User Profile Box */
+aside .bg-white-10 {
+    background: rgba(255, 255, 255, 0.03) !important;
+    border: 1px solid rgba(255, 255, 255, 0.05) !important;
+    margin: 0 10px;
+}
 
 
 
