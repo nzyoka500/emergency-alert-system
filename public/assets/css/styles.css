@@ -26,8 +26,9 @@
     --slate-700: #334155;
     --slate-800: #1e293b;
     --slate-900: #0f172a;
-    --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
     --shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+    --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+    --shadow-md: 0 4px 6px -1px rgba(0,0,0,0.1);
     --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
 }
 
@@ -35,6 +36,8 @@
     margin: 0;
     padding: 0;
     box-sizing: border-box;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
 }
 
 body {
@@ -159,8 +162,8 @@ aside .bg-white-10 {
 /* LAYOUT & MAIN AREA */
 /* ============================================ */
 body {
-    background-color: var(--slate-50);
-    font-family: 'Plus Jakarta Sans', 'Inter', sans-serif;
+    /* background-color: var(--slate-50); */
+    /* font-family: 'Plus Jakarta Sans', 'Inter', sans-serif; */
 }
 
 main.col-lg-10 {
@@ -300,223 +303,249 @@ canvas {
     filter: drop-shadow(0 4px 6px rgba(0,0,0,0.02));
 }
 
+/* ============================================ */
+/* 1. CORE UTILITIES & ROOT VARIABLES */
+/* ============================================ */
+/* :root {
+    --primary: #4f46e5;
+    --primary-hover: #4338ca;
+    --primary-soft: rgba(79, 70, 229, 0.1);
+    --slate-50: #f8fafc;
+    --slate-100: #f1f5f9;
+    --slate-200: #e2e8f0;
+    --slate-300: #cbd5e1;
+    --slate-400: #94a3b8;
+    --slate-700: #334155;
+    --slate-800: #1e293b;
+    --slate-900: #0f172a;
+    --danger: #ef4444;
+    --success: #10b981;
+    --warning: #f59e0b;
+    --shadow-sm: 0 1px 3px rgba(0,0,0,0.1);
+    --shadow-md: 0 4px 6px -1px rgba(0,0,0,0.1);
+    --shadow-lg: 0 20px 25px -5px rgba(0,0,0,0.1);
+} */
 
+/* Base resets for modern feel */
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-/* Footer Styling */
-footer {
-    background: linear-gradient(135deg, rgba(102, 126, 234, 0.05) 0%, rgba(118, 75, 162, 0.05) 100%);
-    border-top: 1px solid #e8ebf2;
-    padding: 24px 20px;
-    margin-top: auto;
-    text-align: center;
-    color: #5a6474;
-    font-size: 13px;
-}
-
-footer small {
-    color: #8892a4;
-    font-weight: 500;
-}
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-/* Responsive Design */
-@media (max-width: 480px) {
-    .login-container {
-        padding: 30px 20px;
-        margin: 20px;
-    }
-
-    .login-container h2 {
-        font-size: 24px;
-    }
-
-    .form-group input {
-        padding: 10px 12px;
-        font-size: 16px;
-    }
-
-    .btn {
-        padding: 11px;
-        font-size: 15px;
-    }
-
-    .col-lg-10 {
-        padding: 16px 20px !important;
-    }
-
-    .display-5 {
-        font-size: 28px !important;
-    }
-
-    .card-body {
-        padding: 16px !important;
-    }
-
-    .card-body h2 {
-        font-size: 28px;
-    }
-
-    .list-group-item {
-        padding: 16px !important;
-    }
-
-    .col-lg-4 {
-        margin-top: 20px;
-    }
-}
 
 /* ============================================ */
-/* FORM CONTROLS & INPUT STYLING */
+/*  MODERN FORM CONTROLS */
 /* ============================================ */
-
-.form-control {
-    border: 2px solid #e8ebf2 !important;
-    border-radius: 8px !important;
-    padding: 12px 14px !important;
-    font-size: 14px !important;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04) !important;
+.form-control, .form-select {
+    border: 1px solid var(--slate-200) !important;
+    border-radius: 10px !important;
+    padding: 0.75rem 1rem !important;
+    font-size: 0.95rem !important;
+    background-color: #fff !important;
+    color: var(--slate-800) !important;
+    transition: all 0.2s ease-in-out !important;
 }
 
-.form-control:focus {
-    border-color: #667eea !important;
-    box-shadow: 0 4px 16px rgba(102, 126, 234, 0.15) !important;
-    background-color: #f9f9ff !important;
+.form-control:focus, .form-select:focus {
+    border-color: var(--primary) !important;
+    box-shadow: 0 0 0 4px var(--primary-soft) !important;
     outline: none !important;
 }
 
 .form-control::placeholder {
-    color: #a8b1c3 !important;
-    font-size: 13px;
+    color: var(--slate-400) !important;
 }
 
 .form-label {
-    color: #2d3748 !important;
+    color: var(--slate-700) !important;
     font-weight: 600 !important;
-    margin-bottom: 8px !important;
-    font-size: 13px !important;
-    letter-spacing: 0.3px;
+    margin-bottom: 0.5rem !important;
+    font-size: 0.85rem !important;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
 }
 
 /* ============================================ */
-/* SVG ICON STYLING */
+/*  TABLE POLISH (Admin Grade) */
 /* ============================================ */
-
-svg {
-    opacity: 1;
+.table {
+    border-collapse: separate;
+    border-spacing: 0;
 }
 
-.card:hover svg {
-    opacity: 0.4 !important;
+.table thead th {
+    background-color: var(--slate-50) !important;
+    border-bottom: 1px solid var(--slate-200) !important;
+    color: var(--slate-400) !important;
+    font-weight: 700 !important;
+    text-transform: uppercase !important;
+    font-size: 0.7rem !important;
+    letter-spacing: 1px !important;
+    padding: 1rem 1.5rem !important;
+}
+
+.table tbody td {
+    padding: 1.25rem 1.5rem !important;
+    border-bottom: 1px solid var(--slate-100) !important;
+    vertical-align: middle !important;
 }
 
 /* ============================================ */
-/* SCROLLBAR STYLING */
+/*  STATUS & ANIMATIONS */
 /* ============================================ */
-
-::-webkit-scrollbar {
+.status-pulse-pending {
+    display: inline-block;
     width: 8px;
+    height: 8px;
+    background-color: var(--warning);
+    border-radius: 50%;
+    margin-right: 8px;
+    animation: pulse-warning 2s infinite;
+}
+
+@keyframes pulse-warning {
+    0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(245, 158, 11, 0.7); }
+    70% { transform: scale(1); box-shadow: 0 0 0 6px rgba(245, 158, 11, 0); }
+    100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(245, 158, 11, 0); }
+}
+
+/* Soft Badges */
+.badge {
+    padding: 0.5rem 0.75rem !important;
+    font-weight: 600 !important;
+    border-radius: 6px !important;
+}
+
+/* ============================================ */
+/*  CUSTOM SCROLLBAR (Indigo Theme) */
+/* ============================================ */
+::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
 }
 
 ::-webkit-scrollbar-track {
-    background: transparent;
+    background: var(--slate-50);
 }
 
 ::-webkit-scrollbar-thumb {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    border-radius: 4px;
+    background: var(--slate-300);
+    border-radius: 10px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-    background: linear-gradient(135deg, #764ba2 0%, #667eea 100%);
+    background: var(--primary);
 }
 
 /* ============================================ */
-/* UTILITY CLASSES */
+/*  OVERALL RESPONSIVENESS */
 /* ============================================ */
 
-.fw-600 {
-    font-weight: 600 !important;
+/* Large screens and up */
+@media (min-width: 1200px) {
+    .container-fluid {
+        padding-left: 0; /* Align sidebar to edge */
+    }
 }
 
-.fw-700 {
-    font-weight: 700 !important;
+/* Tablet and below */
+@media (max-width: 991.98px) {
+    main.col-lg-10 {
+        padding: 1.5rem !important;
+        width: 100% !important;
+    }
+    
+    .card-body h3 {
+        font-size: 1.5rem;
+    }
 }
 
-.text-primary {
-    color: #667eea !important;
+/* Mobile Devices */
+@media (max-width: 576px) {
+    .p-4.p-lg-5 {
+        padding: 1.25rem !important;
+    }
+
+    .d-flex.justify-content-between {
+        flex-direction: column;
+        align-items: flex-start !important;
+        gap: 1rem;
+    }
+
+    .btn {
+        width: 100%;
+    }
+
+    .table thead {
+        display: none; /* Consider using card-view for tables on mobile */
+    }
+
+    .table td {
+        display: block;
+        text-align: left;
+        padding: 0.75rem 1rem !important;
+        border: none !important;
+    }
+
+    .table tr {
+        display: block;
+        border-bottom: 1px solid var(--slate-200);
+        margin-bottom: 1rem;
+        background: #fff;
+        border-radius: 12px;
+        box-shadow: var(--shadow-sm);
+    }
 }
 
-.text-primary:hover {
-    color: #764ba2 !important;
+/* ============================================ */
+/*  UTILITY CLASSES */
+/* ============================================ */
+.fw-600 { font-weight: 600 !important; }
+.fw-700 { font-weight: 700 !important; }
+.fw-800 { font-weight: 800 !important; }
+
+.shadow-card { box-shadow: var(--shadow-md) !important; }
+.shadow-hover:hover { box-shadow: var(--shadow-lg) !important; transform: translateY(-2px); }
+
+.bg-white-border {
+    background-color: #fff !important;
+    border: 1px solid var(--slate-200) !important;
 }
 
-/* Box Shadow Utilities */
-.shadow-sm {
-    box-shadow: 0 8px 24px rgba(50, 50, 100, 0.08) !important;
+/* Indigo Hover Link */
+.text-primary-hover:hover {
+    color: var(--primary-hover) !important;
+    text-decoration: underline !important;
 }
 
-.shadow-lg {
-    box-shadow: 0 20px 60px rgba(102, 126, 234, 0.15) !important;
+
+/* ============================================ */
+/* PRODUCTION GRADE FOOTER */
+/* ============================================ */
+footer {
+    padding: 1.5rem 2rem;
+    background-color: transparent; /* Keeps it integrated with the Slate-50 background */
+    border-top: 1px solid var(--slate-200);
+    margin-top: auto; /* Ensures footer stays at bottom of the main content */
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
 }
 
-/* Enhanced Sidebar Active State */
-.nav-link.active {
-    background: rgba(255, 255, 255, 0.2) !important;
-    font-weight: bold;
-    border-left: 4px solid #fff;
+footer small {
+    color: #94a3b8; /* Slate-400 */
+    font-size: 0.8rem;
+    font-weight: 500;
+    letter-spacing: 0.025em;
 }
 
-/* Status Pulse Animation for Pending Alerts */
-.badge.bg-warning {
-    animation: pulse-red 2s infinite;
+footer .footer-brand {
+    color: var(--slate-700);
+    font-weight: 700;
 }
 
-@keyframes pulse-red {
-    0% { box-shadow: 0 0 0 0 rgba(255, 193, 7, 0.7); }
-    70% { box-shadow: 0 0 0 10px rgba(255, 193, 7, 0); }
-    100% { box-shadow: 0 0 0 0 rgba(255, 193, 7, 0); }
-}
-
-/* Table Polish */
-.table thead th {
-    background-color: #f8f9fa;
-    text-transform: uppercase;
-    font-size: 0.75rem;
-    letter-spacing: 1px;
-    color: #6c757d;
+/* Responsive Footer for Mobile */
+@media (max-width: 768px) {
+    footer {
+        flex-direction: column;
+        gap: 10px;
+        text-align: center;
+        padding: 2rem 1rem;
+    }
 }

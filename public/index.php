@@ -38,7 +38,7 @@ if (!empty($_SESSION['error'])) {
         width: 100%;
         max-width: 420px;
         background: #ffffff;
-        border-radius: 20px;
+        border-radius: 8px;
         border: 1px solid rgba(255, 255, 255, 0.1);
         box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
         padding: 3rem;
@@ -48,7 +48,7 @@ if (!empty($_SESSION['error'])) {
         width: 64px;
         height: 64px;
         background-color: var(--primary);
-        border-radius: 12px;
+        border-radius: 50%;
         display: inline-flex;
         align-items: center;
         justify-content: center;
@@ -99,7 +99,7 @@ if (!empty($_SESSION['error'])) {
 
         <!-- Branded Logo Container -->
         <div class="login-logo-container">
-            <img src="assets/images/logo-white.png" alt="Responda" style="width: 32px; height: 32px; filter: brightness(0) invert(1);">
+            <img src="assets/images/logo-white.png" alt="Responda Logo" style="width: 32px; height: 32px;">
         </div>
 
         <h3 class="fw-bold mb-1" style="color: #0f172a; letter-spacing: -0.5px;">Welcome Back</h3>

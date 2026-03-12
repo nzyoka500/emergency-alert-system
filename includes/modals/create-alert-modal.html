@@ -1,92 +1,93 @@
 <!-- Create Alert Modal -->
 <div class="modal fade" id="createAlertModal" tabindex="-1" aria-labelledby="createAlertModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-lg">
-        <div class="modal-content border-0 shadow-lg">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+        <div class="modal-content border-0 shadow-lg" style="border-radius: 20px; overflow: hidden;">
+            
             <!-- Modal Header -->
-            <div class="modal-header border-bottom-1 bg-light">
-                <h5 class="modal-title fw-bold" id="createAlertModalLabel">
-                    <i class="fas fa-bell-plus text-primary me-2"></i>Create Emergency Alert
-                </h5>
+            <div class="modal-header border-bottom-0 p-4" style="background-color: #f8fafc;">
+                <div class="d-flex align-items-center">
+                    <div class="bg-primary-subtle text-primary p-2 rounded-3 me-3">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M14.857 17.082a23.848 23.848 0 0 0 5.454-1.31A8.967 8.967 0 0 1 18 9.75V9A6 6 0 0 0 6 9v.75a8.967 8.967 0 0 1-2.312 6.022c1.733.64 3.56 1.085 5.455 1.31m5.714 0a24.255 24.255 0 0 1-5.714 0m5.714 0a3 3 0 1 1-5.714 0" />
+                        </svg>
+                    </div>
+                    <h5 class="modal-title fw-bold text-dark mb-0" id="createAlertModalLabel" style="letter-spacing: -0.5px;">Create Emergency Alert</h5>
+                </div>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
 
             <!-- Modal Body -->
-            <div class="modal-body p-4">
-                <!-- Alert Messages -->
-                <div id="alertModalMessage" style="display: none;"></div>
+            <div class="modal-body p-4 p-lg-5">
+                <!-- Dynamic Alert Messages -->
+                <div id="alertModalMessage" class="mb-4" style="display: none;"></div>
 
-                <!-- Form -->
                 <form id="createAlertForm" novalidate>
-                    <div class="row">
+                    <div class="row g-4">
                         <!-- Alert Type -->
-                        <div class="col-md-6 mb-3">
-                            <label for="modalAlertType" class="form-label fw-semibold">
-                                Alert Type <span class="text-danger">*</span>
-                            </label>
-                            <select class="form-select" name="alert_type_id" id="modalAlertType" required>
-                                <option value="" selected disabled>Choose an alert type...</option>
+                        <div class="col-md-6">
+                            <label for="modalAlertType" class="form-label small fw-bold text-uppercase text-muted" style="letter-spacing: 0.5px;">Emergency Category</label>
+                            <select class="form-select border-slate-200 shadow-sm" name="alert_type_id" id="modalAlertType" required>
+                                <option value="" selected disabled>Select category...</option>
                             </select>
-                            <small class="form-text text-muted">Select the type of emergency</small>
                         </div>
 
                         <!-- Title -->
-                        <div class="col-md-6 mb-3">
-                            <label for="modalAlertTitle" class="form-label fw-semibold">
-                                Alert Title <span class="text-danger">*</span>
-                            </label>
-                            <input type="text" class="form-control" name="title" id="modalAlertTitle" 
-                                placeholder="e.g., Fire at Market Street" required maxlength="150">
-                            <small class="form-text text-muted">Brief description of the emergency</small>
+                        <div class="col-md-6">
+                            <label for="modalAlertTitle" class="form-label small fw-bold text-uppercase text-muted" style="letter-spacing: 0.5px;">Alert Title</label>
+                            <input type="text" class="form-control border-slate-200 shadow-sm" name="title" id="modalAlertTitle" 
+                                placeholder="e.g. Chemical Spill at Sector 4" required maxlength="150">
                         </div>
-                    </div>
 
-                    <!-- Description -->
-                    <div class="mb-3">
-                        <label for="modalAlertDescription" class="form-label fw-semibold">
-                            Description <span class="text-danger">*</span>
-                        </label>
-                        <textarea class="form-control" name="description" id="modalAlertDescription" rows="4" 
-                            placeholder="Provide detailed information about the emergency..." required></textarea>
-                        <small class="form-text text-muted">Include relevant details (affected areas, injuries, etc.)</small>
-                    </div>
+                        <!-- Description -->
+                        <div class="col-12">
+                            <label for="modalAlertDescription" class="form-label small fw-bold text-uppercase text-muted" style="letter-spacing: 0.5px;">Description & Situation Report</label>
+                            <textarea class="form-control border-slate-200 shadow-sm" name="description" id="modalAlertDescription" rows="4" 
+                                placeholder="Describe the situation, potential hazards, and immediate requirements..." required></textarea>
+                        </div>
 
-                    <div class="row">
                         <!-- Latitude -->
-                        <div class="col-md-6 mb-3">
-                            <label for="modalAlertLatitude" class="form-label fw-semibold">
-                                Latitude <span class="text-danger">*</span>
-                            </label>
-                            <input type="number" class="form-control" name="latitude" id="modalAlertLatitude" 
-                                placeholder="-90 to 90" required step="0.00000001" min="-90" max="90">
-                            <small class="form-text text-muted">e.g., 37.7749</small>
+                        <div class="col-md-6">
+                            <label for="modalAlertLatitude" class="form-label small fw-bold text-uppercase text-muted" style="letter-spacing: 0.5px;">Latitude</label>
+                            <div class="input-group shadow-sm">
+                                <span class="input-group-text bg-white border-end-0 text-muted">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M15 10.5a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" /><path stroke-linecap="round" stroke-linejoin="round" d="M19.5 10.5c0 7.142-7.5 11.25-7.5 11.25S4.5 17.642 4.5 10.5a7.5 7.5 0 1 1 15 0Z" /></svg>
+                                </span>
+                                <input type="number" class="form-control border-start-0 ps-0" name="latitude" id="modalAlertLatitude" 
+                                    placeholder="e.g. 37.7749" required step="0.00000001" min="-90" max="90">
+                            </div>
                         </div>
 
                         <!-- Longitude -->
-                        <div class="col-md-6 mb-3">
-                            <label for="modalAlertLongitude" class="form-label fw-semibold">
-                                Longitude <span class="text-danger">*</span>
-                            </label>
-                            <input type="number" class="form-control" name="longitude" id="modalAlertLongitude" 
-                                placeholder="-180 to 180" required step="0.00000001" min="-180" max="180">
-                            <small class="form-text text-muted">e.g., -122.4194</small>
+                        <div class="col-md-6">
+                            <label for="modalAlertLongitude" class="form-label small fw-bold text-uppercase text-muted" style="letter-spacing: 0.5px;">Longitude</label>
+                            <div class="input-group shadow-sm">
+                                <span class="input-group-text bg-white border-end-0 text-muted">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M15 10.5a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" /><path stroke-linecap="round" stroke-linejoin="round" d="M19.5 10.5c0 7.142-7.5 11.25-7.5 11.25S4.5 17.642 4.5 10.5a7.5 7.5 0 1 1 15 0Z" /></svg>
+                                </span>
+                                <input type="number" class="form-control border-start-0 ps-0" name="longitude" id="modalAlertLongitude" 
+                                    placeholder="e.g. -122.4194" required step="0.00000001" min="-180" max="180">
+                            </div>
                         </div>
                     </div>
 
-                    <!-- Help Text -->
-                    <div class="alert alert-info alert-sm mb-0">
-                        <i class="fas fa-info-circle me-2"></i>
-                        <small>Need coordinates? Use <a href="https://www.latlong.net/" target="_blank" class="alert-link">latlong.net</a></small>
+                    <!-- Coordinate Help -->
+                    <div class="mt-4 p-3 rounded-3 bg-info-subtle border-0 d-flex align-items-center">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" class="text-info me-2">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M11.25 11.25l.041-.02a.75.75 0 011.063.852l-.708 2.836a.75.75 0 001.063.853l.041-.021M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-9-3.75h.008v.008H12V8.25z" />
+                        </svg>
+                        <small class="text-info fw-semibold">Need precise coordinates? Use <a href="https://www.latlong.net/" target="_blank" class="text-info text-decoration-underline">latlong.net</a></small>
                     </div>
                 </form>
             </div>
 
             <!-- Modal Footer -->
-            <div class="modal-footer bg-light border-top-1">
-                <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">
-                    <i class="fas fa-times me-1"></i>Cancel
-                </button>
-                <button type="button" class="btn btn-primary" id="submitCreateAlertBtn">
-                    <i class="fas fa-paper-plane me-1"></i>Create Alert
+            <div class="modal-footer border-top-0 p-4" style="background-color: #f8fafc;">
+                <button type="button" class="btn btn-white border shadow-sm px-4" data-bs-dismiss="modal">Discard</button>
+                <button type="button" class="btn btn-primary shadow px-4 d-flex align-items-center" id="submitCreateAlertBtn">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" class="me-2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M6 12L3.269 3.126A59.768 59.768 0 0121.485 12 59.77 59.77 0 013.27 20.876L5.999 12zm0 0h7.5" />
+                    </svg>
+                    Broadcast Alert
                 </button>
             </div>
         </div>
@@ -94,150 +95,67 @@
 </div>
 
 <script>
-// Store alert types globally
 let alertTypesCache = [];
 
-// Load alert types on page load
-document.addEventListener('DOMContentLoaded', function() {
-    loadAlertTypes();
-});
+document.addEventListener('DOMContentLoaded', loadAlertTypes);
 
-// Fetch and cache alert types
 function loadAlertTypes() {
-    fetch('create-alert.php', {
-        method: 'GET',
-        headers: {
-            'X-Requested-With': 'XMLHttpRequest'
-        }
-    })
-    .then(response => {
-        if (!response.ok) {
-            throw new Error('HTTP error, status = ' + response.status);
-        }
-        return response.json();
-    })
+    fetch('create-alert.php', { method: 'GET', headers: { 'X-Requested-With': 'XMLHttpRequest' } })
+    .then(res => res.json())
     .then(data => {
-        if (data.alert_types && Array.isArray(data.alert_types) && data.alert_types.length > 0) {
-            alertTypesCache = data.alert_types;
-            console.log('Alert types loaded:', alertTypesCache);
-        } else {
-            console.warn('No alert types received from server');
-        }
-    })
-    .catch(error => {
-        console.error('Error loading alert types:', error);
-    });
+        if (data.alert_types) alertTypesCache = data.alert_types;
+    }).catch(err => console.error('Error loading alert types:', err));
 }
 
-// Initialize alert types when modal is shown
 document.getElementById('createAlertModal').addEventListener('show.bs.modal', function() {
-    const alertTypeSelect = document.getElementById('modalAlertType');
+    const select = document.getElementById('modalAlertType');
+    while (select.options.length > 1) select.remove(1);
     
-    // Clear existing options except the placeholder
-    while (alertTypeSelect.options.length > 1) {
-        alertTypeSelect.remove(1);
-    }
-    
-    // Populate from cached data
-    if (alertTypesCache && alertTypesCache.length > 0) {
-        alertTypesCache.forEach(type => {
-            const option = document.createElement('option');
-            option.value = type.id;
-            option.textContent = type.name + ' - ' + type.description;
-            alertTypeSelect.appendChild(option);
-        });
-    } else {
-        // If cache is empty, try to load immediately
-        loadAlertTypes();
-        // Give it a moment to load, then populate
-        setTimeout(() => {
-            while (alertTypeSelect.options.length > 1) {
-                alertTypeSelect.remove(1);
-            }
-            if (alertTypesCache && alertTypesCache.length > 0) {
-                alertTypesCache.forEach(type => {
-                    const option = document.createElement('option');
-                    option.value = type.id;
-                    option.textContent = type.name + ' - ' + type.description;
-                    alertTypeSelect.appendChild(option);
-                });
-            }
-        }, 500);
-    }
-});
-
-// Handle form submission
-document.getElementById('submitCreateAlertBtn').addEventListener('click', function() {
-    const form = document.getElementById('createAlertForm');
-    const messageDiv = document.getElementById('alertModalMessage');
-    messageDiv.style.display = 'block';
-    
-    // Validate form
-    if (!form.checkValidity()) {
-        form.reportValidity();
-        return;
-    }
-
-    // Validate coordinates
-    const latitude = parseFloat(document.getElementById('modalAlertLatitude').value);
-    const longitude = parseFloat(document.getElementById('modalAlertLongitude').value);
-    
-    if (latitude < -90 || latitude > 90) {
-        messageDiv.innerHTML = '<div class="alert alert-danger alert-dismissible fade show" role="alert"><i class="fas fa-exclamation-circle me-2"></i>Latitude must be between -90 and 90<button type="button" class="btn-close" data-bs-dismiss="alert"></button></div>';
-        return;
-    }
-    
-    if (longitude < -180 || longitude > 180) {
-        messageDiv.innerHTML = '<div class="alert alert-danger alert-dismissible fade show" role="alert"><i class="fas fa-exclamation-circle me-2"></i>Longitude must be between -180 and 180<button type="button" class="btn-close" data-bs-dismiss="alert"></button></div>';
-        return;
-    }
-
-    // Submit form via AJAX
-    const formData = new FormData(form);
-    
-    fetch('create-alert.php', {
-        method: 'POST',
-        headers: {
-            'X-Requested-With': 'XMLHttpRequest'
-        },
-        body: formData
-    })
-    .then(response => {
-        if (!response.ok) {
-            throw new Error('HTTP error, status = ' + response.status);
-        }
-        return response.json();
-    })
-    .then(data => {
-        if (data.success) {
-            messageDiv.innerHTML = '<div class="alert alert-success alert-dismissible fade show" role="alert"><i class="fas fa-check-circle me-2"></i>' + data.message + ' (Alert ID: #' + data.alert_id + ')<button type="button" class="btn-close" data-bs-dismiss="alert"></button></div>';
-            
-            // Reset form
-            form.reset();
-            
-            // Close modal after 2 seconds
-            setTimeout(() => {
-                bootstrap.Modal.getInstance(document.getElementById('createAlertModal')).hide();
-                // Reload alerts list if it exists
-                if (typeof loadAlerts === 'function') {
-                    loadAlerts();
-                }
-                // Reload page to show new alert
-                location.reload();
-            }, 2000);
-        } else {
-            messageDiv.innerHTML = '<div class="alert alert-danger alert-dismissible fade show" role="alert"><i class="fas fa-exclamation-circle me-2"></i>' + data.message + '<button type="button" class="btn-close" data-bs-dismiss="alert"></button></div>';
-        }
-    })
-    .catch(error => {
-        messageDiv.innerHTML = '<div class="alert alert-danger alert-dismissible fade show" role="alert"><i class="fas fa-exclamation-circle me-2"></i>Error creating alert. Please try again.<button type="button" class="btn-close" data-bs-dismiss="alert"></button></div>';
-        console.error('Error:', error);
+    alertTypesCache.forEach(type => {
+        const opt = document.createElement('option');
+        opt.value = type.id;
+        opt.textContent = `${type.name} - ${type.description}`;
+        select.appendChild(opt);
     });
 });
 
-// Clear message when modal is hidden
-document.getElementById('createAlertModal').addEventListener('hide.bs.modal', function() {
-    document.getElementById('alertModalMessage').style.display = 'none';
-    document.getElementById('alertModalMessage').innerHTML = '';
+document.getElementById('submitCreateAlertBtn').addEventListener('click', function() {
+    const form = document.getElementById('createAlertForm');
+    const msg = document.getElementById('alertModalMessage');
+    
+    if (!form.checkValidity()) { form.reportValidity(); return; }
+
+    const btn = this;
+    btn.disabled = true;
+    btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Broadcasting...';
+
+    fetch('create-alert.php', {
+        method: 'POST',
+        headers: { 'X-Requested-With': 'XMLHttpRequest' },
+        body: new FormData(form)
+    })
+    .then(res => res.json())
+    .then(data => {
+        msg.style.display = 'block';
+        if (data.success) {
+            msg.innerHTML = `<div class="alert bg-success-subtle text-success border-0 shadow-sm py-3 px-4 d-flex align-items-center">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" class="me-2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75 11.25 15 15 9.75M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" /></svg>
+                <span>${data.message}</span>
+            </div>`;
+            setTimeout(() => location.reload(), 1500);
+        } else {
+            btn.disabled = false;
+            btn.innerHTML = 'Broadcast Alert';
+            msg.innerHTML = `<div class="alert bg-danger-subtle text-danger border-0 shadow-sm py-3 px-4 d-flex align-items-center">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" class="me-2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m9-.75a9 9 0 1 1-18 0 9 9 0 0 1 18 0Zm-9 3.75h.008v.008H12v-.008Z" /></svg>
+                <span>${data.message}</span>
+            </div>`;
+        }
+    })
+    .catch(() => {
+        btn.disabled = false;
+        btn.innerHTML = 'Broadcast Alert';
+        msg.innerHTML = `<div class="alert bg-danger-subtle text-danger border-0 shadow-sm py-3 px-4">An error occurred. Please try again.</div>`;
+    });
 });
 </script>
