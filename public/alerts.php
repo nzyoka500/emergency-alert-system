@@ -1,10 +1,11 @@
 <?php
-// alerts.php - View and manage all alerts
-// Protected page for logged-in users
+/**
+ * alerts.php - Professional Alert Management
+ * Updated with Indigo/Slate Palette & Soft UI
+ */
 
 require_once __DIR__ . '/../includes/config.php';
 
-// Ensure session is started
 if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
@@ -19,363 +20,232 @@ $username = htmlspecialchars($_SESSION['username'] ?? 'User', ENT_QUOTES, 'UTF-8
 $user_id = $_SESSION['user_id'] ?? null;
 $role_id = $_SESSION['role_id'] ?? null;
 
-// Get filter parameters
-$status_filter = isset($_GET['filter']) ? $_GET['filter'] : 'all';
-$search_query = isset($_GET['search']) ? trim($_GET['search']) : '';
-$sort_by = isset($_GET['sort']) ? $_GET['sort'] : 'recent';
+// Filter Parameters
+$status_filter = $_GET['filter'] ?? 'all';
+$search_query = trim($_GET['search'] ?? '');
+$sort_by = $_GET['sort'] ?? 'recent';
 
-// Initialize alerts array
 $alerts = [];
-$total_count = 0;
-$status_counts = [
-    'pending' => 0,
-    'verified' => 0,
-    'broadcasted' => 0,
-    'resolved' => 0,
-    'all' => 0
-];
+$status_counts = ['pending' => 0, 'verified' => 0, 'broadcasted' => 0, 'resolved' => 0, 'all' => 0];
 
 try {
     $pdo = getPDO();
 
-    // Get status counts
+    // Get Counts
     $stmt = $pdo->query("SELECT status, COUNT(*) as count FROM alerts GROUP BY status");
-    $counts = $stmt->fetchAll();
-    foreach ($counts as $row) {
-        $status_counts[$row['status']] = $row['count'];
+    while ($row = $stmt->fetch()) {
+        if (isset($status_counts[$row['status']])) $status_counts[$row['status']] = (int)$row['count'];
     }
     $status_counts['all'] = array_sum($status_counts);
 
-    // Build query based on filters
+    // Build Query
     $query = "
-        SELECT 
-            a.id, 
-            a.title, 
-            a.description, 
-            a.status, 
-            a.latitude, 
-            a.longitude, 
-            a.created_at, 
-            at.name as alert_type,
-            u.full_name as created_by_name,
-            COUNT(ar.id) as response_count
+        SELECT a.*, at.name as alert_type, u.full_name as creator,
+        (SELECT COUNT(*) FROM alert_responses WHERE alert_id = a.id) as response_count
         FROM alerts a
         LEFT JOIN alert_types at ON a.alert_type_id = at.id
         LEFT JOIN users u ON a.created_by = u.id
-        LEFT JOIN alert_responses ar ON a.id = ar.alert_id
         WHERE 1=1
     ";
 
-    // Add status filter
-    if ($status_filter !== 'all' && in_array($status_filter, ['pending', 'verified', 'broadcasted', 'resolved'])) {
-        $query .= " AND a.status = '" . $status_filter . "'";
+    if ($status_filter !== 'all') {
+        $query .= " AND a.status = " . $pdo->quote($status_filter);
     }
 
-    // Add search filter
     if (!empty($search_query)) {
-        $search_term = '%' . $search_query . '%';
-        $query .= " AND (a.title LIKE ? OR a.description LIKE ? OR at.name LIKE ?)";
+        $query .= " AND (a.title LIKE " . $pdo->quote("%$search_query%") . " OR at.name LIKE " . $pdo->quote("%$search_query%") . ")";
     }
 
-    // Add grouping and sorting
-    $query .= " GROUP BY a.id";
+    $query .= match($sort_by) {
+        'oldest' => " ORDER BY a.created_at ASC",
+        'status' => " ORDER BY FIELD(a.status, 'pending', 'verified', 'broadcasted', 'resolved'), a.created_at DESC",
+        default => " ORDER BY a.created_at DESC"
+    };
 
-    if ($sort_by === 'oldest') {
-        $query .= " ORDER BY a.created_at ASC";
-    } elseif ($sort_by === 'status') {
-        $query .= " ORDER BY FIELD(a.status, 'pending', 'verified', 'broadcasted', 'resolved'), a.created_at DESC";
-    } else { // recent
-        $query .= " ORDER BY a.created_at DESC";
-    }
-
-    // Add limit
-    $query .= " LIMIT 50";
-
-    // Execute query
-    if (!empty($search_query)) {
-        $stmt = $pdo->prepare($query);
-        $stmt->execute([$search_term, $search_term, $search_term]);
-    } else {
-        $stmt = $pdo->query($query);
-    }
-
-    $alerts = $stmt->fetchAll();
-    $total_count = count($alerts);
+    $alerts = $pdo->query($query)->fetchAll();
 } catch (Exception $e) {
-    error_log('Alerts page error: ' . $e->getMessage());
-}
-
-// Function to get status badge color
-function getStatusBadgeClass($status)
-{
-    switch ($status) {
-        case 'pending':
-            return 'bg-warning';
-        case 'verified':
-            return 'bg-info';
-        case 'broadcasted':
-            return 'bg-primary';
-        case 'resolved':
-            return 'bg-success';
-        default:
-            return 'bg-secondary';
-    }
-}
-
-// Function to get status badge icon
-function getStatusIcon($status)
-{
-    switch ($status) {
-        case 'pending':
-            return '⏳';
-        case 'verified':
-            return '✓';
-        case 'broadcasted':
-            return '📡';
-        case 'resolved':
-            return '✓✓';
-        default:
-            return '•';
-    }
+    error_log($e->getMessage());
 }
 
 include __DIR__ . '/../includes/header.php';
 ?>
 
-<div class="container-fluid mt-2 mb-0">
-    <div class="row">
+<div class="container-fluid p-0">
+    <div class="row g-0">
         <!-- Sidebar Navigation -->
         <?php include __DIR__ . '/../includes/sidebar.php'; ?>
 
         <!-- Main Content -->
-        <div class="col-lg-10" style="min-height: calc(100vh - 40px); overflow:auto; padding: 24px 32px;">
+        <main class="col-lg-10 bg-light min-vh-100">
+            <div class="p-4 p-lg-5">
 
-            <!-- Header Section -->
-            <div class="row mb-4 align-items-center border-bottom pb-3">
-                <div class="col-md-6">
-                    <h1 class="display-6 fw-bold">All Alerts</h1>
-                    <p class="text-muted">Manage and monitor emergency alerts</p>
-                </div>
-                <div class="col-md-6 text-end">
-                    <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#createAlertModal">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="currentColor" class="bi bi-plus-circle me-2" viewBox="0 0 16 16" style="display: inline;">
-                            <path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14zm0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16z" />
-                            <path d="M8 4a.5.5 0 0 1 .5.5v3h3a.5.5 0 0 1 0 1h-3v3a.5.5 0 0 1-1 0v-3h-3a.5.5 0 0 1 0-1h3v-3A.5.5 0 0 1 8 4z" />
+                <!-- Header Section -->
+                <div class="d-flex justify-content-between align-items-center mb-5">
+                    <div>
+                        <h1 class="h3 fw-bold mb-1">Alert Management</h1>
+                        <p class="text-muted mb-0">Monitor, verify, and respond to emergency incidents.</p>
+                    </div>
+                    <button class="btn btn-primary shadow-sm px-4 py-2" data-bs-toggle="modal" data-bs-target="#createAlertModal">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" class="me-1">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
                         </svg>
-                        Create Alert
+                        Create New Alert
                     </button>
                 </div>
-            </div>
 
-            <!-- Status Filter Cards -->
-            <div class="row g-3 mb-4">
-                <div class="col-lg-3 col-md-6">
-                    <a href="?filter=all" class="text-decoration-none">
-                        <div class="card border-0 shadow-sm h-100" style="border-left: 4px solid #6c757d; cursor: pointer; <?php echo ($status_filter === 'all') ? 'background: linear-gradient(135deg, #f8f9fd 0%, #f3f4f9 100%);' : ''; ?>">
-                            <div class="card-body">
-                                <p class="text-muted small mb-1">Total Alerts</p>
-                                <h3 class="fw-bold mb-0" style="color: #6c757d;"><?php echo $status_counts['all']; ?></h3>
-                                <small class="text-muted">All statuses</small>
-                            </div>
-                        </div>
-                    </a>
-                </div>
-                <div class="col-lg-3 col-md-6">
-                    <a href="?filter=pending" class="text-decoration-none">
-                        <div class="card border-0 shadow-sm h-100" style="border-left: 4px solid #ffc107; cursor: pointer; <?php echo ($status_filter === 'pending') ? 'background: linear-gradient(135deg, #f8f9fd 0%, #f3f4f9 100%);' : ''; ?>">
-                            <div class="card-body">
-                                <p class="text-muted small mb-1">Pending</p>
-                                <h3 class="fw-bold mb-0" style="color: #ffc107;"><?php echo $status_counts['pending']; ?></h3>
-                                <small class="text-muted">Awaiting review</small>
-                            </div>
-                        </div>
-                    </a>
-                </div>
-                <div class="col-lg-3 col-md-6">
-                    <a href="?filter=verified" class="text-decoration-none">
-                        <div class="card border-0 shadow-sm h-100" style="border-left: 4px solid #0dcaf0; cursor: pointer; <?php echo ($status_filter === 'verified') ? 'background: linear-gradient(135deg, #f8f9fd 0%, #f3f4f9 100%);' : ''; ?>">
-                            <div class="card-body">
-                                <p class="text-muted small mb-1">Verified</p>
-                                <h3 class="fw-bold mb-0" style="color: #0dcaf0;"><?php echo $status_counts['verified']; ?></h3>
-                                <small class="text-muted">Confirmed alerts</small>
-                            </div>
-                        </div>
-                    </a>
-                </div>
-                <div class="col-lg-3 col-md-6">
-                    <a href="?filter=broadcasted" class="text-decoration-none">
-                        <div class="card border-0 shadow-sm h-100" style="border-left: 4px solid #0d6efd; cursor: pointer; <?php echo ($status_filter === 'broadcasted') ? 'background: linear-gradient(135deg, #f8f9fd 0%, #f3f4f9 100%);' : ''; ?>">
-                            <div class="card-body">
-                                <p class="text-muted small mb-1">Broadcasted</p>
-                                <h3 class="fw-bold mb-0" style="color: #0d6efd;"><?php echo $status_counts['broadcasted']; ?></h3>
-                                <small class="text-muted">Sent to community</small>
-                            </div>
-                        </div>
-                    </a>
-                </div>
-            </div>
+                <!-- Status Filter Cards -->
+                <div class="row g-3 mb-4">
+                    <?php
+                    $filter_configs = [
+                        'all' => ['label' => 'Total', 'color' => 'secondary', 'icon' => 'M9 12h6m-6 4h6m2 5H7a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5.586a1 1 0 0 1 .707.293l5.414 5.414a1 1 0 0 1 .293.707V19a2 2 0 0 1-2 2Z'],
+                        'pending' => ['label' => 'Pending', 'color' => 'warning', 'icon' => 'M12 6v6h4.5m4.5 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z'],
+                        'verified' => ['label' => 'Verified', 'color' => 'info', 'icon' => 'M9 12.75 11.25 15 15 9.75M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z'],
+                        'broadcasted' => ['label' => 'Broadcasted', 'color' => 'primary', 'icon' => 'M8.288 15.038a5.25 5.25 0 0 1 7.424 0M5.106 11.856a9.75 9.75 0 0 1 13.788 0M1.924 8.674a14.25 14.25 0 0 1 20.152 0M12.53 18.22a.75.75 0 0 1-1.06 0l-1.06-1.06a.75.75 0 1 1 1.06-1.06l1.06 1.06a.75.75 0 0 1 0 1.06Z']
+                    ];
 
-            <!-- Search and Sort Bar -->
-            <div class="card border-0 shadow-sm mb-4">
-                <div class="card-body p-3">
-                    <form method="GET" class="row g-3">
-                        <div class="col-md-6">
-                            <input type="text" name="search" class="form-control" placeholder="Search by title, description, or type..." value="<?php echo htmlspecialchars($search_query, ENT_QUOTES, 'UTF-8'); ?>">
-                        </div>
-                        <div class="col-md-3">
-                            <select name="sort" class="form-control">
-                                <option value="recent" <?php echo ($sort_by === 'recent') ? 'selected' : ''; ?>>Most Recent</option>
-                                <option value="oldest" <?php echo ($sort_by === 'oldest') ? 'selected' : ''; ?>>Oldest First</option>
-                                <option value="status" <?php echo ($sort_by === 'status') ? 'selected' : ''; ?>>By Status</option>
-                            </select>
-                        </div>
-                        <div class="col-md-3">
-                            <button type="submit" class="btn btn-primary w-100">Search</button>
-                        </div>
-                        <?php if (!empty($search_query) || $status_filter !== 'all' || $sort_by !== 'recent'): ?>
-                            <div class="col-12">
-                                <a href="alerts.php" class="btn btn-outline-secondary btn-sm">Clear Filters</a>
+                    foreach ($filter_configs as $key => $cfg):
+                        $isActive = ($status_filter === $key);
+                    ?>
+                    <div class="col-lg-3">
+                        <a href="?filter=<?= $key ?>" class="text-decoration-none">
+                            <div class="card border-0 shadow-sm <?= $isActive ? 'ring-primary' : '' ?>">
+                                <div class="card-body p-3">
+                                    <div class="d-flex align-items-center">
+                                        <div class="bg-<?= $cfg['color'] ?>-subtle text-<?= $cfg['color'] ?> p-2 rounded-3 me-3">
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                                <path stroke-linecap="round" stroke-linejoin="round" d="<?= $cfg['icon'] ?>" />
+                                            </svg>
+                                        </div>
+                                        <div>
+                                            <h4 class="fw-bold mb-0"><?= $status_counts[$key] ?></h4>
+                                            <small class="text-muted text-uppercase fw-bold" style="font-size: 0.65rem;"><?= $cfg['label'] ?></small>
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
-                        <?php endif; ?>
-                    </form>
+                        </a>
+                    </div>
+                    <?php endforeach; ?>
                 </div>
-            </div>
 
-            <!-- Alerts List -->
-            <div class="card border-0 shadow-sm">
-                <div class="card-header bg-white border-bottom">
-                    <div class="d-flex justify-content-between align-items-center">
-                        <h5 class="mb-0">
-                            <?php
-                            if ($status_filter !== 'all') {
-                                echo ucfirst($status_filter) . ' Alerts';
-                            } else {
-                                echo 'All Alerts';
-                            }
-                            ?>
-                            <span class="badge bg-light text-dark ms-2"><?php echo $total_count; ?></span>
-                        </h5>
+                <!-- Search and Filter Bar -->
+                <div class="card border-0 shadow-sm mb-4">
+                    <div class="card-body p-3">
+                        <form method="GET" class="row g-2">
+                            <input type="hidden" name="filter" value="<?= $status_filter ?>">
+                            <div class="col-md-6">
+                                <div class="input-group">
+                                    <span class="input-group-text bg-transparent border-end-0 text-muted">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z" /></svg>
+                                    </span>
+                                    <input type="text" name="search" class="form-control border-start-0 ps-0" placeholder="Search by title or category..." value="<?= htmlspecialchars($search_query) ?>">
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <select name="sort" class="form-select" onchange="this.form.submit()">
+                                    <option value="recent" <?= $sort_by === 'recent' ? 'selected' : '' ?>>Newest First</option>
+                                    <option value="oldest" <?= $sort_by === 'oldest' ? 'selected' : '' ?>>Oldest First</option>
+                                    <option value="status" <?= $sort_by === 'status' ? 'selected' : '' ?>>Sort by Status</option>
+                                </select>
+                            </div>
+                            <div class="col-md-2">
+                                <button type="submit" class="btn btn-dark w-100">Filter</button>
+                            </div>
+                        </form>
                     </div>
                 </div>
-                <div class="card-body p-0">
-                    <?php if (count($alerts) > 0): ?>
-                        <div class="table-responsive">
-                            <table class="table table-hover mb-0">
-                                <thead>
-                                    <tr style="background: #f8f9fd;">
-                                        <th style="width: 30%;">Alert Title</th>
-                                        <th style="width: 15%;">Type</th>
-                                        <th style="width: 15%;">Status</th>
-                                        <th style="width: 12%;">Responses</th>
-                                        <th style="width: 18%;">Created</th>
-                                        <th style="width: 10%;">Action</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    <?php foreach ($alerts as $alert): ?>
-                                        <tr>
-                                            <td>
-                                                <div class="fw-600" style="color: #2d3748;">
-                                                    <?php echo htmlspecialchars(strlen($alert['title']) > 40 ? substr($alert['title'], 0, 40) . '...' : $alert['title'], ENT_QUOTES, 'UTF-8'); ?>
-                                                </div>
-                                                <small class="text-muted">Created by: <?php echo htmlspecialchars($alert['created_by_name'] ?? 'System', ENT_QUOTES, 'UTF-8'); ?></small>
-                                            </td>
-                                            <td>
-                                                <span class="badge bg-light text-dark" style="font-size: 12px;">
-                                                    <?php echo htmlspecialchars($alert['alert_type'], ENT_QUOTES, 'UTF-8'); ?>
-                                                </span>
-                                            </td>
-                                            <td>
-                                                <span class="badge <?php echo getStatusBadgeClass($alert['status']); ?>" style="font-size: 12px; padding: 8px 12px;">
-                                                    <?php echo getStatusIcon($alert['status']) . ' ' . ucfirst($alert['status']); ?>
-                                                </span>
-                                            </td>
-                                            <td>
-                                                <span class="badge bg-info" style="font-size: 12px;">
-                                                    <?php echo $alert['response_count']; ?> response<?php echo $alert['response_count'] != 1 ? 's' : ''; ?>
-                                                </span>
-                                            </td>
-                                            <td>
-                                                <small class="text-muted">
-                                                    <?php echo date('M d, Y H:i', strtotime($alert['created_at'])); ?>
-                                                </small>
-                                            </td>
-                                            <td>
 
-                                                <button
-                                                    class="btn btn-sm btn-outline-primary view-alert"
-                                                    data-id="<?= $alert['id'] ?>"
-                                                    data-title="<?= htmlspecialchars($alert['title']) ?>"
-                                                    data-description="<?= htmlspecialchars($alert['description']) ?>"
-                                                    data-type="<?= htmlspecialchars($alert['alert_type']) ?>"
-                                                    data-status="<?= $alert['status'] ?>"
-                                                    data-created="<?= $alert['created_at'] ?>"
-                                                    data-bs-toggle="modal"
-                                                    data-bs-target="#viewAlertModal">
-
-                                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
-                                                        <path d="M16 8s-3-5.5-8-5.5S0 8 0 8s3 5.5 8 5.5S16 8 16 8z" />
-                                                    </svg>
-
-                                                </button>
-
-
-
-                                                <!-- If Logged user is of type === RESPONDER : show this button below -->
-                                                <?php if ($role_id == 2 && ($alert['status'] === 'pending' || $alert['status'] === 'verified')): ?>
-                                                    <button type="button" class="btn btn-sm btn-outline-info ms-1" title="Respond to Alert"
-                                                        onclick="openRespondModal(<?php echo $alert['id']; ?>, '<?php echo htmlspecialchars($alert['title'], ENT_QUOTES); ?>', '<?php echo htmlspecialchars(substr($alert['description'], 0, 100), ENT_QUOTES); ?>...', '<?php echo htmlspecialchars($alert['alert_type'], ENT_QUOTES); ?>', '<?php echo $alert['status']; ?>', '<?php echo $alert['created_at']; ?>')">
-                                                        <i class="fas fa-reply"></i> Respond
-                                                    </button>
-                                                <?php endif; ?>
-                                            </td>
-                                        </tr>
-                                    <?php endforeach; ?>
-                                </tbody>
-                            </table>
-                        </div>
-                    <?php else: ?>
-                        <div class="p-5 text-center">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" fill="#cbd5e1" class="mb-3" viewBox="0 0 16 16">
-                                <path d="M8 1a2 2 0 0 1 2 2v4H6V3a2 2 0 0 1 2-2zm3 6V3a3 3 0 0 0-6 0v4a2 2 0 0 0-2 2v5a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2z" />
-                            </svg>
-                            <h5 class="text-muted">No Alerts Found</h5>
-                            <p class="text-muted mb-3">
-                                <?php
-                                if (!empty($search_query)) {
-                                    echo "No alerts match your search. <a href='alerts.php'>Clear search</a>";
-                                } elseif ($status_filter !== 'all') {
-                                    echo "No " . $status_filter . " alerts found.";
-                                } else {
-                                    echo "Create your first alert to get started. <a href='create-alert.php'>Create Alert</a>";
-                                }
+                <!-- Alerts Table -->
+                <div class="card border-0 shadow-sm overflow-hidden">
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle mb-0">
+                            <thead class="bg-light">
+                                <tr>
+                                    <th class="ps-4">Emergency Incident</th>
+                                    <th>Category</th>
+                                    <th>Status</th>
+                                    <th>Activity</th>
+                                    <th>Timestamp</th>
+                                    <th class="text-end pe-4">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <?php if (!empty($alerts)): foreach ($alerts as $alert): 
+                                    $status_meta = match($alert['status']) {
+                                        'pending' => ['class' => 'warning', 'icon' => 'M12 6v6h4.5m4.5 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z'],
+                                        'verified' => ['class' => 'info', 'icon' => 'M9 12.75 11.25 15 15 9.75M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z'],
+                                        'broadcasted' => ['class' => 'primary', 'icon' => 'M8.288 15.038a5.25 5.25 0 0 1 7.424 0M12.53 18.22a.75.75 0 0 1-1.06 0l-1.06-1.06a.75.75 0 1 1 1.06-1.06l1.06 1.06a.75.75 0 0 1 0 1.06Z'],
+                                        'resolved' => ['class' => 'success', 'icon' => 'M9 12.75 11.25 15 15 9.75M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z'],
+                                        default => ['class' => 'secondary', 'icon' => '']
+                                    };
                                 ?>
-                            </p>
-                        </div>
-                    <?php endif; ?>
+                                <tr>
+                                    <td class="ps-4">
+                                        <div class="fw-bold text-dark"><?= htmlspecialchars($alert['title']) ?></div>
+                                        <div class="text-muted small">Reporter: <?= htmlspecialchars($alert['creator'] ?? 'System') ?></div>
+                                    </td>
+                                    <td>
+                                        <span class="badge bg-light text-dark border fw-normal">
+                                            <?= htmlspecialchars($alert['alert_type']) ?>
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <span class="badge bg-<?= $status_meta['class'] ?>-subtle text-<?= $status_meta['class'] ?> d-inline-flex align-items-center">
+                                            <?php if($alert['status'] === 'pending'): ?><span class="status-pulse-pending"></span><?php endif; ?>
+                                            <?= ucfirst($alert['status']) ?>
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <div class="small fw-semibold text-<?= $alert['response_count'] > 0 ? 'primary' : 'muted' ?>">
+                                            <?= $alert['response_count'] ?> Responses
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <div class="small text-dark"><?= date('M d, Y', strtotime($alert['created_at'])) ?></div>
+                                        <div class="small text-muted"><?= date('H:i', strtotime($alert['created_at'])) ?></div>
+                                    </td>
+                                    <td class="text-end pe-4">
+                                        <div class="btn-group">
+                                            <button class="btn btn-sm btn-white border view-alert" 
+                                                data-id="<?= $alert['id'] ?>"
+                                                data-title="<?= htmlspecialchars($alert['title']) ?>"
+                                                data-description="<?= htmlspecialchars($alert['description']) ?>"
+                                                data-type="<?= htmlspecialchars($alert['alert_type']) ?>"
+                                                data-status="<?= $alert['status'] ?>"
+                                                data-bs-toggle="modal" data-bs-target="#viewAlertModal">
+                                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M2.036 12.322a1.012 1.012 0 0 1 0-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178Z" /><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" /></svg>
+                                            </button>
+                                            
+                                            <?php if ($role_id == 2 && ($alert['status'] === 'pending' || $alert['status'] === 'verified')): ?>
+                                                <button class="btn btn-sm btn-primary ms-1" 
+                                                    onclick="openRespondModal(<?= $alert['id'] ?>, '<?= addslashes($alert['title']) ?>', '...', '<?= $alert['alert_type'] ?>', '<?= $alert['status'] ?>', '<?= $alert['created_at'] ?>')">
+                                                    Respond
+                                                </button>
+                                            <?php endif; ?>
+                                        </div>
+                                    </td>
+                                </tr>
+                                <?php endforeach; else: ?>
+                                <tr>
+                                    <td colspan="6" class="p-5 text-center text-muted">
+                                        <img src="assets/images/empty-state.svg" style="width: 120px; opacity: 0.5;" class="mb-3 d-block mx-auto">
+                                        <p class="mb-0">No incidents found matching your criteria.</p>
+                                    </td>
+                                </tr>
+                                <?php endif; ?>
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
-            </div>
 
-            <!-- Info Footer -->
-            <div class="mt-4 p-3 bg-light rounded" style="border-left: 4px solid #667eea;">
-                <small class="text-muted">
-                    <strong>Tip:</strong> Click on any alert to view full details, responses, and take actions.
-                    You can also filter by status or search for specific keywords.
-                </small>
             </div>
-
-        </div>
+        </main>
     </div>
 </div>
 
-
 <?php 
-
-    // Modals : Create, View, Respond (if responder)
     include __DIR__ . '/../includes/modals/create-alert-modal.html'; 
     include __DIR__ . '/../includes/modals/view-alert-modal.php';
+    if ($role_id == 2) include __DIR__ . '/../includes/modals/respond-alert-modal.html';
+    include __DIR__ . '/../includes/footer.php'; 
 ?>
-<?php if ($role_id == 2): include __DIR__ . '/../includes/modals/respond-alert-modal.html';
-endif; ?>
-
-<?php include __DIR__ . '/../includes/footer.php'; ?>

@@ -1,29 +1,29 @@
 <?php
-    // import files
-    include '../includes/header.php';
 
-    // Capture and clear flash error if present
-    $flashError = '';
-    if (session_status() === PHP_SESSION_NONE) session_start();
-    if (!empty($_SESSION['error'])) {
-        $flashError = $_SESSION['error'];
-        unset($_SESSION['error']);
-    }
+/**
+ * index.php - Responda Login Page
+ * Updated to match the Indigo/Slate Production UI
+ */
+include '../includes/header.php';
 
+// Capture and clear flash error if present
+$flashError = '';
+if (session_status() === PHP_SESSION_NONE) session_start();
+if (!empty($_SESSION['error'])) {
+    $flashError = $_SESSION['error'];
+    unset($_SESSION['error']);
+}
 ?>
 
 <style>
-    html, body {
-        height: 100%;
-        margin: 0;
-        padding: 0;
-    }
-
+    /* Specific styles for the Login Page to override global Slate-50 background */
     body {
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #e7d0ff 100%);
+        background: radial-gradient(circle at top right, #1e293b, #0f172a);
         display: flex;
         flex-direction: column;
-        justify-content: flex-start;
+        min-height: 100vh;
+        overflow-y: hidden;
+        margin-top: 12em;
     }
 
     .login-wrapper {
@@ -31,78 +31,138 @@
         justify-content: center;
         align-items: center;
         flex: 1;
-        padding: 40px 20px;
-        width: 100%;
-        margin-top: 8rem;
+        padding: 20px;
     }
 
-    footer {
-        text-align: center;
-        padding: 20px;
-        margin-top: auto;
+    .login-card {
         width: 100%;
+        max-width: 420px;
+        background: #ffffff;
+        border-radius: 20px;
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+        padding: 3rem;
+    }
+
+    .login-logo-container {
+        width: 64px;
+        height: 64px;
+        background-color: var(--primary);
+        border-radius: 12px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        margin-bottom: 1.5rem;
+        box-shadow: 0 10px 15px -3px rgba(79, 70, 229, 0.4);
+    }
+
+    .form-control {
+        background-color: #f8fafc !important;
+        border: 1.5px solid #e2e8f0 !important;
+        padding: 0.75rem 1rem !important;
+        height: auto !important;
+    }
+
+    .form-control:focus {
+        background-color: #ffffff !important;
+        border-color: var(--primary) !important;
+        box-shadow: 0 0 0 4px rgba(79, 70, 229, 0.1) !important;
+    }
+
+    .login-footer {
+        color: #94a3b8;
+        font-size: 0.85rem;
+        margin-top: 2rem;
+    }
+
+    /* Override button for full width and indigo style */
+    .btn-login {
+        background-color: var(--primary) !important;
+        color: white !important;
+        border: none !important;
+        padding: 0.8rem !important;
+        font-weight: 700 !important;
+        letter-spacing: 0.5px;
+        border-radius: 10px !important;
+        transition: all 0.3s ease;
+    }
+
+    .btn-login:hover {
+        background-color: var(--primary-hover) !important;
+        transform: translateY(-1px);
+        box-shadow: 0 10px 20px -5px rgba(79, 70, 229, 0.4) !important;
     }
 </style>
 
 <div class="login-wrapper">
-    <div class="card shadow-lg p-5" style="width: 100%; max-width: 420px; border-radius: 16px; border: 1px solid rgba(255,255,255,0.2); background: white; box-shadow: 0 20px 60px rgba(0,0,0,0.15);">
+    <div class="login-card text-center">
 
-        <!-- App Logo -->
-        <div class="text-center mb-3">
-            <img src="assets/images/logo-full.png" alt="Responda Logo" class="mb-3" style="width: auto; height: 80px;">
+        <!-- Branded Logo Container -->
+        <div class="login-logo-container">
+            <img src="assets/images/logo-white.png" alt="Responda" style="width: 32px; height: 32px; filter: brightness(0) invert(1);">
         </div>
 
-        <h3 class="text-center fw-bold mb-2" style="color: #2d3748;">Welcome Back</h3>
-        <p class="text-center text-muted mb-4" style="font-size: 14px;">Emergency Alert & Response System</p>
+        <h3 class="fw-bold mb-1" style="color: #0f172a; letter-spacing: -0.5px;">Welcome Back</h3>
+        <p class="text-muted mb-4 small">Enter your credentials to access the system</p>
 
-        <form action="login-process.php" method="POST">
+        <form action="login-process.php" method="POST" class="text-start">
             <div class="mb-3">
-                <label for="username" class="form-label fw-600" style="color: #2d3748;">Username</label>
-                <input type="text" id="username" name="username" class="form-control" placeholder="Enter your username" required style="padding: 12px 14px; border: 2px solid #e8ebf2; border-radius: 8px; font-size: 14px; transition: all 0.3s ease;">
+                <label for="username" class="form-label">Username / Email</label>
+                <div class="input-group">
+                    <input type="text" id="username" name="username" class="form-control" placeholder="admin@responda.com" required>
+                </div>
             </div>
+
             <div class="mb-4">
-                <label for="password" class="form-label fw-600" style="color: #2d3748;">Password</label>
-                <input type="password" id="password" name="password" class="form-control" placeholder="Enter your password" required style="padding: 12px 14px; border: 2px solid #e8ebf2; border-radius: 8px; font-size: 14px; transition: all 0.3s ease;">
+                <div class="d-flex justify-content-between">
+                    <label for="password" class="form-label">Password</label>
+                    <a href="forgot-password.php" class="text-decoration-none small text-primary fw-semibold">Forgot?</a>
+                </div>
+                <input type="password" id="password" name="password" class="form-control" placeholder="••••••••" required>
             </div>
-            <button type="submit" class="btn btn-primary w-100" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border: none; padding: 12px; font-weight: 600; border-radius: 8px; transition: all 0.3s ease;">Login</button>
+
+            <button type="submit" class="btn btn-login w-100 mb-3">
+                Sign In
+            </button>
         </form>
 
-        <div class="d-flex justify-content-center align-items-center gap-3 mt-4 pt-4 border-top">
-            <a href="forgot-password.php" class="text-decoration-none text-primary fw-500 small">Forgot Password?</a>
-            <span class="text-muted">|</span>
-            <a href="register.php" class="text-decoration-none text-primary fw-500 small">Register</a>
+        <div class="mt-4 pt-3 border-top">
+            <p class="mb-0 small text-muted">
+                New to the community?
+                <a href="register.php" class="text-decoration-none text-primary fw-bold">Create an account</a>
+            </p>
         </div>
     </div>
 </div>
 
 
-<?php include '../includes/footer.php'; ?>
 
-<!-- Flash Error Modal -->
+<?php // include '../includes/footer.php'; ?>
+
+<!-- Modernized Flash Error Modal -->
 <?php if (!empty($flashError)): ?>
-        <div class="modal fade" id="flashErrorModal" tabindex="-1" aria-hidden="true">
-            <div class="modal-dialog modal-dialog-centered">
-                <div class="modal-content">
-                    <div class="modal-header bg-danger text-white">
-                        <h5 class="modal-title">Error Message</h5>
-                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+    <div class="modal fade" id="flashErrorModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-sm modal-dialog-centered">
+            <div class="modal-content border-0 shadow-lg" style="border-radius: 16px;">
+                <div class="modal-body p-4 text-center">
+                    <div class="mb-3">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" fill="#ef4444" class="bi bi-exclamation-octagon" viewBox="0 0 16 16">
+                            <path d="M4.54.146A.5.5 0 0 1 4.893 0h6.214a.5.5 0 0 1 .353.146l4.394 4.394a.5.5 0 0 1 .146.353v6.214a.5.5 0 0 1-.146.353l-4.394 4.394a.5.5 0 0 1-.353.146H4.893a.5.5 0 0 1-.353-.146L.146 11.46A.5.5 0 0 1 0 11.107V4.893a.5.5 0 0 1 .146-.353L4.54.146zM5.1 1 1 5.1v5.8L5.1 15h5.8l4.1-4.1V5.1L10.9 1H5.1z" />
+                            <path d="M7.002 11a1 1 0 1 1 2 0 1 1 0 0 1-2 0zM7.1 4.995a.905.905 0 1 1 1.8 0l-.35 3.507a.552.552 0 0 1-1.1 0l-.35-3.507z" />
+                        </svg>
                     </div>
-                    <div class="modal-body">
-                        <p class="mb-0"><?php echo htmlspecialchars($flashError, ENT_QUOTES, 'UTF-8'); ?></p>
-                    </div>
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                    </div>
+                    <h5 class="fw-bold text-dark">Login Failed</h5>
+                    <p class="text-muted small mb-4"><?php echo htmlspecialchars($flashError, ENT_QUOTES, 'UTF-8'); ?></p>
+                    <button type="button" class="btn btn-dark w-100 rounded-pill" data-bs-dismiss="modal">Try Again</button>
                 </div>
             </div>
         </div>
+    </div>
 
-        <script>
-        document.addEventListener('DOMContentLoaded', function () {
-                var myModal = new bootstrap.Modal(document.getElementById('flashErrorModal'));
-                myModal.show();
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            var myModal = new bootstrap.Modal(document.getElementById('flashErrorModal'));
+            myModal.show();
         });
-        </script>
+    </script>
 <?php endif; ?>
-
-

@@ -1,12 +1,11 @@
 <?php
-// dashboard.php
-// Protected dashboard page for logged-in users
-// Role-based dashboard (Admin: System Overview, Responder: Personal Stats)
+/**
+ * dashboard.php - Production Grade Dashboard
+ * Professional Layout for Admins & Responders
+ */
 
 require_once __DIR__ . '/../includes/config.php';
-// require_once '/get-new-alerts.php';
 
-// Ensure session is started (config.php may start it)
 if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
@@ -20,9 +19,8 @@ if (empty($_SESSION['logged_in']) || $_SESSION['logged_in'] !== true) {
 $username = htmlspecialchars($_SESSION['username'] ?? 'User', ENT_QUOTES, 'UTF-8');
 $user_id = $_SESSION['user_id'] ?? null;
 $role_id = $_SESSION['role_id'] ?? null;
-$role_name = ($role_id == 1) ? 'Administrator' : 'Responder';
 
-// Initialize stats arrays
+// Initialize stats
 $stats = [
     'active_alerts' => 0,
     'pending_alerts' => 0,
@@ -42,649 +40,284 @@ try {
     $pdo = getPDO();
 
     if ($role_id == 1) {
-        // ADMIN DASHBOARD - System Overview
-        // Count active alerts (status: pending, verified, broadcasted)
+        // ADMIN DATA
         $stmt = $pdo->query("
             SELECT
-            COUNT(*) as total_alerts,
             SUM(status='pending') as pending,
             SUM(status='verified') as verified,
             SUM(status='broadcasted') as broadcasted,
             SUM(status='resolved') as resolved
             FROM alerts
         ");
-
         $row = $stmt->fetch();
+        $stats['active_alerts'] = (int)$row['pending'] + (int)$row['verified'] + (int)$row['broadcasted'];
+        $stats['pending_alerts'] = (int)$row['pending'];
+        $stats['verified_alerts'] = (int)$row['verified'];
+        $stats['resolved_alerts'] = (int)$row['resolved'];
 
-        $stats['active_alerts'] = $row['pending'] + $row['verified'] + $row['broadcasted'];
-        $stats['pending_alerts'] = $row['pending'];
-        $stats['verified_alerts'] = $row['verified'];
-        $stats['resolved_alerts'] = $row['resolved'];
+        $userStats = $pdo->query("SELECT COUNT(*) as total, SUM(status='active') as active FROM users")->fetch();
+        $stats['total_users'] = $userStats['total'];
+        $stats['active_users'] = $userStats['active'];
 
-        // Count total users
-        // Also count active users (logged in within last 15 minutes)
+        $stats['total_responses'] = $pdo->query("SELECT COUNT(*) FROM alert_responses")->fetchColumn();
+
         $stmt = $pdo->query("
-            SELECT
-            COUNT(*) as total_users,
-            SUM(status='active') as active_users
-            FROM users
-        ");
-
-        $userStats = $stmt->fetch();
-
-        $stats['total_users'] = $userStats['total_users'];
-        $stats['active_users'] = $userStats['active_users'];
-
-        // Get status breakdown for chart
-        $stmt = $pdo->query("SELECT status, COUNT(*) as count FROM alerts GROUP BY status");
-        $breakdown = $stmt->fetchAll();
-        foreach ($breakdown as $row) {
-            if (isset($status_breakdown[$row['status']])) {
-                $status_breakdown[$row['status']] = $row['count'];
-            }
-        }
-
-        // Total responses
-        $stmt = $pdo->query("
-            SELECT COUNT(*) as total_responses
-            FROM alert_responses
-        ");
-
-        $stats['total_responses'] = $stmt->fetch()['total_responses'];
-
-        // Fetch recent alerts (all)
-        $stmt = $pdo->query("
-            SELECT a.id, a.title, a.description, a.status, a.created_at, at.name as alert_type, u.full_name as created_by
+            SELECT a.id, a.title, a.status, a.created_at, at.name as alert_type, u.full_name as creator
             FROM alerts a 
             LEFT JOIN alert_types at ON a.alert_type_id = at.id
             LEFT JOIN users u ON a.created_by = u.id
-            ORDER BY a.created_at DESC 
-            LIMIT 8
+            ORDER BY a.created_at DESC LIMIT 6
         ");
-        $recent_alerts = $stmt->fetchAll() ?? [];
+        $recent_alerts = $stmt->fetchAll();
     } else {
-        // RESPONDER DASHBOARD - Personal Stats
-        // Count alerts they've responded to
-        $stmt = $pdo->prepare("SELECT COUNT(*) as count FROM alert_responses WHERE responder_id = ?");
-        $stmt->execute([$user_id]);
-        $stats['personal_responses'] = $stmt->fetch()['count'] ?? 0;
+        // RESPONDER DATA
+        $stats['personal_responses'] = $pdo->query("SELECT COUNT(*) FROM alert_responses WHERE responder_id = $user_id")->fetchColumn();
+        $stats['pending_responses'] = $pdo->query("SELECT COUNT(*) FROM alert_responses WHERE responder_id = $user_id AND status = 'pending'")->fetchColumn();
+        $stats['active_alerts'] = $pdo->query("SELECT COUNT(*) FROM alerts WHERE status IN ('pending', 'verified')")->fetchColumn();
 
-        // Count pending responses for this responder
-        $stmt = $pdo->prepare("
-            SELECT COUNT(*) as count FROM alert_responses 
-            WHERE responder_id = ? AND status = 'pending'
-        ");
-        $stmt->execute([$user_id]);
-        $stats['pending_responses'] = $stmt->fetch()['count'] ?? 0;
-
-        // Count active alerts system-wide
-        $stmt = $pdo->query("SELECT COUNT(*) as count FROM alerts WHERE status IN ('pending', 'verified', 'broadcasted')");
-        $stats['active_alerts'] = $stmt->fetch()['count'] ?? 0;
-
-        // Count total system responses
-        $stmt = $pdo->query("SELECT COUNT(*) as count FROM alert_responses");
-        $stats['total_responses'] = $stmt->fetch()['count'] ?? 0;
-
-        // Get alerts they can respond to
-        $stmt = $pdo->prepare("
-            SELECT a.id, a.title, a.description, a.status, a.created_at, at.name as alert_type
+        $stmt = $pdo->query("
+            SELECT a.id, a.title, a.status, a.created_at, at.name as alert_type
             FROM alerts a 
             LEFT JOIN alert_types at ON a.alert_type_id = at.id
-            WHERE a.status IN ('pending', 'verified', 'broadcasted')
-            ORDER BY a.created_at DESC 
-            LIMIT 8
+            WHERE a.status IN ('pending', 'verified')
+            ORDER BY a.created_at DESC LIMIT 6
         ");
-        $stmt->execute();
-        $recent_alerts = $stmt->fetchAll() ?? [];
-
-        // Get status breakdown for this responder's responses
-        $stmt = $pdo->prepare("
-            SELECT ar.status, COUNT(*) as count 
-            FROM alert_responses ar
-            WHERE ar.responder_id = ?
-            GROUP BY ar.status
-        ");
-        $stmt->execute([$user_id]);
-        $responder_breakdown = $stmt->fetchAll();
-        foreach ($responder_breakdown as $row) {
-            if (isset($status_breakdown[$row['status']])) {
-                $status_breakdown[$row['status']] = $row['count'];
-            }
-        }
+        $recent_alerts = $stmt->fetchAll();
     }
+
+    // Breakdown for Charts
+    $stmt = $pdo->query("SELECT status, COUNT(*) as count FROM alerts GROUP BY status");
+    while($row = $stmt->fetch()) {
+        if(isset($status_breakdown[$row['status']])) $status_breakdown[$row['status']] = (int)$row['count'];
+    }
+
 } catch (Exception $e) {
-    error_log('Dashboard stats error: ' . $e->getMessage());
+    error_log($e->getMessage());
 }
 
 include __DIR__ . '/../includes/header.php';
 ?>
 
-<div class="container-fluid mt-2 mb-0">
-    <div class="row">
-        <!-- Sidebar Navigation -->
+<div class="container-fluid p-0">
+    <div class="row g-0">
+        <!-- Sidebar -->
         <?php include __DIR__ . '/../includes/sidebar.php'; ?>
 
         <!-- Main Content -->
-        <div class="col-lg-10" style="min-height: calc(100vh - 40px); overflow:auto; padding: 24px 32px;">
-            
-            <!-- Header Section -->
-            <div class="row mb-3 align-items-center" style="padding-bottom: 16px; border-bottom: 1px solid #e8ebf2;">
-                <div class="col-md-8">
-                    <h2 class="fw-bold mb-1" style="font-size: 28px; color: #2d3748;">Dashboard</h2>
-                    <small class="text-muted" style="font-size: 13px;">
-                        <?php 
-                        if ($role_id == 1) {
-                            echo 'System Overview & Management';
-                        } else {
-                            echo 'Your Alert Response Center';
-                        }
-                        ?>
-                    </small>
-                </div>
-                <div class="col-md-4 text-end">
-                    <div style="background: linear-gradient(135deg, #667eea 0%, #a36ed8 100%); border-radius: 8px; padding: 12px 16px; color: white;">
-                        <small style="display: block; opacity: 0.9; font-size: 12px;">Welcome back,</small>
-                        <h6 class="mb-1 fw-bold" style="font-size: 16px; margin: 4px 0;"><?php echo $username; ?></h6>
-                        <small style="display: block; opacity: 0.95; font-size: 12px;">
-                            <?php echo ($role_id == 1) ? '👤 Administrator' : '📋 Responder'; ?>
-                        </small>
+        <main class="col-lg-10 bg-light min-vh-100">
+            <div class="p-4 p-lg-5">
+                
+                <!-- Page Header -->
+                <div class="d-flex justify-content-between align-items-end mb-5">
+                    <div>
+                        <h1 class="h3 fw-bold mb-1">Dashboard</h1>
+                        <p class="text-muted mb-0">Overview of system activity and emergency alerts.</p>
+                    </div>
+                    <div class="text-end">
+                        <span class="badge bg-white text-dark border shadow-sm px-3 py-2">
+                            <i class="status-pulse-pending"></i> Live Monitoring Active
+                        </span>
                     </div>
                 </div>
+
+                <!-- Stats Grid -->
+                <div class="row g-4 mb-5">
+                    <?php if ($role_id == 1): ?>
+                        <!-- Admin Stats -->
+                        <div class="col-md-3">
+                            <div class="card border-0 shadow-sm p-3">
+                                <div class="d-flex align-items-center">
+                                    <div class="bg-primary-subtle text-primary p-3 rounded-3 me-3">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M14.857 17.082a23.848 23.848 0 0 0 5.454-1.31A8.967 8.967 0 0 1 18 9.75V9A6 6 0 0 0 6 9v.75a8.967 8.967 0 0 1-2.312 6.022c1.733.64 3.56 1.085 5.455 1.31m5.714 0a24.255 24.255 0 0 1-5.714 0m5.714 0a3 3 0 1 1-5.714 0" /></svg>
+                                    </div>
+                                    <div>
+                                        <h3 class="fw-bold mb-0" id="stat-active"><?= $stats['active_alerts'] ?></h3>
+                                        <small class="text-muted text-uppercase fw-bold" style="font-size: 0.65rem;">Active Alerts</small>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="card border-0 shadow-sm p-3">
+                                <div class="d-flex align-items-center">
+                                    <div class="bg-warning-subtle text-warning p-3 rounded-3 me-3">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M12 6v6h4.5m4.5 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" /></svg>
+                                    </div>
+                                    <div>
+                                        <h3 class="fw-bold mb-0" id="stat-pending"><?= $stats['pending_alerts'] ?></h3>
+                                        <small class="text-muted text-uppercase fw-bold" style="font-size: 0.65rem;">Pending Review</small>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="card border-0 shadow-sm p-3">
+                                <div class="d-flex align-items-center">
+                                    <div class="bg-success-subtle text-success p-3 rounded-3 me-3">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M9 12.75 11.25 15 15 9.75M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" /></svg>
+                                    </div>
+                                    <div>
+                                        <h3 class="fw-bold mb-0"><?= $stats['total_responses'] ?></h3>
+                                        <small class="text-muted text-uppercase fw-bold" style="font-size: 0.65rem;">Total Responses</small>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="card border-0 shadow-sm p-3">
+                                <div class="d-flex align-items-center">
+                                    <div class="bg-info-subtle text-info p-3 rounded-3 me-3">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M15 19.128a9.38 9.38 0 0 0 2.625.372 9.337 9.337 0 0 0 4.121-.952 4.125 4.125 0 0 0-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 0 1 8.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0 1 11.964-3.07M12 6.375a3.375 3.375 0 1 1-6.75 0 3.375 3.375 0 0 1 6.75 0Zm8.25 2.25a2.625 2.625 0 1 1-5.25 0 2.625 2.625 0 0 1 5.25 0Z" /></svg>
+                                    </div>
+                                    <div>
+                                        <h3 class="fw-bold mb-0"><?= $stats['active_users'] ?>/<?= $stats['total_users'] ?></h3>
+                                        <small class="text-muted text-uppercase fw-bold" style="font-size: 0.65rem;">Users Active</small>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    <?php else: ?>
+                        <!-- Responder Stats -->
+                        <div class="col-md-4">
+                            <div class="card border-0 shadow-sm p-4">
+                                <h3 class="fw-bold text-primary mb-1"><?= $stats['personal_responses'] ?></h3>
+                                <small class="text-muted fw-bold">My Responses</small>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="card border-0 shadow-sm p-4">
+                                <h3 class="fw-bold text-warning mb-1"><?= $stats['pending_responses'] ?></h3>
+                                <small class="text-muted fw-bold">Pending Actions</small>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="card border-0 shadow-sm p-4">
+                                <h3 class="fw-bold text-danger mb-1"><?= $stats['active_alerts'] ?></h3>
+                                <small class="text-muted fw-bold">System Alerts</small>
+                            </div>
+                        </div>
+                    <?php endif; ?>
+                </div>
+
+                <div class="row g-4">
+                    <!-- Chart -->
+                    <div class="col-lg-7">
+                        <div class="card border-0 shadow-sm h-100">
+                            <div class="card-header d-flex justify-content-between align-items-center">
+                                <h6 class="fw-bold mb-0">Alert Status Distribution</h6>
+                                <button class="btn btn-sm btn-light border" onclick="location.reload()"><i class="bi bi-arrow-clockwise"></i></button>
+                            </div>
+                            <div class="card-body">
+                                <canvas id="statusChart" style="max-height: 300px;"></canvas>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Recent Alerts -->
+                    <div class="col-lg-5">
+                        <div class="card border-0 shadow-sm h-100">
+                            <div class="card-header d-flex justify-content-between align-items-center">
+                                <h6 class="fw-bold mb-0">Recent Alerts</h6>
+                                <a href="alerts.php" class="text-primary text-decoration-none small fw-bold">View All</a>
+                            </div>
+                            <div class="card-body p-0">
+                                <div class="list-group list-group-flush">
+                                    <?php foreach ($recent_alerts as $alert): ?>
+                                        <div class="list-group-item border-0 px-4 py-3">
+                                            <div class="d-flex justify-content-between align-items-center">
+                                                <div>
+                                                    <p class="mb-0 fw-bold" style="font-size: 0.9rem;"><?= htmlspecialchars($alert['title']) ?></p>
+                                                    <small class="text-muted"><?= htmlspecialchars($alert['alert_type']) ?> • <?= date('H:i', strtotime($alert['created_at'])) ?></small>
+                                                </div>
+                                                <?php
+                                                    $statusClass = match($alert['status']) {
+                                                        'pending' => 'bg-warning-subtle text-warning',
+                                                        'verified' => 'bg-info-subtle text-info',
+                                                        'resolved' => 'bg-success-subtle text-success',
+                                                        default => 'bg-secondary-subtle text-secondary'
+                                                    };
+                                                ?>
+                                                <span class="badge <?= $statusClass ?>"><?= ucfirst($alert['status']) ?></span>
+                                            </div>
+                                        </div>
+                                    <?php endforeach; ?>
+                                    <?php if(empty($recent_alerts)): ?>
+                                        <div class="p-5 text-center text-muted small">No recent activity.</div>
+                                    <?php endif; ?>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Quick Actions -->
+                <div class="mt-5">
+                    <h6 class="fw-bold mb-3">Quick Actions</h6>
+                    <div class="d-flex gap-2">
+                        <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#createAlertModal">
+                            Create Alert
+                        </button>
+                        <a href="alerts.php" class="btn btn-white border shadow-sm">
+                            Manage All Alerts
+                        </a>
+                        <?php if($role_id == 1): ?>
+                            <a href="users.php" class="btn btn-white border shadow-sm">
+                                System Users
+                            </a>
+                        <?php endif; ?>
+                    </div>
+                </div>
+
             </div>
-
-            <?php if ($role_id == 1): ?>
-                <!-- ADMIN DASHBOARD -->
-                
-                <!-- Stats Cards Row -->
-                <div class="row g-3 mt-3 mb-4">
-                    <div class="col-lg-3 col-md-6">
-                        <div class="card border-0 shadow-sm h-100" style="border-left: 4px solid #667eea;">
-                            <div class="card-body p-3">
-                                <div class="d-flex justify-content-between align-items-start">
-                                    <div>
-                                        <p class="text-muted small mb-1" style="font-size: 12px;">Active Alerts</p>
-                                        <h3 class="fw-bold mb-0" style="color: #667eea; font-size: 24px;"><?php echo $stats['active_alerts']; ?></h3>
-                                    </div>
-                                    <svg width="40" height="40" viewBox="0 0 40 40" fill="none" style="opacity: 0.2;">
-                                        <circle cx="20" cy="20" r="18" stroke="#667eea" stroke-width="2"/>
-                                        <path d="M20 10v20M10 20h20" stroke="#667eea" stroke-width="2"/>
-                                    </svg>
-                                </div>
-                                <small class="text-muted">Pending, Verified, Broadcasted</small>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="col-lg-3 col-md-6">
-                        <div class="card border-0 shadow-sm h-100" style="border-left: 4px solid #ffc107;">
-                            <div class="card-body p-3">
-                                <div class="d-flex justify-content-between align-items-start">
-                                    <div>
-                                        <p class="text-muted small mb-1" style="font-size: 12px;">Pending Review</p>
-                                        <h3 class="fw-bold mb-0" style="color: #ffc107; font-size: 24px;"><?php echo $stats['pending_alerts']; ?></h3>
-                                    </div>
-                                    <svg width="40" height="40" viewBox="0 0 40 40" fill="none" style="opacity: 0.2;">
-                                        <rect x="8" y="10" width="24" height="20" stroke="#ffc107" stroke-width="2" rx="2"/>
-                                    </svg>
-                                </div>
-                                <small class="text-muted">Awaiting verification</small>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="col-lg-3 col-md-6">
-                        <div class="card border-0 shadow-sm h-100" style="border-left: 4px solid #28a745;">
-                            <div class="card-body p-3">
-                                <div class="d-flex justify-content-between align-items-start">
-                                    <div>
-                                        <p class="text-muted small mb-1" style="font-size: 12px;">Total Responses</p>
-                                        <h3 class="fw-bold mb-0" style="color: #28a745; font-size: 24px;"><?php echo $stats['total_responses']; ?></h3>
-                                    </div>
-                                    <svg width="40" height="40" viewBox="0 0 40 40" fill="none" style="opacity: 0.2;">
-                                        <path d="M12 20h16M20 12v16" stroke="#28a745" stroke-width="2"/>
-                                    </svg>
-                                </div>
-                                <small class="text-muted">Responder submissions</small>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="col-lg-3 col-md-6">
-                        <div class="card border-0 shadow-sm h-100" style="border-left: 4px solid #0dcaf0;">
-                            <div class="card-body p-3">
-                                <div class="d-flex justify-content-between align-items-start">
-                                    <div>
-                                        <p class="text-muted small mb-1" style="font-size: 12px;">Active Users</p>
-                                        <h3 class="fw-bold mb-0" style="color: #0dcaf0; font-size: 24px;"><?php echo $stats['active_users']; ?>/<?php echo $stats['total_users']; ?></h3>
-                                    </div>
-                                    <svg width="40" height="40" viewBox="0 0 40 40" fill="none" style="opacity: 0.2;">
-                                        <circle cx="14" cy="14" r="4" stroke="#0dcaf0" stroke-width="2"/>
-                                        <path d="M10 22c0-2 2-3 4-3s4 1 4 3" stroke="#0dcaf0" stroke-width="2"/>
-                                    </svg>
-                                </div>
-                                <small class="text-muted">Online / Total</small>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Charts and Content Row -->
-                <div class="row g-4 mb-4">
-                    <!-- Chart Section -->
-                    <div class="col-lg-6">
-                        <div class="card border-0 shadow-sm">
-                            <div class="card-header bg-white border-bottom">
-                                <h5 class="mb-0">Alert Status Distribution</h5>
-                            </div>
-                            <div class="card-body p-4" style="height: 350px;">
-                                <canvas id="statusChart"></canvas>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Quick Stats Section -->
-                    <div class="col-lg-6">
-                        <div class="card border-0 shadow-sm mb-4">
-                            <div class="card-header bg-white border-bottom">
-                                <h5 class="mb-0">Alert Breakdown</h5>
-                            </div>
-                            <div class="card-body">
-                                <div class="mb-3 pb-3 border-bottom">
-                                    <div class="d-flex justify-content-between align-items-center">
-                                        <span class="text-muted">Pending</span>
-                                        <div>
-                                            <span class="badge bg-warning"><?php echo $status_breakdown['pending']; ?></span>
-                                            <small class="text-muted ms-2"><?php echo $stats['active_alerts'] > 0 ? round(($status_breakdown['pending'] / $stats['active_alerts']) * 100) : 0; ?>%</small>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="mb-3 pb-3 border-bottom">
-                                    <div class="d-flex justify-content-between align-items-center">
-                                        <span class="text-muted">Verified</span>
-                                        <div>
-                                            <span class="badge bg-info"><?php echo $stats['verified_alerts']; ?></span>
-                                            <small class="text-muted ms-2"><?php echo $stats['active_alerts'] > 0 ? round(($stats['verified_alerts'] / $stats['active_alerts']) * 100) : 0; ?>%</small>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="mb-3 pb-3 border-bottom">
-                                    <div class="d-flex justify-content-between align-items-center">
-                                        <span class="text-muted">Broadcasted</span>
-                                        <div>
-                                            <span class="badge bg-primary"><?php echo $status_breakdown['broadcasted']; ?></span>
-                                            <small class="text-muted ms-2"><?php echo $stats['active_alerts'] > 0 ? round(($status_breakdown['broadcasted'] / $stats['active_alerts']) * 100) : 0; ?>%</small>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="d-flex justify-content-between align-items-center">
-                                    <span class="text-muted">Resolved</span>
-                                    <div>
-                                        <span class="badge bg-success"><?php echo $stats['resolved_alerts']; ?></span>
-                                        <small class="text-muted ms-2"><?php echo ($stats['pending_alerts'] + $stats['verified_alerts'] + $stats['resolved_alerts'] + $status_breakdown['broadcasted']) > 0 ? round(($stats['resolved_alerts'] / ($stats['pending_alerts'] + $stats['verified_alerts'] + $stats['resolved_alerts'] + $status_breakdown['broadcasted'])) * 100) : 0; ?>%</small>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="card border-0 shadow-sm bg-light">
-                            <div class="card-body">
-                                <h6 class="mb-3">Quick Actions</h6>
-                                <div class="d-flex flex-row gap-2">
-                                    <a type="button" data-bs-toggle="modal" data-bs-target="#createAlertModal" class="btn btn-primary btn-sm" style="text-align:center; width: 140px;">New Alert</a>
-                                    <a href="alerts.php" class="btn btn-outline-primary btn-sm" style="width: 140px;">View Alerts</a>
-                                    <a href="users.php" class="btn btn-outline-secondary btn-sm" style="width: 140px;">Manage Users</a>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Recent Alerts Section -->
-                <div class="card border-0 shadow-sm mb-4">
-                    <div class="card-header bg-white border-bottom">
-                        <div class="d-flex justify-content-between align-items-center">
-                            <h5 class="mb-0">Recent System Alerts</h5>
-                            <a href="alerts.php" class="btn btn-sm btn-outline-primary">View All</a>
-                        </div>
-                    </div>
-                    <div class="card-body p-0">
-                        <?php if (count($recent_alerts) > 0): ?>
-                            <div class="list-group list-group-flush">
-                                <?php foreach ($recent_alerts as $alert): ?>
-                                    <?php
-                                        $status_color = match($alert['status']) {
-                                            'pending' => 'warning',
-                                            'verified' => 'info',
-                                            'broadcasted' => 'primary',
-                                            'resolved' => 'success',
-                                            default => 'secondary'
-                                        };
-                                        $time_ago = date('M d, Y H:i', strtotime($alert['created_at']));
-                                    ?>
-                                    <div class="list-group-item p-4 border-bottom">
-                                        <div class="d-flex justify-content-between align-items-start mb-2">
-                                            <div>
-                                                <h6 class="mb-1">
-                                                    <a href="alert-details.php?id=<?php echo $alert['id']; ?>" class="text-decoration-none" style="color: #2d3748;">
-                                                        <?php echo htmlspecialchars($alert['title'], ENT_QUOTES, 'UTF-8'); ?>
-                                                    </a>
-                                                </h6>
-                                                <span class="badge bg-<?php echo $status_color; ?>"><?php echo ucfirst($alert['status']); ?></span>
-                                                <span class="badge bg-light text-dark ms-2">
-                                                    <?php echo htmlspecialchars($alert['alert_type'], ENT_QUOTES, 'UTF-8'); ?>
-                                                </span>
-                                                <small class="text-muted ms-2">by <?php echo htmlspecialchars($alert['created_by'] ?? 'System', ENT_QUOTES, 'UTF-8'); ?></small>
-                                            </div>
-                                            <small class="text-muted"><?php echo $time_ago; ?></small>
-                                        </div>
-                                        <p class="text-muted small mb-0"><?php echo htmlspecialchars(substr($alert['description'], 0, 120), ENT_QUOTES, 'UTF-8'); ?>...</p>
-                                    </div>
-                                <?php endforeach; ?>
-                            </div>
-                        <?php else: ?>
-                            <div class="p-5 text-center text-muted">
-                                <p>No alerts in the system yet.</p>
-                            </div>
-                        <?php endif; ?>
-                    </div>
-                </div>
-
-            <?php else: ?>
-                <!-- RESPONDER DASHBOARD -->
-                
-                <!-- Personal Stats Cards -->
-                <div class="row g-3 mt-3 mb-4">
-                    <div class="col-lg-4 col-md-6">
-                        <div class="card border-0 shadow-sm h-100" style="border-left: 4px solid #667eea;">
-                            <div class="card-body p-3">
-                                <div class="d-flex justify-content-between align-items-start">
-                                    <div>
-                                        <p class="text-muted small mb-1" style="font-size: 12px;">My Responses</p>
-                                        <h3 class="fw-bold mb-0" style="color: #667eea; font-size: 24px;"><?php echo $stats['personal_responses']; ?></h3>
-                                    </div>
-                                    <svg width="40" height="40" viewBox="0 0 40 40" fill="none" style="opacity: 0.2;">
-                                        <path d="M12 20h16M20 12v16" stroke="#667eea" stroke-width="2"/>
-                                    </svg>
-                                </div>
-                                <small class="text-muted">Total submitted</small>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="col-lg-4 col-md-6">
-                        <div class="card border-0 shadow-sm h-100" style="border-left: 4px solid #ffc107;">
-                            <div class="card-body p-3">
-                                <div class="d-flex justify-content-between align-items-start">
-                                    <div>
-                                        <p class="text-muted small mb-1" style="font-size: 12px;">Pending Actions</p>
-                                        <h3 class="fw-bold mb-0" style="color: #ffc107; font-size: 24px;"><?php echo $stats['pending_responses']; ?></h3>
-                                    </div>
-                                    <svg width="40" height="40" viewBox="0 0 40 40" fill="none" style="opacity: 0.2;">
-                                        <rect x="8" y="10" width="24" height="20" stroke="#ffc107" stroke-width="2" rx="2"/>
-                                    </svg>
-                                </div>
-                                <small class="text-muted">Review needed</small>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="col-lg-4 col-md-6">
-                        <div class="card border-0 shadow-sm h-100" style="border-left: 4px solid #28a745;">
-                            <div class="card-body p-3">
-                                <div class="d-flex justify-content-between align-items-start">
-                                    <div>
-                                        <p class="text-muted small mb-1" style="font-size: 12px;">Active Alerts</p>
-                                        <h3 class="fw-bold mb-0" style="color: #28a745; font-size: 24px;"><?php echo $stats['active_alerts']; ?></h3>
-                                    </div>
-                                    <svg width="40" height="40" viewBox="0 0 40 40" fill="none" style="opacity: 0.2;">
-                                        <circle cx="20" cy="20" r="18" stroke="#28a745" stroke-width="2"/>
-                                        <path d="M20 10v20M10 20h20" stroke="#28a745" stroke-width="2"/>
-                                    </svg>
-                                </div>
-                                <small class="text-muted">Available to respond</small>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Response Status Chart -->
-                <div class="row g-4 mb-4">
-                    <div class="col-lg-6">
-                        <div class="card border-0 shadow-sm">
-                            <div class="card-header bg-white border-bottom">
-                                <h5 class="mb-0">Your Response History</h5>
-                            </div>
-                            <div class="card-body p-4" style="height: 350px;">
-                                <canvas id="responsesChart"></canvas>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="col-lg-6">
-                        <div class="card border-0 shadow-sm mb-4">
-                            <div class="card-header bg-white border-bottom">
-                                <h5 class="mb-0">Response Summary</h5>
-                            </div>
-                            <div class="card-body">
-                                <div class="mb-3 pb-3 border-bottom">
-                                    <div class="d-flex justify-content-between align-items-center">
-                                        <span class="text-muted">Pending Review</span>
-                                        <span class="badge bg-warning"><?php echo $status_breakdown['pending']; ?></span>
-                                    </div>
-                                </div>
-                                <div class="mb-3 pb-3 border-bottom">
-                                    <div class="d-flex justify-content-between align-items-center">
-                                        <span class="text-muted">Verified</span>
-                                        <span class="badge bg-info"><?php echo $status_breakdown['verified']; ?></span>
-                                    </div>
-                                </div>
-                                <div class="mb-3 pb-3 border-bottom">
-                                    <div class="d-flex justify-content-between align-items-center">
-                                        <span class="text-muted">Broadcasted</span>
-                                        <span class="badge bg-primary"><?php echo $status_breakdown['broadcasted']; ?></span>
-                                    </div>
-                                </div>
-                                <div class="d-flex justify-content-between align-items-center">
-                                    <span class="text-muted">Resolved</span>
-                                    <span class="badge bg-success"><?php echo $status_breakdown['resolved']; ?></span>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="card border-0 shadow-sm bg-light">
-                            <div class="card-body">
-                                <h6 class="mb-3">Quick Actions</h6>
-                                <div class="d-flex flex-column gap-2">
-                                    <a href="alerts.php" class="btn btn-primary btn-sm" style="width: 140px;">View Alerts</a>
-                                    <a href="alerts.php?filter=pending" class="btn btn-warning btn-sm" style="width: 140px;">See Pending</a>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Alerts Available for Response -->
-                <div class="card border-0 shadow-sm mb-4">
-                    <div class="card-header bg-white border-bottom">
-                        <div class="d-flex justify-content-between align-items-center">
-                            <h5 class="mb-0">Alerts Awaiting Your Response</h5>
-                            <a href="alerts.php" class="btn btn-sm btn-outline-primary">View All</a>
-                        </div>
-                    </div>
-                    <div class="card-body p-0">
-                        <?php if (count($recent_alerts) > 0): ?>
-                            <div class="list-group list-group-flush">
-                                <?php foreach ($recent_alerts as $alert): ?>
-                                    <?php
-                                        $status_color = match($alert['status']) {
-                                            'pending' => 'warning',
-                                            'verified' => 'info',
-                                            'broadcasted' => 'primary',
-                                            'resolved' => 'success',
-                                            default => 'secondary'
-                                        };
-                                        $time_ago = date('M d, Y H:i', strtotime($alert['created_at']));
-                                    ?>
-                                    <div class="list-group-item p-4 border-bottom">
-                                        <div class="d-flex justify-content-between align-items-start mb-2">
-                                            <div class="flex-grow-1">
-                                                <h6 class="mb-1">
-                                                    <a href="alert-details.php?id=<?php echo $alert['id']; ?>" class="text-decoration-none" style="color: #2d3748;">
-                                                        <?php echo htmlspecialchars($alert['title'], ENT_QUOTES, 'UTF-8'); ?>
-                                                    </a>
-                                                </h6>
-                                                <span class="badge bg-<?php echo $status_color; ?>"><?php echo ucfirst($alert['status']); ?></span>
-                                                <span class="badge bg-light text-dark ms-2"><?php echo htmlspecialchars($alert['alert_type'], ENT_QUOTES, 'UTF-8'); ?></span>
-                                            </div>
-                                            <small class="text-muted"><?php echo $time_ago; ?></small>
-                                        </div>
-                                        <p class="text-muted small"><?php echo htmlspecialchars(substr($alert['description'], 0, 120), ENT_QUOTES, 'UTF-8'); ?>...</p>
-                                    </div>
-                                <?php endforeach; ?>
-                            </div>
-                        <?php else: ?>
-                            <div class="p-5 text-center text-muted">
-                                <p>No active alerts to respond to at the moment.</p>
-                            </div>
-                        <?php endif; ?>
-                    </div>
-                </div>
-
-            <?php endif; ?>
-
-        </div>
+        </main>
     </div>
 </div>
 
-<!-- Chart.js and inline chart initialization -->
-<script src="https://cdn.jsdelivr.net/npm/chart.js@4.3.2/dist/chart.umd.js" integrity="sha384-eI7PSr3L1XLISH8JdDII5YN/njoSsxfbrkCTnJrzXt+ENP5MOVBxD+l6sEG4zoLp" crossorigin="anonymous"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
-    (function(){
-        const roleId = <?php echo json_encode($role_id); ?>;
-        const statusBreakdown = <?php echo json_encode($status_breakdown); ?>;
+    // Chart Initialization
+    const statusData = {
+        labels: ['Pending', 'Verified', 'Broadcasted', 'Resolved'],
+        datasets: [{
+            data: [
+                <?= $status_breakdown['pending'] ?>,
+                <?= $status_breakdown['verified'] ?>,
+                <?= $status_breakdown['broadcasted'] ?>,
+                <?= $status_breakdown['resolved'] ?>
+            ],
+            backgroundColor: ['#f59e0b', '#0ea5e9', '#4f46e5', '#10b981'],
+            hoverOffset: 10,
+            borderRadius: 5,
+            spacing: 5
+        }]
+    };
 
-        if (roleId == 1) {
-            // ADMIN CHART - Alert Status Distribution
-            const adminLabels = ['Pending', 'Verified', 'Broadcasted', 'Resolved'];
-            const adminData = [
-                statusBreakdown.pending,
-                statusBreakdown.verified,
-                statusBreakdown.broadcasted,
-                statusBreakdown.resolved
-            ];
-            
-            const ctx = document.getElementById('statusChart');
-            if (ctx) {
-                new Chart(ctx, {
-                    type: 'doughnut',
-                    data: {
-                        labels: adminLabels,
-                        datasets: [{
-                            data: adminData,
-                            backgroundColor: ['#FF0000', '#190e6d', '#ff5e00', '#17BF41'],
-                            borderColor: '#fff',
-                            borderWidth: 4,
-                            hoverOffset: 30,
-                            borderRadius: 6,
-                            spacing: 4,
-                            cutout: '70%'
-                        }]
-                    },
-                    options: {
-                        responsive: true,
-                        maintainAspectRatio: false,
-                        plugins: {
-                            legend: {
-                                position: 'bottom',
-                                labels: { padding: 15, font: { size: 13 } }
-                            }
-                        }
-                    }
-                });
-            }
-        } else {
-            // RESPONDER CHART - Response History
-            const responderLabels = ['Pending', 'Verified', 'Broadcasted', 'Resolved'];
-            const responderData = [
-                statusBreakdown.pending,
-                statusBreakdown.verified,
-                statusBreakdown.broadcasted,
-                statusBreakdown.resolved
-            ];
-
-            const ctx = document.getElementById('responsesChart');
-            if (ctx) {
-                new Chart(ctx, {
-                    type: 'bar',
-                    data: {
-                        labels: responderLabels,
-                        datasets: [{
-                            label: 'My Responses',
-                            data: responderData,
-                            backgroundColor: ['#ffc107', '#0dcaf0', '#0d6efd', '#28a745'],
-                            borderRadius: 6,
-                            borderSkipped: false
-                        }]
-                    },
-                    options: {
-                        responsive: true,
-                        maintainAspectRatio: false,
-                        plugins: {
-                            legend: { display: false }
-                        },
-                        scales: {
-                            y: {
-                                beginAtZero: true,
-                                ticks: { stepSize: 1 }
-                            }
-                        }
-                    }
-                });
+    new Chart(document.getElementById('statusChart'), {
+        type: 'doughnut',
+        data: statusData,
+        options: {
+            cutout: '70%',
+            plugins: {
+                legend: { position: 'bottom', labels: { usePointStyle: true, padding: 20 } }
             }
         }
-    })();
+    });
 
-    // Auto refresh stats every 5 minutes
-    function loadDashboardStats(){
-
-        fetch("get-dashboard-stats.php")
-        .then(res => res.json())
-        .then(data => {
-            document.getElementById("totalAlerts").innerText = data.alerts
-            document.getElementById("pendingAlerts").innerText = data.pending
-            document.getElementById("verifiedAlerts").innerText = data.verified
-            document.getElementById("resolvedAlerts").innerText = data.resolved
-        })
-
+    // Stats Auto-Refresh
+    function updateStats() {
+        fetch('get-dashboard-stats.php')
+            .then(res => res.json())
+            .then(data => {
+                if (document.getElementById('stat-active')) {
+                    document.getElementById('stat-active').innerText = data.alerts;
+                    document.getElementById('stat-pending').innerText = data.pending;
+                }
+            });
     }
-    loadDashboardStats()
-    setInterval(loadDashboardStats,5000)
-
-    // POP UP NOTIFICATIONS FOR NEW ALERTS (for responders)
-    function checkNewAlerts(){
-
-        fetch("get-new-alerts.php")
-        .then(res=>res.json())
-        .then(alerts=>{
-
-            if(alerts.length > 0){
-
-            Swal.fire({
-            icon:"info",
-            title:"New Alert",
-            text:alerts[0].title
-            })
-
-            }
-
-        })
-
-    }
-
-    setInterval(checkNewAlerts,10000)
-
+    setInterval(updateStats, 10000); // 10 seconds
 </script>
-<?php include __DIR__ . '/../includes/modals/create-alert-modal.html'; ?>
-<?php include __DIR__ . '/../includes/footer.php'; ?>
 
-
+<?php 
+include __DIR__ . '/../includes/modals/create-alert-modal.html';
+include __DIR__ . '/../includes/footer.php'; 
+?>
