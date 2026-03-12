@@ -39,8 +39,8 @@ function is_active($pages, $required_filter = null) {
                     <img src="assets/images/logo-white.png" alt="Logo" style="width: 22px; height: 22px; filter: brightness(0) invert(1);">
                 </div>
                 <div class="ms-3">
-                    <h5 class="text-white fw-bold mb-0" style="letter-spacing: -0.5px; font-size: 1.1rem;">Responda</h5>
-                    <span class="text-muted" style="font-size: 0.65rem; text-transform: uppercase; letter-spacing: 1px; color: #64748b !important;">Admin Portal</span>
+                    <h5 class="text-white fw-bold mb-0" style="letter-spacing: -0.2px; font-size: 1.1rem;">Responda</h5>
+                    <span class="text-muted" style="font-size: 0.65rem; text-transform: uppercase; letter-spacing: 1px; color: #64748b !important;">Account Portal</span>
                 </div>
             </div>
         </div>
