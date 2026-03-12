@@ -101,13 +101,13 @@ try {
 
     $alerts = $stmt->fetchAll();
     $total_count = count($alerts);
-
 } catch (Exception $e) {
     error_log('Alerts page error: ' . $e->getMessage());
 }
 
 // Function to get status badge color
-function getStatusBadgeClass($status) {
+function getStatusBadgeClass($status)
+{
     switch ($status) {
         case 'pending':
             return 'bg-warning';
@@ -123,7 +123,8 @@ function getStatusBadgeClass($status) {
 }
 
 // Function to get status badge icon
-function getStatusIcon($status) {
+function getStatusIcon($status)
+{
     switch ($status) {
         case 'pending':
             return '⏳';
@@ -148,7 +149,7 @@ include __DIR__ . '/../includes/header.php';
 
         <!-- Main Content -->
         <div class="col-lg-10" style="min-height: calc(100vh - 40px); overflow:auto; padding: 24px 32px;">
-            
+
             <!-- Header Section -->
             <div class="row mb-4 align-items-center border-bottom pb-3">
                 <div class="col-md-6">
@@ -158,8 +159,8 @@ include __DIR__ . '/../includes/header.php';
                 <div class="col-md-6 text-end">
                     <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#createAlertModal">
                         <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="currentColor" class="bi bi-plus-circle me-2" viewBox="0 0 16 16" style="display: inline;">
-                            <path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14zm0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16z"/>
-                            <path d="M8 4a.5.5 0 0 1 .5.5v3h3a.5.5 0 0 1 0 1h-3v3a.5.5 0 0 1-1 0v-3h-3a.5.5 0 0 1 0-1h3v-3A.5.5 0 0 1 8 4z"/>
+                            <path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14zm0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16z" />
+                            <path d="M8 4a.5.5 0 0 1 .5.5v3h3a.5.5 0 0 1 0 1h-3v3a.5.5 0 0 1-1 0v-3h-3a.5.5 0 0 1 0-1h3v-3A.5.5 0 0 1 8 4z" />
                         </svg>
                         Create Alert
                     </button>
@@ -245,7 +246,7 @@ include __DIR__ . '/../includes/header.php';
                 <div class="card-header bg-white border-bottom">
                     <div class="d-flex justify-content-between align-items-center">
                         <h5 class="mb-0">
-                            <?php 
+                            <?php
                             if ($status_filter !== 'all') {
                                 echo ucfirst($status_filter) . ' Alerts';
                             } else {
@@ -300,14 +301,29 @@ include __DIR__ . '/../includes/header.php';
                                                 </small>
                                             </td>
                                             <td>
-                                                <a href="alert-details.php?id=<?php echo $alert['id']; ?>" class="btn btn-sm btn-outline-primary" title="View Details">
-                                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-eye" viewBox="0 0 16 16">
-                                                        <path d="M16 8s-3-5.5-8-5.5S0 8 0 8s3 5.5 8 5.5S16 8 16 8zM1.173 8a13.133 13.133 0 0 1 1.66-2.043C4.12 4.668 5.88 3.5 8 3.5c2.12 0 3.879 1.168 5.168 2.457A13.134 13.134 0 0 1 14.828 8c-.058.087-.122.183-.195.288-.335.48-.83 1.12-1.465 1.755C11.879 11.332 10.119 12.5 8 12.5c-2.12 0-3.879-1.168-5.168-2.457A13.134 13.134 0 0 1 1.172 8z"/>
-                                                        <path d="M8 5.5a2.5 2.5 0 1 0 0 5 2.5 2.5 0 0 0 0-5zM4.5 8a3.5 3.5 0 1 1 7 0 3.5 3.5 0 0 1-7 0z"/>
+
+                                                <button
+                                                    class="btn btn-sm btn-outline-primary view-alert"
+                                                    data-id="<?= $alert['id'] ?>"
+                                                    data-title="<?= htmlspecialchars($alert['title']) ?>"
+                                                    data-description="<?= htmlspecialchars($alert['description']) ?>"
+                                                    data-type="<?= htmlspecialchars($alert['alert_type']) ?>"
+                                                    data-status="<?= $alert['status'] ?>"
+                                                    data-created="<?= $alert['created_at'] ?>"
+                                                    data-bs-toggle="modal"
+                                                    data-bs-target="#viewAlertModal">
+
+                                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+                                                        <path d="M16 8s-3-5.5-8-5.5S0 8 0 8s3 5.5 8 5.5S16 8 16 8z" />
                                                     </svg>
-                                                </a>
+
+                                                </button>
+
+
+
+                                                <!-- If Logged user is of type === RESPONDER : show this button below -->
                                                 <?php if ($role_id == 2 && ($alert['status'] === 'pending' || $alert['status'] === 'verified')): ?>
-                                                    <button type="button" class="btn btn-sm btn-outline-info ms-1" title="Respond to Alert" 
+                                                    <button type="button" class="btn btn-sm btn-outline-info ms-1" title="Respond to Alert"
                                                         onclick="openRespondModal(<?php echo $alert['id']; ?>, '<?php echo htmlspecialchars($alert['title'], ENT_QUOTES); ?>', '<?php echo htmlspecialchars(substr($alert['description'], 0, 100), ENT_QUOTES); ?>...', '<?php echo htmlspecialchars($alert['alert_type'], ENT_QUOTES); ?>', '<?php echo $alert['status']; ?>', '<?php echo $alert['created_at']; ?>')">
                                                         <i class="fas fa-reply"></i> Respond
                                                     </button>
@@ -321,11 +337,11 @@ include __DIR__ . '/../includes/header.php';
                     <?php else: ?>
                         <div class="p-5 text-center">
                             <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" fill="#cbd5e1" class="mb-3" viewBox="0 0 16 16">
-                                <path d="M8 1a2 2 0 0 1 2 2v4H6V3a2 2 0 0 1 2-2zm3 6V3a3 3 0 0 0-6 0v4a2 2 0 0 0-2 2v5a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2z"/>
+                                <path d="M8 1a2 2 0 0 1 2 2v4H6V3a2 2 0 0 1 2-2zm3 6V3a3 3 0 0 0-6 0v4a2 2 0 0 0-2 2v5a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2z" />
                             </svg>
                             <h5 class="text-muted">No Alerts Found</h5>
                             <p class="text-muted mb-3">
-                                <?php 
+                                <?php
                                 if (!empty($search_query)) {
                                     echo "No alerts match your search. <a href='alerts.php'>Clear search</a>";
                                 } elseif ($status_filter !== 'all') {
@@ -343,7 +359,7 @@ include __DIR__ . '/../includes/header.php';
             <!-- Info Footer -->
             <div class="mt-4 p-3 bg-light rounded" style="border-left: 4px solid #667eea;">
                 <small class="text-muted">
-                    <strong>Tip:</strong> Click on any alert to view full details, responses, and take actions. 
+                    <strong>Tip:</strong> Click on any alert to view full details, responses, and take actions.
                     You can also filter by status or search for specific keywords.
                 </small>
             </div>
@@ -352,7 +368,14 @@ include __DIR__ . '/../includes/header.php';
     </div>
 </div>
 
-<?php include __DIR__ . '/../includes/modals/create-alert-modal.html'; ?>
-<?php if ($role_id == 2): include __DIR__ . '/../includes/modals/respond-alert-modal.html'; endif; ?>
+
+<?php 
+
+    // Modals : Create, View, Respond (if responder)
+    include __DIR__ . '/../includes/modals/create-alert-modal.html'; 
+    include __DIR__ . '/../includes/modals/view-alert-modal.php';
+?>
+<?php if ($role_id == 2): include __DIR__ . '/../includes/modals/respond-alert-modal.html';
+endif; ?>
 
 <?php include __DIR__ . '/../includes/footer.php'; ?>
