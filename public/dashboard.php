@@ -4,6 +4,7 @@
 // Role-based dashboard (Admin: System Overview, Responder: Personal Stats)
 
 require_once __DIR__ . '/../includes/config.php';
+// require_once '/get-new-alerts.php';
 
 // Ensure session is started (config.php may start it)
 if (session_status() === PHP_SESSION_NONE) {
@@ -43,32 +44,36 @@ try {
     if ($role_id == 1) {
         // ADMIN DASHBOARD - System Overview
         // Count active alerts (status: pending, verified, broadcasted)
-        $stmt = $pdo->query("SELECT COUNT(*) as count FROM alerts WHERE status IN ('pending', 'verified', 'broadcasted')");
-        $stats['active_alerts'] = $stmt->fetch()['count'] ?? 0;
+        $stmt = $pdo->query("
+            SELECT
+            COUNT(*) as total_alerts,
+            SUM(status='pending') as pending,
+            SUM(status='verified') as verified,
+            SUM(status='broadcasted') as broadcasted,
+            SUM(status='resolved') as resolved
+            FROM alerts
+        ");
 
-        // Count pending review
-        $stmt = $pdo->query("SELECT COUNT(*) as count FROM alerts WHERE status = 'pending'");
-        $stats['pending_alerts'] = $stmt->fetch()['count'] ?? 0;
+        $row = $stmt->fetch();
 
-        // Count verified
-        $stmt = $pdo->query("SELECT COUNT(*) as count FROM alerts WHERE status = 'verified'");
-        $stats['verified_alerts'] = $stmt->fetch()['count'] ?? 0;
-
-        // Count resolved
-        $stmt = $pdo->query("SELECT COUNT(*) as count FROM alerts WHERE status = 'resolved'");
-        $stats['resolved_alerts'] = $stmt->fetch()['count'] ?? 0;
-
-        // Count total responses
-        $stmt = $pdo->query("SELECT COUNT(*) as count FROM alert_responses");
-        $stats['total_responses'] = $stmt->fetch()['count'] ?? 0;
+        $stats['active_alerts'] = $row['pending'] + $row['verified'] + $row['broadcasted'];
+        $stats['pending_alerts'] = $row['pending'];
+        $stats['verified_alerts'] = $row['verified'];
+        $stats['resolved_alerts'] = $row['resolved'];
 
         // Count total users
-        $stmt = $pdo->query("SELECT COUNT(*) as count FROM users");
-        $stats['total_users'] = $stmt->fetch()['count'] ?? 0;
+        // Also count active users (logged in within last 15 minutes)
+        $stmt = $pdo->query("
+            SELECT
+            COUNT(*) as total_users,
+            SUM(status='active') as active_users
+            FROM users
+        ");
 
-        // Count active users
-        $stmt = $pdo->query("SELECT COUNT(*) as count FROM users WHERE status = 'active'");
-        $stats['active_users'] = $stmt->fetch()['count'] ?? 0;
+        $userStats = $stmt->fetch();
+
+        $stats['total_users'] = $userStats['total_users'];
+        $stats['active_users'] = $userStats['active_users'];
 
         // Get status breakdown for chart
         $stmt = $pdo->query("SELECT status, COUNT(*) as count FROM alerts GROUP BY status");
@@ -78,6 +83,14 @@ try {
                 $status_breakdown[$row['status']] = $row['count'];
             }
         }
+
+        // Total responses
+        $stmt = $pdo->query("
+            SELECT COUNT(*) as total_responses
+            FROM alert_responses
+        ");
+
+        $stats['total_responses'] = $stmt->fetch()['total_responses'];
 
         // Fetch recent alerts (all)
         $stmt = $pdo->query("
@@ -568,9 +581,13 @@ include __DIR__ . '/../includes/header.php';
                         labels: adminLabels,
                         datasets: [{
                             data: adminData,
-                            backgroundColor: ['#ffc107', '#0dcaf0', '#0d6efd', '#28a745'],
+                            backgroundColor: ['#FF0000', '#190e6d', '#ff5e00', '#17BF41'],
                             borderColor: '#fff',
-                            borderWidth: 2
+                            borderWidth: 4,
+                            hoverOffset: 30,
+                            borderRadius: 6,
+                            spacing: 4,
+                            cutout: '70%'
                         }]
                     },
                     options: {
@@ -626,6 +643,46 @@ include __DIR__ . '/../includes/header.php';
             }
         }
     })();
+
+    // Auto refresh stats every 5 minutes
+    function loadDashboardStats(){
+
+        fetch("get-dashboard-stats.php")
+        .then(res => res.json())
+        .then(data => {
+            document.getElementById("totalAlerts").innerText = data.alerts
+            document.getElementById("pendingAlerts").innerText = data.pending
+            document.getElementById("verifiedAlerts").innerText = data.verified
+            document.getElementById("resolvedAlerts").innerText = data.resolved
+        })
+
+    }
+    loadDashboardStats()
+    setInterval(loadDashboardStats,5000)
+
+    // POP UP NOTIFICATIONS FOR NEW ALERTS (for responders)
+    function checkNewAlerts(){
+
+        fetch("get-new-alerts.php")
+        .then(res=>res.json())
+        .then(alerts=>{
+
+            if(alerts.length > 0){
+
+            Swal.fire({
+            icon:"info",
+            title:"New Alert",
+            text:alerts[0].title
+            })
+
+            }
+
+        })
+
+    }
+
+    setInterval(checkNewAlerts,10000)
+
 </script>
 <?php include __DIR__ . '/../includes/modals/create-alert-modal.html'; ?>
 <?php include __DIR__ . '/../includes/footer.php'; ?>

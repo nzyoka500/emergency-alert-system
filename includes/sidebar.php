@@ -93,12 +93,20 @@ function is_active_section($pages) {
                             </svg>Reports
                         </span>
                     </a>
+
+                    <!-- Logout button -->
+                    <a href="logout.php" class="nav-link text-white py-2 px-2 rounded">
+                        <span>
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-box-arrow-right me-2" viewBox="0 0 16 16">
+                                <path fill-rule="evenodd" d="M8 3.5a.5.5 0 0 1 .5.5v9a.5.5 0 0 1-1 0v-9a.5.5 0 0 1 .5-.5zm3.5 2a.5.5 0 0 0 0-1h-7a.5.5 0 0 0 0 1h7z"/>
+                            </svg>Logout
+                        </span>
+                    </a>
                 </nav>
 
                 <div class="mt-auto">
                     <div class="d-flex justify-content-between align-items-center mb-2">
-                        <small class="text-white-50">Role: <?php echo ($role_id == 1) ? 'Administrator' : 'Responder'; ?></small>
-                        <a href="logout.php" class="btn btn-sm btn-outline-light">Logout</a>
+                        <small class="fw-800 text-white-50">Role: <?php echo ($role_id == 1) ? 'Administrator' : 'Responder'; ?></small>
                     </div>
                     <div class="text-white-50 small">v1.0 • <?php echo date('Y'); ?></div>
                 </div>

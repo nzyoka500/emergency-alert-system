@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: localhost
--- Generation Time: Feb 28, 2026 at 10:17 AM
+-- Generation Time: Mar 12, 2026 at 07:57 AM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.2.12
 
@@ -45,7 +45,9 @@ CREATE TABLE `alerts` (
 
 INSERT INTO `alerts` (`id`, `alert_type_id`, `title`, `description`, `latitude`, `longitude`, `status`, `created_by`, `created_at`) VALUES
 (1, 1, 'Fire at market', 'Fire at market place', 57.00000000, 112.00000000, 'pending', 5, '2026-02-19 05:30:58'),
-(2, 3, 'Airport road accident', 'Coalition of several vehicles along Main land road to airport road, on the the Eastern bypass.', 57.80000000, 143.00000000, 'pending', 6, '2026-02-19 05:44:19');
+(2, 3, 'Airport road accident', 'Coalition of several vehicles along Main land road to airport road, on the the Eastern bypass.', 57.80000000, 143.00000000, 'verified', 6, '2026-02-19 05:44:19'),
+(3, 1, 'Test data 2', 'This is a test alert to test the featire', 67.00000000, 112.00000000, 'resolved', 6, '2026-03-06 16:37:19'),
+(4, 2, 'Floods due to heavy rains', 'Most parts of the country has floods due to the rains, most affected areas are the regions on mountains', 12.88792500, 30.17099200, 'broadcasted', 6, '2026-03-12 06:06:49');
 
 -- --------------------------------------------------------
 
@@ -153,7 +155,8 @@ CREATE TABLE `roles` (
 
 INSERT INTO `roles` (`id`, `name`, `created_at`) VALUES
 (1, 'Admin', '2026-02-11 09:56:59'),
-(2, 'Responder', '2026-02-11 09:56:59');
+(2, 'Responder', '2026-02-11 09:56:59'),
+(3, 'Community', '2026-03-07 05:04:28');
 
 -- --------------------------------------------------------
 
@@ -198,9 +201,13 @@ CREATE TABLE `users` (
 --
 
 INSERT INTO `users` (`id`, `full_name`, `email`, `phone`, `password`, `role_id`, `status`, `created_at`) VALUES
-(4, 'Eric Nzyoka', 'eric@gmail.com', '123456789', '$2y$12$csdlnD3NHAqL8Sm4fgfTruf0MzUaewpxN46LxyP3TJKGKOah6luiy', 2, 'active', '2026-02-12 08:06:24'),
 (5, 'Demo Account', 'demo@test.com', '123456789', '$2y$12$uxlGHXe9RVFOvXDcUyr87OqVPsgryzrZgiMmf2WvCV910temcz/5O', 2, 'active', '2026-02-12 08:08:36'),
-(6, 'Admin Tesst', 'admin@test.com', '0712345678', '$2y$12$0L3PG6SyTr9LoJd64mSP5.ZTeSmgahThVFLvZT7u3Aci2ss46RKkq', 1, 'active', '2026-02-16 16:28:57');
+(6, 'Admin Tesst', 'admin@test.com', '0712345678', '$2y$12$0L3PG6SyTr9LoJd64mSP5.ZTeSmgahThVFLvZT7u3Aci2ss46RKkq', 1, 'active', '2026-02-16 16:28:57'),
+(7, 'Phrah Amend', 'hamed@gmail.com', '9114567890', '$2y$12$3wtCP3JjYretdDL1oRPAiudMbcE4CRQekUeqFLvRToDlbbzXmW4tq', 3, 'active', '2026-03-07 05:06:01'),
+(8, 'Red Cross Angels', 'red@cress.ems', '8112873', '$2y$12$5bkoLggR0Ru.b2vNc5esJuF0bqTPy3p5vOgDgO.iCy7sNDC1KXDG6', 2, 'active', '2026-03-07 05:12:54'),
+(9, 'Test Account', 'test@mail.com', '9114567890', '$2y$12$pmTmnwhgoi4CGTu6ys2cze/bJhVcqQ5YEYJaXIhtnqgK0oPKg2KdO', 3, 'active', '2026-03-09 13:22:55'),
+(10, 'Bola Tinubu', 'tinubu@mail.com', '12131323', '$2y$12$lUZ4WvRp01/aGiNbKPgcAO0TcV310CB3K6max285NM0IrNWAWV/mi', 2, 'active', '2026-03-09 13:30:52'),
+(11, 'Kenya One', 'kenyaone@mail.com', '9114567890', '$2y$12$nR87NXvMjx0xjPKsIXKhe.pb3oIjiOVXCGM7eIVwI2e6kJcyQLVg.', 2, 'active', '2026-03-09 13:44:53');
 
 --
 -- Indexes for dumped tables
@@ -281,7 +288,7 @@ ALTER TABLE `users`
 -- AUTO_INCREMENT for table `alerts`
 --
 ALTER TABLE `alerts`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
 
 --
 -- AUTO_INCREMENT for table `alert_broadcasts`
@@ -317,7 +324,7 @@ ALTER TABLE `community_users`
 -- AUTO_INCREMENT for table `roles`
 --
 ALTER TABLE `roles`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
 
 --
 -- AUTO_INCREMENT for table `system_logs`
@@ -329,7 +336,7 @@ ALTER TABLE `system_logs`
 -- AUTO_INCREMENT for table `users`
 --
 ALTER TABLE `users`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=12;
 
 --
 -- Constraints for dumped tables
