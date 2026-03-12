@@ -315,6 +315,73 @@ include __DIR__ . '/../includes/header.php';
             });
     }
     setInterval(updateStats, 10000); // 10 seconds
+
+    // 
+    // Variable to track the highest Alert ID seen so far to avoid duplicate notifications
+let lastNotifiedAlertId = 0;
+
+// Function to play emergency notification sound
+function playNotificationSound() {
+    const audio = new Audio('assets/sounds/notification.mp3'); 
+    audio.play().catch(e => console.log("Audio play blocked by browser. Interaction required."));
+}
+
+function checkPendingAlerts() {
+    // Only run if the user is an Admin (Role ID 1)
+    if (<?php echo $_SESSION['role_id']; ?> !== 1) return;
+
+    fetch(`../api/check-pending.php?last_id=${lastNotifiedAlertId}`)
+        .then(res => res.json())
+        .then(data => {
+            if (data.success && data.count > 0) {
+                
+                // Update the last ID seen
+                lastNotifiedAlertId = data.alerts[0].id;
+
+                data.alerts.forEach(alert => {
+                    // Trigger SweetAlert Toast
+                    const Toast = Swal.mixin({
+                        toast: true,
+                        position: 'top-end',
+                        showConfirmButton: false,
+                        timer: 5000,
+                        timerProgressBar: true,
+                        didOpen: (toast) => {
+                            toast.addEventListener('mouseenter', Swal.stopTimer)
+                            toast.addEventListener('mouseleave', Swal.resumeTimer)
+                        }
+                    });
+
+                    Toast.fire({
+                        icon: 'warning',
+                        title: 'New Verification Required',
+                        text: `${alert.type}: ${alert.title} (by ${alert.responder})`
+                    });
+                    
+                    // Play Sound
+                    playNotificationSound();
+                    
+                    // Optional: Refresh the "Recent Alerts" list or Stats automatically
+                    if (typeof loadDashboardStats === 'function') loadDashboardStats();
+                });
+            }
+        })
+        .catch(err => console.error("Notification Error:", err));
+}
+
+// Check every 10 seconds
+setInterval(checkPendingAlerts, 10000);
+
+// Run once on load to establish current max ID
+document.addEventListener('DOMContentLoaded', () => {
+    // Initialize lastNotifiedAlertId with current highest ID in the DB
+    // so we don't notify for old alerts on every refresh
+    fetch(`../api/check-pending.php?last_id=0`)
+        .then(res => res.json())
+        .then(data => {
+            if(data.alerts.length > 0) lastNotifiedAlertId = data.alerts[0].id;
+        });
+});
 </script>
 
 <?php 

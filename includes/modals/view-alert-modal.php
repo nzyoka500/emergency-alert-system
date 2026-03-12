@@ -63,6 +63,21 @@
 
             </div>
 
+            <div class="modal-footer border-top-0 bg-light p-4">
+    <!-- Close button for everyone -->
+    <button class="btn btn-white border px-4" data-bs-dismiss="modal">Close</button>
+    
+    <?php if ($_SESSION['role_id'] == 1): ?>
+        <!-- Admin only: Show Verify button if status is pending -->
+        <div id="adminActionButtons">
+            <!-- This will be shown dynamically via JS -->
+        </div>
+        
+        <!-- Delete Alert -->
+        <button class="btn btn-outline-danger px-4" id="deleteAlertBtn">Delete Incident</button>
+    <?php endif; ?>
+</div>
+
             <div class="modal-footer">
 
                 <!-- Soft delete: with modal to confirm -->
@@ -159,6 +174,22 @@
         })
 
     })
+
+    // Modal action buttons for admin (verify/respond)
+    // Inside the button click listener that opens the modal:
+const status = this.dataset.status;
+const alertId = this.dataset.id;
+const actionContainer = document.getElementById('adminActionButtons');
+
+if (status === 'pending' && actionContainer) {
+    actionContainer.innerHTML = `
+        <button class="btn btn-primary px-4 me-2" onclick="verifyAndBroadcast(${alertId})">
+            Verify & Broadcast
+        </button>
+    `;
+} else if (actionContainer) {
+    actionContainer.innerHTML = ''; // Hide if already verified
+}
 
 
 </script>
