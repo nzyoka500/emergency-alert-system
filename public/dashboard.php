@@ -205,7 +205,12 @@ include __DIR__ . '/../includes/header.php';
                         <div class="card border-0 shadow-sm h-100">
                             <div class="card-header d-flex justify-content-between align-items-center">
                                 <h6 class="fw-bold mb-0">Alert Status Distribution</h6>
-                                <button class="btn btn-sm btn-light border" onclick="location.reload()"><i class="bi bi-arrow-clockwise"></i></button>
+                                <button class="btn btn-sm btn-light border" onclick="location.reload()">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-arrow-clockwise" viewBox="0 0 16 16">
+                                        <path fill-rule="evenodd" d="M8 3a5 5 0 1 0 4.546 2.914.5.5 0 0 1 .908-.417A6 6 0 1 1 8 2z"/>
+                                        <path d="M8 4.466V.534a.25.25 0 0 1 .41-.192l2.36 1.966c.12.1.12.284 0 .384L8.41 4.658A.25.25 0 0 1 8 4.466"/>
+                                    </svg>
+                                </button>
                             </div>
                             <div class="card-body">
                                 <canvas id="statusChart" style="max-height: 300px;"></canvas>
