@@ -38,6 +38,16 @@
                                 placeholder="e.g. Chemical Spill at Sector 4" required maxlength="150">
                         </div>
 
+                        <!-- Alert Severity -->
+                        <div class="col-md-12">
+                            <label for="modalAlertSeverity" class="form-label small fw-bold text-uppercase text-muted" style="letter-spacing: 0.5px;">Incident Severity</label>
+                            <select class="form-select border-slate-200 shadow-sm fw-bold" name="severity" id="modalAlertSeverity" required>
+                                <option value="Low">Low - Minor Incident</option>
+                                <option value="Medium" selected>Medium - Significant Incident</option>
+                                <option value="High">High - Critical Emergency</option>
+                            </select>
+                        </div>
+
                         <!-- Description -->
                         <div class="col-12">
                             <label for="modalAlertDescription" class="form-label small fw-bold text-uppercase text-muted" style="letter-spacing: 0.5px;">Description & Situation Report</label>
@@ -77,6 +87,8 @@
                         </svg>
                         <small class="text-info fw-semibold">Need precise coordinates? Use <a href="https://www.latlong.net/" target="_blank" class="text-info text-decoration-underline">latlong.net</a></small>
                     </div>
+
+
                 </form>
             </div>
 

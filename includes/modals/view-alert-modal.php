@@ -42,12 +42,12 @@
                     </div>
 
                     <div class="row g-4 mb-4">
-                        <div class="col-md-6">
+                        <div class="col-md-4">
                             <label class="form-label small fw-bold text-uppercase text-muted" style="letter-spacing: 0.5px;">Alert Category</label>
                             <input type="text" class="form-control border-slate-200 shadow-sm bg-light" id="alertType" name="type" readonly>
                         </div>
-                        <div class="col-md-6">
-                            <label class="form-label small fw-bold text-uppercase text-muted" style="letter-spacing: 0.5px;">System Status</label>
+                        <div class="col-md-4">
+                            <label class="form-label small fw-bold text-uppercase text-muted" style="letter-spacing: 0.5px;">Alert Status</label>
                             <?php if ($_SESSION['role_id'] == 1): ?>
                                 <select class="form-select border-slate-200 shadow-sm fw-bold" id="alertStatus" name="status">
                                     <option value="pending text-warning">Pending</option>
@@ -57,6 +57,18 @@
                                 </select>
                             <?php else: ?>
                                 <input type="text" class="form-control border-slate-200 shadow-sm bg-light fw-bold" id="alertStatusView" readonly>
+                            <?php endif; ?>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label small fw-bold text-uppercase text-muted">Incident Severity</label>
+                            <?php if ($_SESSION['role_id'] == 1): ?>
+                                <select class="form-select border-slate-200 shadow-sm fw-bold" id="alertSeverity" name="severity">
+                                    <option value="Low">Low</option>
+                                    <option value="Medium">Medium</option>
+                                    <option value="High">High</option>
+                                </select>
+                            <?php else: ?>
+                                <input type="text" class="form-control bg-light fw-bold" id="alertSeverityView" readonly>
                             <?php endif; ?>
                         </div>
                     </div>

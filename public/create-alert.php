@@ -26,6 +26,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         // Validate and sanitize inputs
         $alert_type_id = isset($_POST['alert_type_id']) ? (int)$_POST['alert_type_id'] : null;
         $title = isset($_POST['title']) ? trim($_POST['title']) : '';
+        $severity = isset($_POST['severity']) ? trim($_POST['severity']) : 'Medium';
         $description = isset($_POST['description']) ? trim($_POST['description']) : '';
         $latitude = isset($_POST['latitude']) ? (float)$_POST['latitude'] : null;
         $longitude = isset($_POST['longitude']) ? (float)$_POST['longitude'] : null;
@@ -38,6 +39,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         // Validate title length
         if (strlen($title) > 150) {
             throw new Exception('Title must not exceed 150 characters.');
+        }
+
+        // Validate severity
+        if (!in_array($severity, ['Low', 'Medium', 'High'])) {
+            throw new Exception('Invalid severity level selected.');
         }
 
         // Validate latitude and longitude ranges
@@ -56,11 +62,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             throw new Exception('Invalid alert type selected.');
         }
 
-        // Insert alert into database
+        // Insert alert record into database
+        // Note: 'severity' column must exist in the 'alerts' table for this to work
         $stmt = $pdo->prepare('
-            INSERT INTO alerts (alert_type_id, title, description, latitude, longitude, created_by, status)
-            VALUES (?, ?, ?, ?, ?, ?, ?)
+            INSERT INTO alerts (alert_type_id, title, description, latitude, longitude, created_by, status, severity)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?)
         ');
+
         $stmt->execute([
             $alert_type_id,
             $title,
@@ -68,7 +76,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $latitude,
             $longitude,
             $user_id,
-            'pending'
+            'pending',
+            $severity // Added this line
         ]);
 
         $alert_id = $pdo->lastInsertId();

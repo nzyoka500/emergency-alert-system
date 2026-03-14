@@ -164,6 +164,7 @@ include __DIR__ . '/../includes/header.php';
                                     <th class="ps-4">Emergency Incident</th>
                                     <th>Category</th>
                                     <th>Status</th>
+                                    <th>Severity</th>
                                     <th>Activity</th>
                                     <th>Timestamp</th>
                                     <th class="text-end pe-4">Actions</th>
@@ -177,6 +178,13 @@ include __DIR__ . '/../includes/header.php';
                                         'broadcasted' => ['class' => 'primary', 'icon' => 'M8.288 15.038a5.25 5.25 0 0 1 7.424 0M12.53 18.22a.75.75 0 0 1-1.06 0l-1.06-1.06a.75.75 0 1 1 1.06-1.06l1.06 1.06a.75.75 0 0 1 0 1.06Z'],
                                         'resolved' => ['class' => 'success', 'icon' => 'M9 12.75 11.25 15 15 9.75M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z'],
                                         default => ['class' => 'secondary', 'icon' => '']
+                                    };
+
+                                     $severity_color = match($alert['severity']) {
+                                        'High' => 'danger',
+                                        'Medium' => 'warning',
+                                        'Low' => 'success',
+                                        default => 'secondary'
                                     };
                                 ?>
                                 <tr>
@@ -193,6 +201,11 @@ include __DIR__ . '/../includes/header.php';
                                         <span class="badge bg-<?= $status_meta['class'] ?>-subtle text-<?= $status_meta['class'] ?> d-inline-flex align-items-center">
                                             <?php if($alert['status'] === 'pending'): ?><span class="status-pulse-pending"></span><?php endif; ?>
                                             <?= ucfirst($alert['status']) ?>
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <span class="badge border border-<?= $severity_color ?> text-<?= $severity_color ?> bg-transparent">
+                                            ● <?= $alert['severity'] ?>
                                         </span>
                                     </td>
                                     <td>

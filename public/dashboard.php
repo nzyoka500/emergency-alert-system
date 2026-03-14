@@ -290,7 +290,7 @@ include __DIR__ . '/../includes/header.php';
                 <?= $status_breakdown['broadcasted'] ?>,
                 <?= $status_breakdown['resolved'] ?>
             ],
-            backgroundColor: ['#f59e0b', '#0ea5e9', '#4f46e5', '#10b981'],
+            backgroundColor: ['#ffa200', '#000000', '#ff0000', '#0a5707'],
             hoverOffset: 10,
             borderRadius: 5,
             spacing: 5
