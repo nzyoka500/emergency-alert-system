@@ -88,17 +88,14 @@ include __DIR__ . '/../includes/header.php';
                     <div class="card-header bg-white py-3 border-bottom-0">
                         <div class="row align-items-center g-3">
                             <div class="col-md-8">
-                                <h6 class="fw-bold mb-0">Registered System Users</h6>
+                                <h6 class="fw-bold mb-0">System Users</h6>
                             </div>
-                            <div class="col-md-4">
-                                <div class="input-group input-group-sm">
-                                    <span class="input-group-text bg-transparent border-end-0 text-muted">
-                                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                                            <path stroke-linecap="round" stroke-linejoin="round" d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z" />
-                                        </svg>
-                                    </span>
-                                    <input type="text" id="userSearch" class="form-control border-start-0 ps-0" placeholder="Search by name, email or role...">
-                                </div>
+
+                            <div class="search-wrapper">
+                                <input type="text" id="userSearch" class="form-control border-0" placeholder="Search by name, email, or role...">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" />
+                                </svg>
                             </div>
                         </div>
                     </div>
@@ -195,12 +192,12 @@ include __DIR__ . '/../includes/header.php';
                 <form id="createUserForm">
                     <div class="mb-3">
                         <label class="form-label small fw-bold">Full Name</label>
-                        <input type="text" name="full_name" class="form-control" placeholder="John Doe" required>
+                        <input type="text" name="full_name" class="form-control" placeholder="Full Name" required>
                     </div>
                     <div class="row">
                         <div class="col-md-6 mb-3">
                             <label class="form-label small fw-bold">Email Address</label>
-                            <input type="email" name="email" class="form-control" placeholder="john@example.com" required>
+                            <input type="email" name="email" class="form-control" placeholder="example@email.com" required>
                         </div>
                         <div class="col-md-6 mb-3">
                             <label class="form-label small fw-bold">Phone Number</label>
@@ -226,28 +223,79 @@ include __DIR__ . '/../includes/header.php';
     </div>
 </div>
 
-<!-- Modal: View User -->
-<div class="modal fade" id="viewUserModal" tabindex="-1">
+<!-- Modal: View & Edit User -->
+<div class="modal fade" id="viewUserModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content border-0 shadow-lg" style="border-radius: 16px;">
-            <div class="modal-body p-5 text-center">
-                <div class="rounded-circle bg-primary-subtle text-primary d-flex align-items-center justify-content-center mx-auto mb-3" style="width: 64px; height: 64px;">
-                    <h3 class="mb-0 fw-bold" id="viewInitial">J</h3>
-                </div>
-                <h4 class="fw-bold mb-1" id="viewName">John Doe</h4>
-                <p class="text-muted mb-4" id="viewRole">Responder</p>
+        <div class="modal-content border-0 shadow-lg" style="border-radius: 20px; overflow: hidden;">
 
-                <div class="row g-2 text-start">
-                    <div class="col-12 p-3 bg-light rounded-3 mb-2">
-                        <small class="text-muted d-block mb-1">Email Address</small>
-                        <div class="fw-bold" id="viewEmail">john@example.com</div>
+            <!-- Modal Header -->
+            <div class="modal-header border-bottom-0 p-4" style="background-color: #f8fafc;">
+                <h5 class="modal-title fw-bold text-dark mb-0">Manage User Account</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+
+            <div class="modal-body p-4 p-lg-5">
+                <!-- Profile Summary Header -->
+                <div class="text-center mb-4">
+                    <div class="rounded-circle bg-primary-subtle text-primary d-flex align-items-center justify-content-center mx-auto mb-2 shadow-sm" style="width: 60px; height: 60px;">
+                        <h3 class="mb-0 fw-bold" id="viewInitial">A</h3>
                     </div>
-                    <div class="col-12 p-3 bg-light rounded-3">
-                        <small class="text-muted d-block mb-1">Phone Number</small>
-                        <div class="fw-bold" id="viewPhone">+254 700 000 000</div>
-                    </div>
+                    <h5 class="fw-bold mb-0" id="headerName">User Name</h5>
+                    <span class="badge bg-light text-muted border" id="headerRole">Role</span>
                 </div>
-                <button type="button" class="btn btn-dark w-100 mt-4 rounded-pill" data-bs-dismiss="modal">Close</button>
+
+                <!-- Update Form -->
+                <form id="editUserForm">
+                    <input type="hidden" name="user_id" id="editUserId">
+
+                    <div class="mb-3">
+                        <label class="form-label small fw-bold text-muted text-uppercase">Full Name</label>
+                        <input type="text" name="full_name" id="editName" class="form-control border-slate-200 shadow-sm" required>
+                    </div>
+
+                    <div class="row g-3 mb-3">
+                        <div class="col-md-6">
+                            <label class="form-label small fw-bold text-muted text-uppercase">Email Address</label>
+                            <input type="email" name="email" id="editEmail" class="form-control border-slate-200 shadow-sm" required>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label small fw-bold text-muted text-uppercase">Phone Number</label>
+                            <input type="text" name="phone" id="editPhone" class="form-control border-slate-200 shadow-sm">
+                        </div>
+                    </div>
+
+                    <div class="row g-3 mb-4">
+                        <div class="col-md-6">
+                            <label class="form-label small fw-bold text-muted text-uppercase">System Role</label>
+                            <select name="role_id" id="editRole" class="form-select border-slate-200 shadow-sm fw-bold">
+                                <option value="1">Administrator</option>
+                                <option value="2">Responder</option>
+                                <option value="3">Community</option>
+                            </select>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label small fw-bold text-muted text-uppercase">Account Status</label>
+                            <select name="status" id="editStatus" class="form-select border-slate-200 shadow-sm fw-bold">
+                                <option value="active">Active</option>
+                                <option value="inactive">Inactive / Suspended</option>
+                            </select>
+                        </div>
+                    </div>
+                </form>
+            </div>
+
+            <!-- Action Footer -->
+            <div class="modal-footer border-top-0 p-4 d-flex justify-content-between" style="background-color: #f8fafc;">
+                <button type="button" class="btn btn-outline-danger border-0 fw-bold px-3" id="modalDeleteBtn">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" class="me-1">
+                        <path d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0" />
+                    </svg>
+                    Delete User
+                </button>
+                <div class="d-flex gap-2">
+                    <button type="button" class="btn btn-white border px-4 shadow-sm" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-primary px-4 shadow" id="saveUserBtn">Save Profile</button>
+                </div>
             </div>
         </div>
     </div>
@@ -259,24 +307,111 @@ include __DIR__ . '/../includes/header.php';
     document.getElementById("userSearch").addEventListener("keyup", function() {
         let filter = this.value.toLowerCase();
         let rows = document.querySelectorAll("#usersTable tbody tr");
+        let visibleCount = 0;
+
         rows.forEach(row => {
-            row.style.display = row.innerText.toLowerCase().includes(filter) ? "" : "none";
+            let text = row.innerText.toLowerCase();
+            if (text.includes(filter)) {
+                row.style.display = "";
+                row.style.opacity = "1";
+                visibleCount++;
+            } else {
+                row.style.opacity = "0";
+                setTimeout(() => {
+                    if (!row.innerText.toLowerCase().includes(document.getElementById("userSearch").value.toLowerCase())) {
+                        row.style.display = "none";
+                    }
+                }, 200);
+            }
         });
+
+        // Handle "No Users Found" state
+        let emptyMsg = document.getElementById("noResultsMsg");
+        if (visibleCount === 0) {
+            if (!emptyMsg) {
+                let tr = document.createElement('tr');
+                tr.id = "noResultsMsg";
+                tr.innerHTML = `<td colspan="6" class="text-center py-5 text-muted">
+                <div class="mb-2"><svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1"><path d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /><path d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" /></svg></div>
+                No users match your search criteria.
+            </td>`;
+                document.querySelector("#usersTable tbody").appendChild(tr);
+            }
+        } else if (emptyMsg) {
+            emptyMsg.remove();
+        }
     });
 
-    // View Modal Population
+    /**
+     * 1. Populate Modal with existing data
+     */
     document.querySelectorAll(".view-user").forEach(btn => {
         btn.addEventListener("click", function() {
-            const name = this.dataset.name;
-            document.getElementById("viewName").innerText = name;
-            document.getElementById("viewEmail").innerText = this.dataset.email;
-            document.getElementById("viewPhone").innerText = this.dataset.phone || '--';
-            document.getElementById("viewRole").innerText = this.dataset.role;
-            document.getElementById("viewInitial").innerText = name.charAt(0).toUpperCase();
+            const d = this.dataset;
+
+            // Map to Form
+            document.getElementById("editUserId").value = d.id;
+            document.getElementById("editName").value = d.name;
+            document.getElementById("editEmail").value = d.email;
+            document.getElementById("editPhone").value = d.phone || '';
+            document.getElementById("editStatus").value = d.status || 'active';
+
+            // Map Role ID (Logic to convert name back to ID)
+            const roleMap = {
+                'Admin': 1,
+                'Responder': 2,
+                'Community': 3
+            };
+            document.getElementById("editRole").value = roleMap[d.role] || 3;
+
+            // Map Header Profile
+            document.getElementById("viewInitial").innerText = d.name.charAt(0).toUpperCase();
+            document.getElementById("headerName").innerText = d.name;
+            document.getElementById("headerRole").innerText = d.role;
+
+            // Set up Delete button for this specific user
+            document.getElementById("modalDeleteBtn").onclick = () => triggerDelete(d.id);
         });
     });
 
-    // Delete User
+    /**
+     * 2. Handle Update (AJAX)
+     */
+    document.getElementById("saveUserBtn").addEventListener("click", async function() {
+        const btn = this;
+        const form = document.getElementById("editUserForm");
+
+        btn.disabled = true;
+        btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Saving...';
+
+        try {
+            const response = await fetch("update-user.php", {
+                method: "POST",
+                body: new FormData(form)
+            });
+            const result = await response.json();
+
+            if (result.success) {
+                Swal.fire({
+                        icon: 'success',
+                        title: 'Updated!',
+                        text: result.message,
+                        showConfirmButton: false,
+                        timer: 1500
+                    })
+                    .then(() => location.reload());
+            } else {
+                Swal.fire('Error', result.message, 'error');
+            }
+        } catch (e) {
+            Swal.fire('Error', 'Network connection failed.', 'error');
+        } finally {
+            btn.disabled = false;
+            btn.innerHTML = 'Save Profile';
+        }
+    });
+
+    
     /**
      * Global Delete Handler
      * Works for both Users and Alerts

@@ -534,6 +534,136 @@ canvas {
 
 
 /* ============================================ */
+/* USER LISTING TABLE & SEARCH STYLING */
+/* ============================================ */
+
+/* 1. Enhanced Search Bar */
+.search-wrapper {
+    position: relative;
+    max-width: 400px;
+}
+
+.search-wrapper svg {
+    position: absolute;
+    left: 14px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--slate-400);
+    pointer-events: none;
+    transition: color 0.2s ease;
+}
+
+.search-wrapper .form-control {
+    padding-left: 42px !important; /* Space for the icon */
+    height: 46px;
+    background-color: var(--slate-50) !important;
+    border: 1.5px solid var(--slate-200) !important;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+}
+
+.search-wrapper .form-control:focus {
+    background-color: #fff !important;
+    border-color: var(--primary) !important;
+    box-shadow: 0 10px 15px -3px rgba(79, 70, 229, 0.1), 0 4px 6px -4px rgba(79, 70, 229, 0.1) !important;
+}
+
+.search-wrapper .form-control:focus + svg {
+    color: var(--primary);
+}
+
+/* 2. Table Row Polish */
+#usersTable {
+    border-collapse: separate;
+    border-spacing: 0 8px; /* Creates the "floating row" effect */
+    margin-top: -8px; /* Offsets the spacing for the first row */
+}
+
+#usersTable thead th {
+    background: transparent !important;
+    border: none !important;
+    color: var(--slate-400);
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    padding: 1rem 1.5rem;
+}
+
+#usersTable tbody tr {
+    background-color: #fff;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.02);
+    transition: all 0.2s ease;
+}
+
+#usersTable tbody tr:hover {
+    transform: scale(1.005);
+    box-shadow: var(--shadow-md);
+    background-color: #fff !important; /* Overrides bootstrap hover gray */
+    z-index: 10;
+    position: relative;
+}
+
+#usersTable td {
+    border: none !important;
+    padding: 1.25rem 1.5rem !important;
+    background-color: #fff;
+}
+
+/* Rounding the floating rows */
+#usersTable td:first-child {
+    border-top-left-radius: 12px;
+    border-bottom-left-radius: 12px;
+}
+
+#usersTable td:last-child {
+    border-top-right-radius: 12px;
+    border-bottom-right-radius: 12px;
+}
+
+/* 3. User Avatar/Initial Squircle */
+.user-info-cell {
+    display: flex;
+    align-items: center;
+}
+
+.user-squircle {
+    width: 42px;
+    height: 42px;
+    border-radius: 12px; /* Modern "Squircle" look */
+    background: var(--primary-soft);
+    color: var(--primary);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    margin-right: 15px;
+    flex-shrink: 0;
+}
+
+/* Highlight search results */
+.search-highlight {
+    background-color: rgba(245, 158, 11, 0.2);
+    border-bottom: 1px solid var(--warning);
+    padding: 0 2px;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/* ============================================ */
 /* PRODUCTION GRADE FOOTER */
 /* ============================================ */
 footer {
