@@ -411,75 +411,83 @@ include __DIR__ . '/../includes/header.php';
         }
     });
 
-    
+
     /**
-     * Global Delete Handler
-     * Works for both Users and Alerts
+     * Global Delete Controller
+     * Uses Event Delegation to ensure it works on dynamic elements and modals
      */
-    document.querySelectorAll(".delete-user, .delete-btn").forEach(btn => {
-        btn.addEventListener("click", function(e) {
+    document.addEventListener('click', function(e) {
+        // Look for elements with .delete-user or .delete-alert class (or closest parent)
+        const deleteBtn = e.target.closest('.delete-user, .delete-alert, #modalDeleteBtn');
+
+        if (deleteBtn) {
             e.preventDefault();
 
-            const id = this.dataset.id;
-            const row = this.closest('tr'); // Capture the row to remove it later
-            const type = this.classList.contains('delete-user') ? 'User' : 'Alert';
-            const targetUrl = type === 'User' ? 'delete-user.php' : 'delete-alert.php';
+            // 1. Determine Type and ID
+            // If it's the modal button, we get ID from a hidden input, otherwise from dataset
+            const isModalDelete = deleteBtn.id === 'modalDeleteBtn';
+            const id = isModalDelete ? document.getElementById('editUserId').value : deleteBtn.dataset.id;
+            const isUser = deleteBtn.classList.contains('delete-user') || isModalDelete;
 
-            // Professional Indigo/Slate Confirmation
+            const typeLabel = isUser ? 'User' : 'Alert';
+            const targetUrl = isUser ? 'delete-user.php' : 'delete-alert.php';
+
+            if (!id) return;
+
+            // 2. SweetAlert Confirmation
             Swal.fire({
-                title: `Delete ${type}?`,
+                title: `Delete ${typeLabel}?`,
                 text: "This action is permanent and cannot be undone.",
                 icon: "warning",
                 showCancelButton: true,
-                confirmButtonColor: "#4f46e5", // Indigo Primary
-                cancelButtonColor: "#64748b", // Slate Muted
-                confirmButtonText: "Yes, delete it",
-                background: "#ffffff",
-                customClass: {
-                    title: 'fw-bold text-dark',
-                    popup: 'rounded-4'
-                }
+                confirmButtonColor: "#ef4444", // Red
+                cancelButtonColor: "#64748b", // Slate
+                confirmButtonText: "Yes, Delete Permanently",
+                reverseButtons: true
             }).then((result) => {
                 if (result.isConfirmed) {
-                    // Show loading state
-                    Swal.showLoading();
 
-                    // Perform AJAX deletion
+                    // Show loading state
+                    Swal.fire({
+                        title: 'Processing...',
+                        didOpen: () => {
+                            Swal.showLoading();
+                        }
+                    });
+
+                    // 3. AJAX Request
+                    const formData = new FormData();
+                    formData.append('id', id);
+
                     fetch(targetUrl, {
                             method: 'POST',
-                            headers: {
-                                'Content-Type': 'application/x-www-form-urlencoded'
-                            },
-                            body: `id=${id}`
+                            body: formData
                         })
                         .then(res => res.json())
                         .then(data => {
                             if (data.success) {
-                                // Success Feedback
                                 Swal.fire({
-                                    title: "Deleted!",
+                                    icon: 'success',
+                                    title: 'Deleted!',
                                     text: data.message,
-                                    icon: "success",
-                                    timer: 2000,
+                                    timer: 1500,
                                     showConfirmButton: false
+                                }).then(() => {
+                                    // If we deleted from a modal, we must refresh or remove the row
+                                    // Simply reloading is safest to update all counters
+                                    location.reload();
                                 });
-
-                                // Smoothly remove the row from the UI without refresh
-                                row.style.transition = "all 0.5s ease";
-                                row.style.opacity = "0";
-                                row.style.transform = "translateX(20px)";
-                                setTimeout(() => row.remove(), 500);
-
                             } else {
                                 Swal.fire("Error", data.message, "error");
                             }
                         })
                         .catch(err => {
-                            Swal.fire("System Error", "Could not connect to server.", "error");
+                            console.error(err);
+                            Swal.fire("System Error", "Connection to server failed.", "error");
                         });
                 }
             });
-        });
+        }
     });
 
     // Form Submission

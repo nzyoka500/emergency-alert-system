@@ -1,20 +1,31 @@
 <?php
-
 require_once __DIR__ . '/../includes/config.php';
+header('Content-Type: application/json');
 
-session_start();
+if (session_status() === PHP_SESSION_NONE) session_start();
 
-if ($_SESSION['role_id'] != 1) {
-    header("Location: users.php");
-    exit;
+// Admin Only
+if (!isset($_SESSION['role_id']) || $_SESSION['role_id'] != 1) {
+    echo json_encode(["success" => false, "message" => "Unauthorized"]); exit;
 }
 
 $pdo = getPDO();
+$id = $_POST['id'] ?? null;
 
-$id = (int)($_GET['id'] ?? 0);
+if (!$id) {
+    echo json_encode(["success" => false, "message" => "ID missing"]); exit;
+}
 
-$stmt = $pdo->prepare("DELETE FROM users WHERE id = ?");
-$stmt->execute([$id]);
+try {
+    // Prevent self-deletion
+    if ($id == $_SESSION['user_id']) {
+        echo json_encode(["success" => false, "message" => "You cannot delete your own account."]); exit;
+    }
 
-header("Location: users.php");
-exit;
+    $stmt = $pdo->prepare("DELETE FROM users WHERE id = ?");
+    $stmt->execute([$id]);
+
+    echo json_encode(["success" => true, "message" => "User deleted successfully."]);
+} catch (Exception $e) {
+    echo json_encode(["success" => false, "message" => "Database error."]);
+}

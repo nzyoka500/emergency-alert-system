@@ -37,7 +37,7 @@ if (!empty($_SESSION['error'])) {
     .login-card {
         width: 100%;
         max-width: 420px;
-        background: #ffffff;
+        background: #faf7f7;
         border-radius: 8px;
         border: 1px solid rgba(255, 255, 255, 0.1);
         box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
@@ -53,7 +53,7 @@ if (!empty($_SESSION['error'])) {
         align-items: center;
         justify-content: center;
         margin-bottom: 1.5rem;
-        box-shadow: 0 10px 15px -3px rgba(79, 70, 229, 0.4);
+        box-shadow: 0 10px 15px -3px rgba(69, 62, 216, 0.4);
     }
 
     .form-control {
@@ -99,7 +99,7 @@ if (!empty($_SESSION['error'])) {
 
         <!-- Branded Logo Container -->
         <div class="login-logo-container">
-            <img src="assets/images/logo-white.png" alt="Responda Logo" style="width: 32px; height: 32px;">
+            <img class="img-fluid" src="assets/images/logo-white.png" alt="Responda Logo" style="width: 32px; height: 32px; border-radius: 50%;">
         </div>
 
         <h3 class="fw-bold mb-1" style="color: #0f172a; letter-spacing: -0.5px;">Welcome Back</h3>
