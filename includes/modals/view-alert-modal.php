@@ -142,7 +142,11 @@ document.querySelectorAll(".view-alert").forEach(btn => {
         document.getElementById("alertTitle").value = data.title;
         document.getElementById("alertDescription").value = data.description;
         document.getElementById("alertType").value = data.type;
-        
+        // Inside document.querySelectorAll(".view-alert").forEach...
+        document.getElementById("alertSeverity").value = data.severity; // For Admin
+        // OR
+        document.getElementById("alertSeverityView").value = data.severity; // For Responder
+                
         const statusField = document.getElementById("alertStatus");
         const statusViewField = document.getElementById("alertStatusView");
 

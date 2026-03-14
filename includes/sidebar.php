@@ -40,26 +40,11 @@ function is_active($pages, $required_filter = null) {
                 </div>
                 <div class="ms-3">
                     <h5 class="text-white fw-bold mb-0" style="letter-spacing: -0.2px; font-size: 1.1rem;">Responda</h5>
-                    <span class="text-muted" style="font-size: 0.65rem; text-transform: uppercase; letter-spacing: 1px; color: #95aac7 !important;">Account Portal</span>
+                    <!-- <span class="text-muted" style="font-size: 0.65rem; text-transform: uppercase; letter-spacing: 1px; color: #95aac7 !important;">Account Portal</span> -->
                 </div>
             </div>
         </div>
 
-        <!-- User Profile Card -->
-        <div class="px-3 mb-4">
-            <div class="rounded-3 p-3" style="background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.05);">
-                <div class="d-flex align-items-center">
-                    <div class="rounded-circle d-flex align-items-center justify-content-center text-white fw-bold shadow-sm" 
-                         style="width: 34px; height: 34px; font-size: 0.8rem; background-color: #6366f1;">
-                        <?php echo strtoupper(substr($_SESSION['username'] ?? 'A', 0, 1)); ?>
-                    </div>
-                    <div class="ms-2 overflow-hidden">
-                        <p class="text-white mb-0 text-truncate fw-semibold" style="font-size: 0.85rem;"><?php echo htmlspecialchars($_SESSION['username'] ?? 'Administrator'); ?></p>
-                        <p class="mb-0 text-truncate" style="font-size: 0.7rem; color: #94a3b8;"><?php echo ($role_id == 1) ? 'Administrator' : 'Responder'; ?></p>
-                    </div>
-                </div>
-            </div>
-        </div>
 
         <!-- Navigation Menu -->
         <nav class="nav flex-column px-3 flex-grow-1">

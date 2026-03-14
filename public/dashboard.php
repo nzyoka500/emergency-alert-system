@@ -1,4 +1,5 @@
 <?php
+
 /**
  * dashboard.php - Production Grade Dashboard
  * Professional Layout for Admins & Responders
@@ -87,10 +88,9 @@ try {
 
     // Breakdown for Charts
     $stmt = $pdo->query("SELECT status, COUNT(*) as count FROM alerts GROUP BY status");
-    while($row = $stmt->fetch()) {
-        if(isset($status_breakdown[$row['status']])) $status_breakdown[$row['status']] = (int)$row['count'];
+    while ($row = $stmt->fetch()) {
+        if (isset($status_breakdown[$row['status']])) $status_breakdown[$row['status']] = (int)$row['count'];
     }
-
 } catch (Exception $e) {
     error_log($e->getMessage());
 }
@@ -103,20 +103,84 @@ include __DIR__ . '/../includes/header.php';
         <!-- Sidebar -->
         <?php include __DIR__ . '/../includes/sidebar.php'; ?>
 
+
+
         <!-- Main Content -->
         <main class="col-lg-10 bg-light min-vh-100">
             <div class="p-4 p-lg-5">
-                
-                <!-- Page Header -->
-                <div class="d-flex justify-content-between align-items-end mb-5">
+
+
+
+                <!-- Top Header Bar -->
+                <div class="d-flex justify-content-between align-items-center mb-5">
+                    <!-- Left Side: Page Title -->
                     <div>
                         <h1 class="h3 fw-bold mb-1">Dashboard</h1>
-                        <p class="text-muted mb-0">Overview of system activity and emergency alerts.</p>
+                        <p class="text-muted mb-0 small">Welcome back to the Responda Control Center.</p>
                     </div>
-                    <div class="text-end">
-                        <span class="badge bg-white text-dark border shadow-sm px-3 py-2">
-                            <i class="status-pulse-pending"></i> Live Monitoring Active
-                        </span>
+
+                    <!-- Right Side: Notifications + User Profile -->
+                    <div class="d-flex align-items-center">
+
+                        <!-- 1. Notification Bell (Admin Only) -->
+                        <?php if ($_SESSION['role_id'] == 1): ?>
+                            <!-- Notification Bell -->
+                            <div class="dropdown me-3">
+                                <button class="btn btn-danger border shadow-sm position-relative rounded-circle p-0 d-flex align-items-center justify-content-center" 
+                                        type="button" id="notifBell" data-bs-toggle="dropdown" aria-expanded="false" 
+                                        style="width: 50px; height: 50px; transition: all 0.2s ease;">
+                                    
+                                    <!-- Updated SVG: Heroicon Bell with explicit Indigo color -->
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" fill="none" viewBox="0 0 24 24" stroke="#4f46e5" stroke-width="2">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M14.857 17.082a23.848 23.848 0 005.454-1.31A8.967 8.967 0 0118 9.75V9A6 6 0 006 9v.75a8.967 8.967 0 01-2.312 6.022c1.733.64 3.56 1.085 5.455 1.31m5.714 0a24.255 24.255 0 01-5.714 0m5.714 0a3 3 0 11-5.714 0" />
+                                    </svg>
+
+                                    <!-- Count Badge -->
+                                    <span id="pendingCountBadge" class="position-absolute badge rounded-pill bg-danger d-none border border-white" 
+                                        style="top: 2px; right: -2px; font-size: 0.6rem; padding: 0.35em 0.5em;">
+                                        0
+                                    </span>
+                                </button>
+                                
+                                <ul class="dropdown-menu dropdown-menu-end shadow-lg border-0 py-0 overflow-hidden" 
+                                    style="width: 320px; border-radius: 12px; margin-top: 10px;">
+                                    <li class="p-3 border-bottom bg-light">
+                                        <div class="d-flex justify-content-between align-items-center">
+                                            <h6 class="mb-0 fw-bold text-dark">Verification Requests</h6>
+                                            <span class="badge bg-primary-subtle text-primary" id="notifCountLabel">0 New</span>
+                                        </div>
+                                    </li>
+                                    <div id="pendingNotifList" style="max-height: 350px; overflow-y: auto;">
+                                        <!-- Pending items injected via JS -->
+                                        <li class="p-4 text-center text-muted small">No pending verifications</li>
+                                    </div>
+                                    <li class="p-2 border-top text-center bg-slate-50">
+                                        <a href="alerts.php?filter=pending" class="text-primary small fw-bold text-decoration-none">View Management Console</a>
+                                    </li>
+                                </ul>
+                            </div>
+                        <?php endif; ?>
+
+                        <!-- 2. The User Profile Card (Moved to Top Right) -->
+                        <div class="bg-white border rounded-3 p-2 shadow-sm" style="min-width: 200px;">
+                            <div class="d-flex align-items-center">
+                                <!-- Initial Circle -->
+                                <div class="rounded-circle d-flex align-items-center justify-content-center text-white fw-bold shadow-sm"
+                                    style="width: 36px; height: 36px; font-size: 0.85rem; background: var(--primary); flex-shrink: 0;">
+                                    <?php echo strtoupper(substr($_SESSION['username'] ?? 'U', 0, 1)); ?>
+                                </div>
+                                <!-- Name and Role -->
+                                <div class="ms-3 overflow-hidden">
+                                    <p class="mb-0 text-truncate fw-bold text-dark" style="font-size: 0.9rem; line-height: 1.2;">
+                                        <?php echo htmlspecialchars($_SESSION['username'] ?? 'User'); ?>
+                                    </p>
+                                    <p class="mb-0 text-truncate text-muted fw-semibold" style="font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.5px;">
+                                        <?php echo ($role_id == 1) ? 'Administrator' : 'Responder'; ?>
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+
                     </div>
                 </div>
 
@@ -128,7 +192,9 @@ include __DIR__ . '/../includes/header.php';
                             <div class="card border-0 shadow-sm p-3">
                                 <div class="d-flex align-items-center">
                                     <div class="bg-primary-subtle text-primary p-3 rounded-3 me-3">
-                                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M14.857 17.082a23.848 23.848 0 0 0 5.454-1.31A8.967 8.967 0 0 1 18 9.75V9A6 6 0 0 0 6 9v.75a8.967 8.967 0 0 1-2.312 6.022c1.733.64 3.56 1.085 5.455 1.31m5.714 0a24.255 24.255 0 0 1-5.714 0m5.714 0a3 3 0 1 1-5.714 0" /></svg>
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                            <path d="M14.857 17.082a23.848 23.848 0 0 0 5.454-1.31A8.967 8.967 0 0 1 18 9.75V9A6 6 0 0 0 6 9v.75a8.967 8.967 0 0 1-2.312 6.022c1.733.64 3.56 1.085 5.455 1.31m5.714 0a24.255 24.255 0 0 1-5.714 0m5.714 0a3 3 0 1 1-5.714 0" />
+                                        </svg>
                                     </div>
                                     <div>
                                         <h3 class="fw-bold mb-0" id="stat-active"><?= $stats['active_alerts'] ?></h3>
@@ -141,7 +207,9 @@ include __DIR__ . '/../includes/header.php';
                             <div class="card border-0 shadow-sm p-3">
                                 <div class="d-flex align-items-center">
                                     <div class="bg-warning-subtle text-warning p-3 rounded-3 me-3">
-                                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M12 6v6h4.5m4.5 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" /></svg>
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                            <path d="M12 6v6h4.5m4.5 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
+                                        </svg>
                                     </div>
                                     <div>
                                         <h3 class="fw-bold mb-0" id="stat-pending"><?= $stats['pending_alerts'] ?></h3>
@@ -154,7 +222,9 @@ include __DIR__ . '/../includes/header.php';
                             <div class="card border-0 shadow-sm p-3">
                                 <div class="d-flex align-items-center">
                                     <div class="bg-success-subtle text-success p-3 rounded-3 me-3">
-                                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M9 12.75 11.25 15 15 9.75M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" /></svg>
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                            <path d="M9 12.75 11.25 15 15 9.75M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
+                                        </svg>
                                     </div>
                                     <div>
                                         <h3 class="fw-bold mb-0"><?= $stats['total_responses'] ?></h3>
@@ -167,7 +237,9 @@ include __DIR__ . '/../includes/header.php';
                             <div class="card border-0 shadow-sm p-3">
                                 <div class="d-flex align-items-center">
                                     <div class="bg-info-subtle text-info p-3 rounded-3 me-3">
-                                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M15 19.128a9.38 9.38 0 0 0 2.625.372 9.337 9.337 0 0 0 4.121-.952 4.125 4.125 0 0 0-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 0 1 8.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0 1 11.964-3.07M12 6.375a3.375 3.375 0 1 1-6.75 0 3.375 3.375 0 0 1 6.75 0Zm8.25 2.25a2.625 2.625 0 1 1-5.25 0 2.625 2.625 0 0 1 5.25 0Z" /></svg>
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                            <path d="M15 19.128a9.38 9.38 0 0 0 2.625.372 9.337 9.337 0 0 0 4.121-.952 4.125 4.125 0 0 0-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 0 1 8.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0 1 11.964-3.07M12 6.375a3.375 3.375 0 1 1-6.75 0 3.375 3.375 0 0 1 6.75 0Zm8.25 2.25a2.625 2.625 0 1 1-5.25 0 2.625 2.625 0 0 1 5.25 0Z" />
+                                        </svg>
                                     </div>
                                     <div>
                                         <h3 class="fw-bold mb-0"><?= $stats['active_users'] ?>/<?= $stats['total_users'] ?></h3>
@@ -207,8 +279,8 @@ include __DIR__ . '/../includes/header.php';
                                 <h6 class="fw-bold mb-0">Alert Status Distribution</h6>
                                 <button class="btn btn-sm btn-light border" onclick="location.reload()">
                                     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-arrow-clockwise" viewBox="0 0 16 16">
-                                        <path fill-rule="evenodd" d="M8 3a5 5 0 1 0 4.546 2.914.5.5 0 0 1 .908-.417A6 6 0 1 1 8 2z"/>
-                                        <path d="M8 4.466V.534a.25.25 0 0 1 .41-.192l2.36 1.966c.12.1.12.284 0 .384L8.41 4.658A.25.25 0 0 1 8 4.466"/>
+                                        <path fill-rule="evenodd" d="M8 3a5 5 0 1 0 4.546 2.914.5.5 0 0 1 .908-.417A6 6 0 1 1 8 2z" />
+                                        <path d="M8 4.466V.534a.25.25 0 0 1 .41-.192l2.36 1.966c.12.1.12.284 0 .384L8.41 4.658A.25.25 0 0 1 8 4.466" />
                                     </svg>
                                 </button>
                             </div>
@@ -235,18 +307,18 @@ include __DIR__ . '/../includes/header.php';
                                                     <small class="text-muted"><?= htmlspecialchars($alert['alert_type']) ?> • <?= date('H:i', strtotime($alert['created_at'])) ?></small>
                                                 </div>
                                                 <?php
-                                                    $statusClass = match($alert['status']) {
-                                                        'pending' => 'bg-warning-subtle text-warning',
-                                                        'verified' => 'bg-info-subtle text-info',
-                                                        'resolved' => 'bg-success-subtle text-success',
-                                                        default => 'bg-secondary-subtle text-secondary'
-                                                    };
+                                                $statusClass = match ($alert['status']) {
+                                                    'pending' => 'bg-warning-subtle text-warning',
+                                                    'verified' => 'bg-info-subtle text-info',
+                                                    'resolved' => 'bg-success-subtle text-success',
+                                                    default => 'bg-secondary-subtle text-secondary'
+                                                };
                                                 ?>
                                                 <span class="badge <?= $statusClass ?>"><?= ucfirst($alert['status']) ?></span>
                                             </div>
                                         </div>
                                     <?php endforeach; ?>
-                                    <?php if(empty($recent_alerts)): ?>
+                                    <?php if (empty($recent_alerts)): ?>
                                         <div class="p-5 text-center text-muted small">No recent activity.</div>
                                     <?php endif; ?>
                                 </div>
@@ -265,7 +337,7 @@ include __DIR__ . '/../includes/header.php';
                         <a href="alerts.php" class="btn btn-white border shadow-sm">
                             Manage All Alerts
                         </a>
-                        <?php if($role_id == 1): ?>
+                        <?php if ($role_id == 1): ?>
                             <a href="users.php" class="btn btn-white border shadow-sm">
                                 System Users
                             </a>
@@ -303,7 +375,13 @@ include __DIR__ . '/../includes/header.php';
         options: {
             cutout: '70%',
             plugins: {
-                legend: { position: 'bottom', labels: { usePointStyle: true, padding: 20 } }
+                legend: {
+                    position: 'bottom',
+                    labels: {
+                        usePointStyle: true,
+                        padding: 20
+                    }
+                }
             }
         }
     });
@@ -323,73 +401,73 @@ include __DIR__ . '/../includes/header.php';
 
     // 
     // Variable to track the highest Alert ID seen so far to avoid duplicate notifications
-let lastNotifiedAlertId = 0;
+    let lastNotifiedAlertId = 0;
 
-// Function to play emergency notification sound
-function playNotificationSound() {
-    const audio = new Audio('assets/sounds/notification.mp3'); 
-    audio.play().catch(e => console.log("Audio play blocked by browser. Interaction required."));
-}
+    // Function to play emergency notification sound
+    function playNotificationSound() {
+        const audio = new Audio('assets/sounds/notification.mp3');
+        audio.play().catch(e => console.log("Audio play blocked by browser. Interaction required."));
+    }
 
-function checkPendingAlerts() {
-    // Only run if the user is an Admin (Role ID 1)
-    if (<?php echo $_SESSION['role_id']; ?> !== 1) return;
+    function checkPendingAlerts() {
+        // Only run if the user is an Admin (Role ID 1)
+        if (<?php echo $_SESSION['role_id']; ?> !== 1) return;
 
-    fetch(`../api/check-pending.php?last_id=${lastNotifiedAlertId}`)
-        .then(res => res.json())
-        .then(data => {
-            if (data.success && data.count > 0) {
-                
-                // Update the last ID seen
-                lastNotifiedAlertId = data.alerts[0].id;
+        fetch(`../api/check-pending.php?last_id=${lastNotifiedAlertId}`)
+            .then(res => res.json())
+            .then(data => {
+                if (data.success && data.count > 0) {
 
-                data.alerts.forEach(alert => {
-                    // Trigger SweetAlert Toast
-                    const Toast = Swal.mixin({
-                        toast: true,
-                        position: 'top-end',
-                        showConfirmButton: false,
-                        timer: 5000,
-                        timerProgressBar: true,
-                        didOpen: (toast) => {
-                            toast.addEventListener('mouseenter', Swal.stopTimer)
-                            toast.addEventListener('mouseleave', Swal.resumeTimer)
-                        }
+                    // Update the last ID seen
+                    lastNotifiedAlertId = data.alerts[0].id;
+
+                    data.alerts.forEach(alert => {
+                        // Trigger SweetAlert Toast
+                        const Toast = Swal.mixin({
+                            toast: true,
+                            position: 'top-end',
+                            showConfirmButton: false,
+                            timer: 5000,
+                            timerProgressBar: true,
+                            didOpen: (toast) => {
+                                toast.addEventListener('mouseenter', Swal.stopTimer)
+                                toast.addEventListener('mouseleave', Swal.resumeTimer)
+                            }
+                        });
+
+                        Toast.fire({
+                            icon: 'warning',
+                            title: 'New Verification Required',
+                            text: `${alert.type}: ${alert.title} (by ${alert.responder})`
+                        });
+
+                        // Play Sound
+                        playNotificationSound();
+
+                        // Optional: Refresh the "Recent Alerts" list or Stats automatically
+                        if (typeof loadDashboardStats === 'function') loadDashboardStats();
                     });
+                }
+            })
+            .catch(err => console.error("Notification Error:", err));
+    }
 
-                    Toast.fire({
-                        icon: 'warning',
-                        title: 'New Verification Required',
-                        text: `${alert.type}: ${alert.title} (by ${alert.responder})`
-                    });
-                    
-                    // Play Sound
-                    playNotificationSound();
-                    
-                    // Optional: Refresh the "Recent Alerts" list or Stats automatically
-                    if (typeof loadDashboardStats === 'function') loadDashboardStats();
-                });
-            }
-        })
-        .catch(err => console.error("Notification Error:", err));
-}
+    // Check every 10 seconds
+    setInterval(checkPendingAlerts, 10000);
 
-// Check every 10 seconds
-setInterval(checkPendingAlerts, 10000);
-
-// Run once on load to establish current max ID
-document.addEventListener('DOMContentLoaded', () => {
-    // Initialize lastNotifiedAlertId with current highest ID in the DB
-    // so we don't notify for old alerts on every refresh
-    fetch(`../api/check-pending.php?last_id=0`)
-        .then(res => res.json())
-        .then(data => {
-            if(data.alerts.length > 0) lastNotifiedAlertId = data.alerts[0].id;
-        });
-});
+    // Run once on load to establish current max ID
+    document.addEventListener('DOMContentLoaded', () => {
+        // Initialize lastNotifiedAlertId with current highest ID in the DB
+        // so we don't notify for old alerts on every refresh
+        fetch(`../api/check-pending.php?last_id=0`)
+            .then(res => res.json())
+            .then(data => {
+                if (data.alerts.length > 0) lastNotifiedAlertId = data.alerts[0].id;
+            });
+    });
 </script>
 
-<?php 
+<?php
 include __DIR__ . '/../includes/modals/create-alert-modal.html';
-include __DIR__ . '/../includes/footer.php'; 
+include __DIR__ . '/../includes/footer.php';
 ?>
