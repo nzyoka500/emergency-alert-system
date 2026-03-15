@@ -120,7 +120,7 @@
                         <div id="adminActionButtons" class="d-inline-block">
                             <!-- Injected via JavaScript -->
                         </div>
-                        <button type="button" class="btn btn-primary shadow px-4" id="editAlert">Update Details</button>
+                        <button type="button" class="btn btn-primary shadow px-4" id="editAlert">Update</button>
                     <?php endif; ?>
                 </div>
             </div>
@@ -205,40 +205,91 @@ if (editBtn) {
     });
 }
 
-/**
- * Delete Handler (Integrated with the Smooth Delete logic)
- */
-const deleteBtn = document.getElementById("deleteAlert");
-if (deleteBtn) {
-    deleteBtn.addEventListener("click", function() {
-        const alertId = document.getElementById("alertId").value;
 
+/**
+ * Unified Alert Deletion Handler
+ */
+document.addEventListener('click', function (e) {
+    // 1. Detect if the clicked element is an Alert Delete button (table or modal)
+    const alertDeleteBtn = e.target.closest('.delete-alert, #deleteAlert');
+
+    if (alertDeleteBtn) {
+        e.preventDefault();
+
+        let alertId;
+        
+        // 2. Extract ID based on context
+        if (alertDeleteBtn.id === 'deleteAlert') {
+            // Context: Inside the "View Alert" Modal
+            alertId = document.getElementById('alertId').value;
+        } else {
+            // Context: Directly from the table row
+            alertId = alertDeleteBtn.dataset.id;
+        }
+
+        if (!alertId) {
+            Swal.fire("Error", "Could not identify the incident ID.", "error");
+            return;
+        }
+
+        // 3. Professional Confirmation Dialog
         Swal.fire({
-            title: "Purge Incident Record?",
-            text: "This action is permanent and will remove all associated responder logs.",
-            icon: "warning",
+            title: 'Purge Incident Record?',
+            text: "This will permanently remove this alert and all associated responder responses. This action is irreversible.",
+            icon: 'warning',
             showCancelButton: true,
-            confirmButtonColor: "#ef4444",
-            cancelButtonColor: "#64748b",
-            confirmButtonText: "Yes, delete permanently"
-        }).then(result => {
+            confirmButtonColor: '#ef4444', // Danger Red
+            cancelButtonColor: '#64748b',  // Slate Gray
+            confirmButtonText: 'Yes, Delete Permanently',
+            reverseButtons: true,
+            background: '#ffffff',
+            customClass: {
+                popup: 'rounded-4 shadow-lg border-0'
+            }
+        }).then((result) => {
             if (result.isConfirmed) {
-                fetch("delete-alert.php", {
-                    method: "POST",
-                    headers: {'Content-Type': 'application/x-www-form-urlencoded'},
-                    body: "id=" + alertId
+                // Show Processing State
+                Swal.fire({
+                    title: 'De-registering Incident...',
+                    allowOutsideClick: false,
+                    didOpen: () => { Swal.showLoading(); }
+                });
+
+                // 4. AJAX Deletion
+                const formData = new FormData();
+                formData.append('id', alertId);
+
+                fetch('delete-alert.php', {
+                    method: 'POST',
+                    body: formData
                 })
                 .then(res => res.json())
                 .then(data => {
-                    Swal.fire({
-                        icon: data.success ? "success" : "error",
-                        title: data.message,
-                        showConfirmButton: false,
-                        timer: 1500
-                    }).then(() => { if(data.success) location.reload(); });
+                    if (data.success) {
+                        Swal.fire({
+                            icon: 'success',
+                            title: 'Removed!',
+                            text: data.message,
+                            timer: 1500,
+                            showConfirmButton: false
+                        }).then(() => {
+                            // Reload to update stats and table
+                            location.reload();
+                        });
+                    } else {
+                        Swal.fire("Access Denied", data.message, "error");
+                    }
+                })
+                .catch(err => {
+                    console.error("Delete Error:", err);
+                    Swal.fire("Connection Failed", "Unable to reach the server. Please check your internet.", "error");
                 });
             }
         });
-    });
-}
+    }
+});
+
+
+
+
 </script>
