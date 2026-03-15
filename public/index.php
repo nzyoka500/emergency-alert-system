@@ -159,8 +159,8 @@ include '../includes/header.php';
     <div class="container">
         <!-- 1. Left: Brand -->
         <a class="navbar-brand d-flex align-items-center fw-bold text-dark" href="/">
-            <img src="assets/images/logo-white.png" style="width: 38px; height: 38px; border-radius: 50%; padding: 6px; margin-right: 12px;" alt="Responda Logo">
-            <span style="letter-spacing: -0.5px; font-size: 1.25rem;">Responda</span>
+            <img src="assets/images/logo-white.png" style="width: 38px; height: 38px; border-radius: 50%; background: var(--primary); padding: 6px; margin-right: 12px;" alt="Responda Logo">
+            <span style="letter-spacing: -0.5px; font-size: 1.30rem;">Responda</span>
         </a>
 
         <!-- Mobile Toggle -->
@@ -298,7 +298,7 @@ include '../includes/header.php';
                     <div class="bg-light rounded-circle mx-auto d-flex align-items-center justify-content-center mb-4" style="width: 80px; height: 80px;">
                         <img src="assets/tech/php.png" alt="PHP" style="width: 40px; height: auto;" onerror="this.src='https://cdn.jsdelivr.net/gh/devicons/devicon/icons/php/php-original.svg'">
                     </div>
-                    <h5 class="fw-bold">Enterprise PHP</h5>
+                    <h5 class="fw-bold">Enterprise</h5>
                     <p class="text-muted small">Robust server-side logic handling real-time incident routing and secure data processing.</p>
                 </div>
             </div>
@@ -309,7 +309,7 @@ include '../includes/header.php';
                     <div class="bg-light rounded-circle mx-auto d-flex align-items-center justify-content-center mb-4" style="width: 80px; height: 80px;">
                         <img src="assets/tech/react.png" alt="React" style="width: 40px; height: auto;" onerror="this.src='https://cdn.jsdelivr.net/gh/devicons/devicon/icons/react/react-original.svg'">
                     </div>
-                    <h5 class="fw-bold">Reactive UI</h5>
+                    <h5 class="fw-bold">Clean UI</h5>
                     <p class="text-muted small">A lightning-fast, state-driven interface designed for high-pressure emergency dispatch environments.</p>
                 </div>
             </div>

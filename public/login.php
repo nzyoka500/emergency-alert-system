@@ -92,6 +92,53 @@ if (!empty($_SESSION['error'])) {
         transform: translateY(-1px);
         box-shadow: 0 10px 20px -5px rgba(79, 70, 229, 0.4) !important;
     }
+
+    /* --- Login Footer Links --- */
+
+.transition-all {
+    transition: all 0.2s ease;
+}
+
+/* Make the "Create Account" link pop slightly on hover */
+.text-primary.fw-bold:hover {
+    color: var(--primary-hover) !important;
+    text-decoration: underline !important;
+}
+
+/* Modern "Back to Home" Button-Link */
+.btn-back-home {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    color: var(--slate-400);
+    text-decoration: none;
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    padding: 8px 16px;
+    border-radius: 8px;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.btn-back-home svg {
+    transition: transform 0.3s ease;
+}
+
+.btn-back-home:hover {
+    color: var(--slate-900);
+    background-color: var(--slate-50);
+}
+
+/* Animation: Arrow moves left slightly on hover */
+.btn-back-home:hover svg {
+    transform: translateX(-4px);
+}
+
+/* Ensure the border is extremely subtle */
+.border-top {
+    border-top: 1.5px solid #f1f5f9 !important; /* slate-100 */
+}
 </style>
 
 <div class="login-wrapper">
@@ -126,11 +173,22 @@ if (!empty($_SESSION['error'])) {
             </button>
         </form>
 
-        <div class="mt-4 pt-3 border-top">
-            <p class="mb-0 small text-muted">
-                New to the community?
-                <a href="register.php" class="text-decoration-none text-primary fw-bold">Create an account</a>
+        <div class="mt-4 pt-4 border-top" style="border-color: var(--slate-100) !important;">
+            <!-- Registration Link -->
+            <p class="mb-3 small text-muted">
+                New to the community? 
+                <a href="register.php" class="text-decoration-none text-primary fw-bold transition-all">Create an account</a>
             </p>
+
+            <!-- Home Link with Icon -->
+            <div class="d-flex justify-content-center mt-2">
+                <a href="/" class="btn-back-home">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18" />
+                    </svg>
+                    <span>Back to Homepage</span>
+                </a>
+            </div>
         </div>
     </div>
 </div>

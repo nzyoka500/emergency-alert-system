@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: localhost
--- Generation Time: Mar 12, 2026 at 07:57 AM
+-- Generation Time: Mar 15, 2026 at 07:50 PM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.2.12
 
@@ -35,6 +35,7 @@ CREATE TABLE `alerts` (
   `latitude` decimal(10,8) NOT NULL,
   `longitude` decimal(11,8) NOT NULL,
   `status` enum('pending','verified','broadcasted','resolved') DEFAULT 'pending',
+  `severity` enum('Low','Medium','High') DEFAULT 'Medium',
   `created_by` int(11) DEFAULT NULL,
   `created_at` timestamp NOT NULL DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
@@ -43,11 +44,15 @@ CREATE TABLE `alerts` (
 -- Dumping data for table `alerts`
 --
 
-INSERT INTO `alerts` (`id`, `alert_type_id`, `title`, `description`, `latitude`, `longitude`, `status`, `created_by`, `created_at`) VALUES
-(1, 1, 'Fire at market', 'Fire at market place', 57.00000000, 112.00000000, 'pending', 5, '2026-02-19 05:30:58'),
-(2, 3, 'Airport road accident', 'Coalition of several vehicles along Main land road to airport road, on the the Eastern bypass.', 57.80000000, 143.00000000, 'verified', 6, '2026-02-19 05:44:19'),
-(3, 1, 'Test data 2', 'This is a test alert to test the featire', 67.00000000, 112.00000000, 'resolved', 6, '2026-03-06 16:37:19'),
-(4, 2, 'Floods due to heavy rains', 'Most parts of the country has floods due to the rains, most affected areas are the regions on mountains', 12.88792500, 30.17099200, 'broadcasted', 6, '2026-03-12 06:06:49');
+INSERT INTO `alerts` (`id`, `alert_type_id`, `title`, `description`, `latitude`, `longitude`, `status`, `severity`, `created_by`, `created_at`) VALUES
+(15, 9, 'Industrial Fire - Westgate Warehouse', 'Massive smoke detected in the chemical storage section. Fire department is on-site. Potential hazmat risk.', -1.26460000, 36.80450000, 'verified', 'Medium', 6, '2026-03-12 11:16:56'),
+(16, 13, 'Multi-Vehicle Collision - Highway A1', 'Three-car pileup near the junction. 4 casualties reported. Emergency medical services and ambulances required immediately.', -1.28330000, 36.81670000, 'resolved', 'Medium', 5, '2026-03-12 11:21:13'),
+(17, 11, 'Armed Robbery - Downtown Bank', 'Silent alarm triggered. Three suspects seen entering the premises. Police units are cordoning off the area.', -1.28610000, 36.82190000, 'pending', 'Medium', 6, '2026-03-12 11:24:43'),
+(18, 12, 'Flash Flood Warning - River Basin Area', 'Heavy rainfall has caused the river to burst its banks. Residents in low-lying Zone B are advised to evacuate.', -1.30320000, 36.84110000, 'broadcasted', 'High', 6, '2026-03-12 11:26:04'),
+(19, 9, 'Residential Fire - Parkland Estate', 'Kitchen fire spread to the roof of a two-story building. All residents evacuated. Containment in progress.', -1.25890000, 36.81220000, 'verified', 'High', 6, '2026-03-12 11:28:22'),
+(20, 10, 'Test medical', 'This a medical test feature for the site', -12.45600000, 21.45600000, 'verified', 'Low', 5, '2026-03-12 12:05:14'),
+(21, 9, 'Demo', 'Demo description', -12.40000000, 24.00000000, 'pending', 'Low', 6, '2026-03-14 14:11:46'),
+(22, 10, 'Test title', 'This a test description of the form input', -12.21450000, 23.98000000, 'pending', 'Low', 12, '2026-03-15 14:45:14');
 
 -- --------------------------------------------------------
 
@@ -82,7 +87,9 @@ CREATE TABLE `alert_responses` (
 --
 
 INSERT INTO `alert_responses` (`id`, `alert_id`, `responder_id`, `note`, `status`, `responded_at`) VALUES
-(1, 1, 5, 'Arrived 10 minutes after alert was created, and 10 people where affected with minor burns, 50 shops burned, no deaths records', 'completed', '2026-02-19 05:49:39');
+(2, 16, 5, 'On site checking situation', 'in_progress', '2026-03-12 12:09:39'),
+(3, 20, 5, 'More CRP specialist needed on site, and please create roads', 'in_progress', '2026-03-14 11:18:48'),
+(4, 19, 12, 'More water can, mobile clinics and more health persons needed on site to assist.', 'accepted', '2026-03-14 13:38:04');
 
 -- --------------------------------------------------------
 
@@ -102,10 +109,11 @@ CREATE TABLE `alert_types` (
 --
 
 INSERT INTO `alert_types` (`id`, `name`, `description`, `created_at`) VALUES
-(1, 'Fire', 'Fire outbreak', '2026-02-11 09:56:59'),
-(2, 'Flood', 'Flood disaster', '2026-02-11 09:56:59'),
-(3, 'Accident', 'Road accident', '2026-02-11 09:56:59'),
-(4, 'Security Threat', 'Man-made disaster', '2026-02-11 09:56:59');
+(9, 'Fire', 'Fire emergency and smoke sightings', '2026-03-12 07:12:37'),
+(10, 'Medical', 'Medical emergencies requiring ambulance', '2026-03-12 07:12:37'),
+(11, 'Crime', 'Theft, assault, or suspicious activity', '2026-03-12 07:12:37'),
+(12, 'Natural Disaster', 'Floods, earthquakes, or storms', '2026-03-12 07:12:37'),
+(13, 'Accidents', 'Road accidents caused by vehicles, people ', '2026-03-12 11:19:24');
 
 -- --------------------------------------------------------
 
@@ -177,7 +185,10 @@ CREATE TABLE `system_logs` (
 
 INSERT INTO `system_logs` (`id`, `user_id`, `action`, `created_at`) VALUES
 (1, 5, 'Responder responded to alert #1 (Fire): accepted', '2026-02-19 05:47:23'),
-(2, 5, 'Responder responded to alert #1 (Fire): completed', '2026-02-19 05:49:39');
+(2, 5, 'Responder responded to alert #1 (Fire): completed', '2026-02-19 05:49:39'),
+(3, 5, 'Responder responded to alert #16 (Accidents): in_progress', '2026-03-12 12:09:39'),
+(4, 5, 'Responder responded to alert #20 (Medical): in_progress', '2026-03-14 11:18:49'),
+(5, 12, 'Responder responded to alert #19 (Fire): accepted', '2026-03-14 13:38:04');
 
 -- --------------------------------------------------------
 
@@ -191,6 +202,7 @@ CREATE TABLE `users` (
   `email` varchar(100) NOT NULL,
   `phone` varchar(20) DEFAULT NULL,
   `password` varchar(255) NOT NULL,
+  `api_token` varchar(255) DEFAULT NULL,
   `role_id` int(11) NOT NULL,
   `status` enum('active','inactive') DEFAULT 'active',
   `created_at` timestamp NOT NULL DEFAULT current_timestamp()
@@ -200,14 +212,15 @@ CREATE TABLE `users` (
 -- Dumping data for table `users`
 --
 
-INSERT INTO `users` (`id`, `full_name`, `email`, `phone`, `password`, `role_id`, `status`, `created_at`) VALUES
-(5, 'Demo Account', 'demo@test.com', '123456789', '$2y$12$uxlGHXe9RVFOvXDcUyr87OqVPsgryzrZgiMmf2WvCV910temcz/5O', 2, 'active', '2026-02-12 08:08:36'),
-(6, 'Admin Tesst', 'admin@test.com', '0712345678', '$2y$12$0L3PG6SyTr9LoJd64mSP5.ZTeSmgahThVFLvZT7u3Aci2ss46RKkq', 1, 'active', '2026-02-16 16:28:57'),
-(7, 'Phrah Amend', 'hamed@gmail.com', '9114567890', '$2y$12$3wtCP3JjYretdDL1oRPAiudMbcE4CRQekUeqFLvRToDlbbzXmW4tq', 3, 'active', '2026-03-07 05:06:01'),
-(8, 'Red Cross Angels', 'red@cress.ems', '8112873', '$2y$12$5bkoLggR0Ru.b2vNc5esJuF0bqTPy3p5vOgDgO.iCy7sNDC1KXDG6', 2, 'active', '2026-03-07 05:12:54'),
-(9, 'Test Account', 'test@mail.com', '9114567890', '$2y$12$pmTmnwhgoi4CGTu6ys2cze/bJhVcqQ5YEYJaXIhtnqgK0oPKg2KdO', 3, 'active', '2026-03-09 13:22:55'),
-(10, 'Bola Tinubu', 'tinubu@mail.com', '12131323', '$2y$12$lUZ4WvRp01/aGiNbKPgcAO0TcV310CB3K6max285NM0IrNWAWV/mi', 2, 'active', '2026-03-09 13:30:52'),
-(11, 'Kenya One', 'kenyaone@mail.com', '9114567890', '$2y$12$nR87NXvMjx0xjPKsIXKhe.pb3oIjiOVXCGM7eIVwI2e6kJcyQLVg.', 2, 'active', '2026-03-09 13:44:53');
+INSERT INTO `users` (`id`, `full_name`, `email`, `phone`, `password`, `api_token`, `role_id`, `status`, `created_at`) VALUES
+(5, 'Mark Taly', 'demo@test.com', '123456789', '$2y$12$uxlGHXe9RVFOvXDcUyr87OqVPsgryzrZgiMmf2WvCV910temcz/5O', NULL, 2, 'active', '2026-02-12 08:08:36'),
+(6, 'Luka K. Mahlly', 'admin@test.com', '0712345678', '$2y$12$0L3PG6SyTr9LoJd64mSP5.ZTeSmgahThVFLvZT7u3Aci2ss46RKkq', NULL, 1, 'active', '2026-02-16 16:28:57'),
+(7, 'Phrah Amend', 'hamed@gmail.com', '9114567890', '$2y$12$3wtCP3JjYretdDL1oRPAiudMbcE4CRQekUeqFLvRToDlbbzXmW4tq', NULL, 3, 'active', '2026-03-07 05:06:01'),
+(8, 'Red Cross Angels', 'red@cress.ems', '8112873', '$2y$12$5bkoLggR0Ru.b2vNc5esJuF0bqTPy3p5vOgDgO.iCy7sNDC1KXDG6', NULL, 2, 'active', '2026-03-07 05:12:54'),
+(10, 'Bola Tinubu', 'tinubu@mail.com', '12131323', '$2y$12$lUZ4WvRp01/aGiNbKPgcAO0TcV310CB3K6max285NM0IrNWAWV/mi', NULL, 2, 'active', '2026-03-09 13:30:52'),
+(11, 'Kenya One', 'kenyaone@mail.com', '9114567890', '$2y$12$nR87NXvMjx0xjPKsIXKhe.pb3oIjiOVXCGM7eIVwI2e6kJcyQLVg.', NULL, 2, 'active', '2026-03-09 13:44:53'),
+(12, 'Kioko Musau', 'musau@responda.com', '0712345678', '$2y$12$OF9kaYUo3mtrVQW3E67lmueLUsJs60SPXC/.mB1vbPIkOx0eEi0QW', NULL, 2, 'active', '2026-03-14 13:36:12'),
+(13, 'Mohamed Hussen', 'hussen@gmail.com', '0712345678', '$2y$12$5NmtVwNidu.7z9JP/l4KrOJRKhqMAA7aoQbv3LTsCiwca2LYJ2wJ.', NULL, 2, 'active', '2026-03-15 14:51:55');
 
 --
 -- Indexes for dumped tables
@@ -278,6 +291,7 @@ ALTER TABLE `system_logs`
 ALTER TABLE `users`
   ADD PRIMARY KEY (`id`),
   ADD UNIQUE KEY `email` (`email`),
+  ADD UNIQUE KEY `api_token` (`api_token`),
   ADD KEY `role_id` (`role_id`);
 
 --
@@ -288,7 +302,7 @@ ALTER TABLE `users`
 -- AUTO_INCREMENT for table `alerts`
 --
 ALTER TABLE `alerts`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=24;
 
 --
 -- AUTO_INCREMENT for table `alert_broadcasts`
@@ -300,13 +314,13 @@ ALTER TABLE `alert_broadcasts`
 -- AUTO_INCREMENT for table `alert_responses`
 --
 ALTER TABLE `alert_responses`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
 
 --
 -- AUTO_INCREMENT for table `alert_types`
 --
 ALTER TABLE `alert_types`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=14;
 
 --
 -- AUTO_INCREMENT for table `api_tokens`
@@ -330,13 +344,13 @@ ALTER TABLE `roles`
 -- AUTO_INCREMENT for table `system_logs`
 --
 ALTER TABLE `system_logs`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
 
 --
 -- AUTO_INCREMENT for table `users`
 --
 ALTER TABLE `users`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=12;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=14;
 
 --
 -- Constraints for dumped tables
