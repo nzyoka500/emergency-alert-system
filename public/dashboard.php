@@ -126,23 +126,23 @@ include __DIR__ . '/../includes/header.php';
                         <?php if ($_SESSION['role_id'] == 1): ?>
                             <!-- Notification Bell -->
                             <div class="dropdown me-3">
-                                <button class="btn btn-danger border shadow-sm position-relative rounded-circle p-0 d-flex align-items-center justify-content-center" 
-                                        type="button" id="notifBell" data-bs-toggle="dropdown" aria-expanded="false" 
-                                        style="width: 50px; height: 50px; transition: all 0.2s ease;">
-                                    
+                                <button class="btn btn-danger border shadow-sm position-relative rounded-circle p-0 d-flex align-items-center justify-content-center"
+                                    type="button" id="notifBell" data-bs-toggle="dropdown" aria-expanded="false"
+                                    style="width: 50px; height: 50px; transition: all 0.2s ease;">
+
                                     <!-- Updated SVG: Heroicon Bell with explicit Indigo color -->
                                     <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" fill="none" viewBox="0 0 24 24" stroke="#4f46e5" stroke-width="2">
                                         <path stroke-linecap="round" stroke-linejoin="round" d="M14.857 17.082a23.848 23.848 0 005.454-1.31A8.967 8.967 0 0118 9.75V9A6 6 0 006 9v.75a8.967 8.967 0 01-2.312 6.022c1.733.64 3.56 1.085 5.455 1.31m5.714 0a24.255 24.255 0 01-5.714 0m5.714 0a3 3 0 11-5.714 0" />
                                     </svg>
 
                                     <!-- Count Badge -->
-                                    <span id="pendingCountBadge" class="position-absolute badge rounded-pill bg-danger d-none border border-white" 
+                                    <span id="pendingCountBadge" class="position-absolute badge rounded-pill bg-danger d-none border border-white"
                                         style="top: 2px; right: -2px; font-size: 0.6rem; padding: 0.35em 0.5em;">
                                         0
                                     </span>
                                 </button>
-                                
-                                <ul class="dropdown-menu dropdown-menu-end shadow-lg border-0 py-0 overflow-hidden" 
+
+                                <ul class="dropdown-menu dropdown-menu-end shadow-lg border-0 py-0 overflow-hidden"
                                     style="width: 320px; border-radius: 12px; margin-top: 10px;">
                                     <li class="p-3 border-bottom bg-light">
                                         <div class="d-flex justify-content-between align-items-center">
@@ -399,72 +399,112 @@ include __DIR__ . '/../includes/header.php';
     }
     setInterval(updateStats, 10000); // 10 seconds
 
-    // 
-    // Variable to track the highest Alert ID seen so far to avoid duplicate notifications
-    let lastNotifiedAlertId = 0;
+    let lastNotifiedId = 0;
 
-    // Function to play emergency notification sound
-    function playNotificationSound() {
-        const audio = new Audio('assets/sounds/notification.mp3');
-        audio.play().catch(e => console.log("Audio play blocked by browser. Interaction required."));
-    }
+    async function checkNotifications() {
+        // Determine the correct path to the API
+        // If you are in /public/dashboard.php, the API is at ../api/
+        const apiPath = '../api/check-pending.php';
 
-    function checkPendingAlerts() {
-        // Only run if the user is an Admin (Role ID 1)
-        if (<?php echo $_SESSION['role_id']; ?> !== 1) return;
+        try {
+            const response = await fetch(`${apiPath}?last_id=${lastNotifiedId}`);
+            const data = await response.json();
 
-        fetch(`../api/check-pending.php?last_id=${lastNotifiedAlertId}`)
-            .then(res => res.json())
-            .then(data => {
-                if (data.success && data.count > 0) {
+            if (!data.success) {
+                console.error("API Error:", data.message);
+                return;
+            }
 
-                    // Update the last ID seen
-                    lastNotifiedAlertId = data.alerts[0].id;
+            console.log(`Polling... Total Pending: ${data.total_count}`);
 
-                    data.alerts.forEach(alert => {
-                        // Trigger SweetAlert Toast
-                        const Toast = Swal.mixin({
-                            toast: true,
-                            position: 'top-end',
-                            showConfirmButton: false,
-                            timer: 5000,
-                            timerProgressBar: true,
-                            didOpen: (toast) => {
-                                toast.addEventListener('mouseenter', Swal.stopTimer)
-                                toast.addEventListener('mouseleave', Swal.resumeTimer)
-                            }
-                        });
-
-                        Toast.fire({
-                            icon: 'warning',
-                            title: 'New Verification Required',
-                            text: `${alert.type}: ${alert.title} (by ${alert.responder})`
-                        });
-
-                        // Play Sound
-                        playNotificationSound();
-
-                        // Optional: Refresh the "Recent Alerts" list or Stats automatically
-                        if (typeof loadDashboardStats === 'function') loadDashboardStats();
-                    });
+            // 1. Update the Bell Badge
+            const badge = document.getElementById('pendingCountBadge');
+            if (badge) {
+                if (data.total_count > 0) {
+                    badge.innerText = data.total_count;
+                    badge.classList.remove('d-none');
+                } else {
+                    badge.classList.add('d-none');
                 }
-            })
-            .catch(err => console.error("Notification Error:", err));
+            }
+
+            // 2. Update the Dropdown List
+            updateBellDropdown(data.all_pending);
+
+            // 3. Trigger Toasts for BRAND NEW alerts
+            if (lastNotifiedId !== 0 && data.new_alerts.length > 0) {
+                data.new_alerts.forEach(alert => {
+                    showNotificationToast(alert);
+                });
+            }
+
+            // 4. Update our tracker to the highest ID found
+            if (data.all_pending.length > 0) {
+                lastNotifiedId = data.all_pending[0].id;
+            } else if (lastNotifiedId === 0) {
+                // If it's the first run and nothing is pending, 
+                // set it to a dummy value so the next one triggers a toast
+                lastNotifiedId = 1;
+            }
+
+        } catch (err) {
+            console.error("Fetch failed. Check if api/check-pending.php exists.", err);
+        }
     }
 
-    // Check every 10 seconds
-    setInterval(checkPendingAlerts, 10000);
+    function updateBellDropdown(alerts) {
+        const list = document.getElementById('pendingNotifList');
+        if (!list) return;
 
-    // Run once on load to establish current max ID
+        if (alerts.length === 0) {
+            list.innerHTML = '<li class="p-4 text-center text-muted small">No pending verifications</li>';
+            return;
+        }
+
+        let html = '';
+        alerts.forEach(alert => {
+            const sevColor = alert.severity === 'High' ? 'text-danger' : 'text-warning';
+            html += `
+        <li class="dropdown-item p-3 border-bottom d-flex align-items-start" style="white-space: normal; cursor: pointer;" onclick="location.href='alerts.php?filter=pending'">
+            <div class="bg-light p-2 rounded-3 me-3">
+                <svg class="text-primary" width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M12 9v3.75m9-.75a9 9 0 1 1-18 0 9 9 0 0 1 18 0Zm-9 3.75h.008v.008H12v-.008Z" /></svg>
+            </div>
+            <div class="flex-grow-1">
+                <div class="fw-bold small text-dark">${alert.title}</div>
+                <div class="text-muted" style="font-size: 0.7rem;">
+                    <span class="${sevColor} fw-bold">● ${alert.severity}</span> • ${alert.responder}
+                </div>
+            </div>
+        </li>`;
+        });
+        list.innerHTML = html;
+    }
+
+    function showNotificationToast(alert) {
+        Swal.fire({
+            toast: true,
+            position: 'top-end',
+            icon: 'warning',
+            title: 'New Verification Alert',
+            text: alert.title,
+            showConfirmButton: false,
+            timer: 8000,
+            timerProgressBar: true
+        });
+
+        // Play sound
+        const audio = new Audio('../assets/sounds/notification.mp3');
+        audio.play().catch(() => console.log("Sound blocked until user clicks page."));
+    }
+
+    // Start polling immediately, then every 10 seconds
     document.addEventListener('DOMContentLoaded', () => {
-        // Initialize lastNotifiedAlertId with current highest ID in the DB
-        // so we don't notify for old alerts on every refresh
-        fetch(`../api/check-pending.php?last_id=0`)
-            .then(res => res.json())
-            .then(data => {
-                if (data.alerts.length > 0) lastNotifiedAlertId = data.alerts[0].id;
-            });
+        checkNotifications();
+        setInterval(checkNotifications, 10000);
     });
+
+
+    
 </script>
 
 <?php
