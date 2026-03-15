@@ -159,7 +159,7 @@ include '../includes/header.php';
     <div class="container">
         <!-- 1. Left: Brand -->
         <a class="navbar-brand d-flex align-items-center fw-bold text-dark" href="/">
-            <img src="assets/images/logo-white.png" style="width: 38px; height: 38px; border-radius: 50%; background: var(--primary); padding: 6px; margin-right: 12px;" alt="Responda Logo">
+            <img src="assets/images/logo-white.png" style="width: 38px; height: 38px; border-radius: 50%; padding: 6px; margin-right: 12px;" alt="Responda Logo">
             <span style="letter-spacing: -0.5px; font-size: 1.25rem;">Responda</span>
         </a>
 
