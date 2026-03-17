@@ -172,7 +172,7 @@ include '../includes/header.php';
         <div class="collapse navbar-collapse" id="mainNav">
             <ul class="navbar-nav mx-auto mb-2 mb-lg-0">
                 <li class="nav-item"><a class="nav-link" href="#features">Solution</a></li>
-                <li class="nav-item"><a class="nav-link" href="#technology">Technology</a></li>
+                <!-- <li class="nav-item"><a class="nav-link" href="#technology">Technology</a></li> -->
                 <li class="nav-item"><a class="nav-link" href="#community">Community</a></li>
             </ul>
 
@@ -283,17 +283,17 @@ include '../includes/header.php';
 </section>
 
 <!-- Technology Section -->
-<section id="technology" class="section-padding bg-white">
+<!-- <section id="technology" class="section-padding bg-white">
     <div class="container">
         <div class="text-center mb-5 pb-lg-4">
             <h6 class="text-primary fw-bold text-uppercase" style="letter-spacing: 2px;">The Tech Stack</h6>
             <h2 class="display-5 fw-bold text-dark">Built for Scale & Security</h2>
             <p class="text-muted mx-auto" style="max-width: 600px;">Our infrastructure is engineered using industry-standard technologies to ensure sub-second latency and 99.9% availability during critical emergencies.</p>
-        </div>
+        </div> -->
 
-        <div class="row g-4 pt-4">
+        <!-- <div class="row g-4 pt-4"> -->
             <!-- PHP Backend -->
-            <div class="col-lg-3 col-md-6">
+            <!-- <div class="col-lg-3 col-md-6">
                 <div class="feature-card border-slate-100 shadow-hover text-center">
                     <div class="bg-light rounded-circle mx-auto d-flex align-items-center justify-content-center mb-4" style="width: 80px; height: 80px;">
                         <img src="assets/tech/php.png" alt="PHP" style="width: 40px; height: auto;" onerror="this.src='https://cdn.jsdelivr.net/gh/devicons/devicon/icons/php/php-original.svg'">
@@ -301,10 +301,10 @@ include '../includes/header.php';
                     <h5 class="fw-bold">Enterprise</h5>
                     <p class="text-muted small">Robust server-side logic handling real-time incident routing and secure data processing.</p>
                 </div>
-            </div>
+            </div> -->
 
             <!-- React UI -->
-            <div class="col-lg-3 col-md-6">
+            <!-- <div class="col-lg-3 col-md-6">
                 <div class="feature-card border-slate-100 shadow-hover text-center">
                     <div class="bg-light rounded-circle mx-auto d-flex align-items-center justify-content-center mb-4" style="width: 80px; height: 80px;">
                         <img src="assets/tech/react.png" alt="React" style="width: 40px; height: auto;" onerror="this.src='https://cdn.jsdelivr.net/gh/devicons/devicon/icons/react/react-original.svg'">
@@ -312,10 +312,10 @@ include '../includes/header.php';
                     <h5 class="fw-bold">Clean UI</h5>
                     <p class="text-muted small">A lightning-fast, state-driven interface designed for high-pressure emergency dispatch environments.</p>
                 </div>
-            </div>
+            </div> -->
 
             <!-- MySQL -->
-            <div class="col-lg-3 col-md-6">
+            <!-- <div class="col-lg-3 col-md-6">
                 <div class="feature-card border-slate-100 shadow-hover text-center">
                     <div class="bg-light rounded-circle mx-auto d-flex align-items-center justify-content-center mb-4" style="width: 80px; height: 80px;">
                         <img src="assets/tech/my-sql.png" alt="MySQL" style="width: 40px; height: auto;" onerror="this.src='https://cdn.jsdelivr.net/gh/devicons/devicon/icons/mysql/mysql-original.svg'">
@@ -323,10 +323,10 @@ include '../includes/header.php';
                     <h5 class="fw-bold">Secure Storage</h5>
                     <p class="text-muted small">ACID-compliant relational database ensuring 100% data integrity for every emergency log.</p>
                 </div>
-            </div>
+            </div> -->
 
             <!-- Docker -->
-            <div class="col-lg-3 col-md-6">
+            <!-- <div class="col-lg-3 col-md-6">
                 <div class="feature-card border-slate-100 shadow-hover text-center">
                     <div class="bg-light rounded-circle mx-auto d-flex align-items-center justify-content-center mb-4" style="width: 80px; height: 80px;">
                         <img src="assets/tech/docker.png" alt="Docker" style="width: 40px; height: auto;" onerror="this.src='https://cdn.jsdelivr.net/gh/devicons/devicon/icons/docker/docker-original.svg'">
@@ -337,7 +337,7 @@ include '../includes/header.php';
             </div>
         </div>
     </div>
-</section>
+</section> -->
 
 <!-- Community Section -->
 <section id="community" class="section-padding bg-slate-50">
