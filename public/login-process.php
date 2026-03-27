@@ -24,9 +24,8 @@ require_once __DIR__ . '/../includes/config.php';
 try {
 	$pdo = getPDO();
 
-	// Allow users to login using email, full_name, or phone
-	// Use positional placeholders to avoid driver issues with repeated named parameters
-	$stmt = $pdo->prepare('SELECT id, full_name, email, phone, password, role_id, status FROM users WHERE email = ? OR full_name = ? OR phone = ? LIMIT 1');
+	// UPDATED: Table and Column names to match New Convention (Users_ prefix and Title Case table)
+	$stmt = $pdo->prepare('SELECT Users_id, Users_full_name, Users_email, Users_phone, Users_password, Users_Roles_id, Users_status FROM Users WHERE Users_email = ? OR Users_full_name = ? OR Users_phone = ? LIMIT 1');
 	$stmt->execute([$username, $username, $username]);
 	$user = $stmt->fetch();
 
@@ -44,8 +43,8 @@ try {
 		exit;
 	}
 
-	// If we have a user, enforce active status first
-	if (isset($user['status']) && $user['status'] !== 'active') {
+	// UPDATED: If we have a user, enforce active status first (Users_status)
+	if (isset($user['Users_status']) && $user['Users_status'] !== 'active') {
 		$_SESSION['error'] = 'Account is not active. Please contact administrator.';
 		header('Location: index.php');
 		exit;
@@ -53,33 +52,33 @@ try {
 
 	// At this point we have a user
 	// For debugging: temporarily store whether stored password looks hashed
-	$stored = $user['password'] ?? '';
+	$stored = $user['Users_password'] ?? '';
 	$looks_hashed = (strpos($stored, '$2y$') === 0 || strpos($stored, '$2a$') === 0 || strpos($stored, '$argon2') === 0);
 
 	// Continue to password checks
 
 	if ($user) {
-		// Assume passwords are hashed with password_hash(). Use password_verify().
-		if (!empty($user['password']) && password_verify($password, $user['password'])) {
+		// UPDATED: Accessing password via Users_password
+		if (!empty($user['Users_password']) && password_verify($password, $user['Users_password'])) {
 			session_regenerate_id(true);
-			$_SESSION['user_id'] = $user['id'];
-			$_SESSION['username'] = $user['full_name'] ?? $user['email'];
-			$_SESSION['email'] = $user['email'];
-			$_SESSION['role_id'] = $user['role_id'];
-			$_SESSION['status'] = $user['status'];
+			$_SESSION['user_id'] = $user['Users_id'];
+			$_SESSION['username'] = $user['Users_full_name'] ?? $user['Users_email'];
+			$_SESSION['email'] = $user['Users_email'];
+			$_SESSION['role_id'] = $user['Users_Roles_id'];
+			$_SESSION['status'] = $user['Users_status'];
 			$_SESSION['logged_in'] = true;
 			header('Location: dashboard.php');
 			exit;
 		}
 
-		// Fallback (only if your DB stores plain text passwords) - NOT recommended.
-		if ($password === $user['password']) {
+		// Fallback (only if your DB stores plain text passwords)
+		if ($password === $user['Users_password']) {
 			session_regenerate_id(true);
-			$_SESSION['user_id'] = $user['id'];
-			$_SESSION['username'] = $user['full_name'] ?? $user['email'];
-			$_SESSION['email'] = $user['email'];
-			$_SESSION['role_id'] = $user['role_id'];
-			$_SESSION['status'] = $user['status'];
+			$_SESSION['user_id'] = $user['Users_id'];
+			$_SESSION['username'] = $user['Users_full_name'] ?? $user['Users_email'];
+			$_SESSION['email'] = $user['Users_email'];
+			$_SESSION['role_id'] = $user['Users_Roles_id'];
+			$_SESSION['status'] = $user['Users_status'];
 			$_SESSION['logged_in'] = true;
 			header('Location: dashboard.php');
 			exit;
@@ -87,11 +86,10 @@ try {
 	}
 
 	// If we reach here, password verification failed
-	// Log debug info about the failed auth attempt (mask sensitive parts)
-	$stored = $user['password'] ?? '';
+	$stored = $user['Users_password'] ?? '';
 	$stored_preview = substr($stored, 0, 10); // preview only
 	$pv = password_verify($password, $stored) ? 'true' : 'false';
-	error_log(sprintf('Login failed: identifier="%s", user_id=%s, password_verify=%s, stored_preview=%s', $username, $user['id'], $pv, $stored_preview));
+	error_log(sprintf('Login failed: identifier="%s", user_id=%s, password_verify=%s, stored_preview=%s', $username, $user['Users_id'], $pv, $stored_preview));
 
 	// Friendly message for users
 	$_SESSION['error'] = 'Incorrect password. Please try again.';
