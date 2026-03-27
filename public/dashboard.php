@@ -42,13 +42,14 @@ try {
 
     if ($role_id == 1) {
         // ADMIN DATA
+        // UPDATED: Table 'Alerts', Column 'Alerts_status'
         $stmt = $pdo->query("
             SELECT
-            SUM(status='pending') as pending,
-            SUM(status='verified') as verified,
-            SUM(status='broadcasted') as broadcasted,
-            SUM(status='resolved') as resolved
-            FROM alerts
+            SUM(Alerts_status='pending') as pending,
+            SUM(Alerts_status='verified') as verified,
+            SUM(Alerts_status='broadcasted') as broadcasted,
+            SUM(Alerts_status='resolved') as resolved
+            FROM Alerts
         ");
         $row = $stmt->fetch();
         $stats['active_alerts'] = (int)$row['pending'] + (int)$row['verified'] + (int)$row['broadcasted'];
@@ -56,40 +57,46 @@ try {
         $stats['verified_alerts'] = (int)$row['verified'];
         $stats['resolved_alerts'] = (int)$row['resolved'];
 
-        $userStats = $pdo->query("SELECT COUNT(*) as total, SUM(status='active') as active FROM users")->fetch();
+        // UPDATED: Table 'Users', Column 'Users_status'
+        $userStats = $pdo->query("SELECT COUNT(*) as total, SUM(Users_status='active') as active FROM Users")->fetch();
         $stats['total_users'] = $userStats['total'];
         $stats['active_users'] = $userStats['active'];
 
-        $stats['total_responses'] = $pdo->query("SELECT COUNT(*) FROM alert_responses")->fetchColumn();
+        // UPDATED: Table 'AlertResponses'
+        $stats['total_responses'] = $pdo->query("SELECT COUNT(*) FROM AlertResponses")->fetchColumn();
 
+        // UPDATED: Column prefixes and Title Case tables
         $stmt = $pdo->query("
-            SELECT a.id, a.title, a.status, a.created_at, at.name as alert_type, u.full_name as creator
-            FROM alerts a 
-            LEFT JOIN alert_types at ON a.alert_type_id = at.id
-            LEFT JOIN users u ON a.created_by = u.id
-            ORDER BY a.created_at DESC LIMIT 6
+            SELECT a.Alerts_id, a.Alerts_title, a.Alerts_status, a.Alerts_created_at, at.AlertTypes_name as alert_type, u.Users_full_name as creator
+            FROM Alerts a 
+            LEFT JOIN AlertTypes at ON a.Alerts_AlertTypes_id = at.AlertTypes_id
+            LEFT JOIN Users u ON a.Alerts_Users_id = u.Users_id
+            ORDER BY a.Alerts_created_at DESC LIMIT 6
         ");
         $recent_alerts = $stmt->fetchAll();
     } else {
         // RESPONDER DATA
-        $stats['personal_responses'] = $pdo->query("SELECT COUNT(*) FROM alert_responses WHERE responder_id = $user_id")->fetchColumn();
-        $stats['pending_responses'] = $pdo->query("SELECT COUNT(*) FROM alert_responses WHERE responder_id = $user_id AND status = 'pending'")->fetchColumn();
-        $stats['active_alerts'] = $pdo->query("SELECT COUNT(*) FROM alerts WHERE status IN ('pending', 'verified')")->fetchColumn();
+        // UPDATED: AlertResponses table, AlertResponses_Users_id column
+        $stats['personal_responses'] = $pdo->query("SELECT COUNT(*) FROM AlertResponses WHERE AlertResponses_Users_id = $user_id")->fetchColumn();
+        $stats['pending_responses'] = $pdo->query("SELECT COUNT(*) FROM AlertResponses WHERE AlertResponses_Users_id = $user_id AND AlertResponses_status = 'pending'")->fetchColumn();
+        $stats['active_alerts'] = $pdo->query("SELECT COUNT(*) FROM Alerts WHERE Alerts_status IN ('pending', 'verified')")->fetchColumn();
 
+        // UPDATED: Joins and column prefixes
         $stmt = $pdo->query("
-            SELECT a.id, a.title, a.status, a.created_at, at.name as alert_type
-            FROM alerts a 
-            LEFT JOIN alert_types at ON a.alert_type_id = at.id
-            WHERE a.status IN ('pending', 'verified')
-            ORDER BY a.created_at DESC LIMIT 6
+            SELECT a.Alerts_id, a.Alerts_title, a.Alerts_status, a.Alerts_created_at, at.AlertTypes_name as alert_type
+            FROM Alerts a 
+            LEFT JOIN AlertTypes at ON a.Alerts_AlertTypes_id = at.AlertTypes_id
+            WHERE a.Alerts_status IN ('pending', 'verified')
+            ORDER BY a.Alerts_created_at DESC LIMIT 6
         ");
         $recent_alerts = $stmt->fetchAll();
     }
 
     // Breakdown for Charts
-    $stmt = $pdo->query("SELECT status, COUNT(*) as count FROM alerts GROUP BY status");
+    // UPDATED: Column 'Alerts_status', Table 'Alerts'
+    $stmt = $pdo->query("SELECT Alerts_status, COUNT(*) as count FROM Alerts GROUP BY Alerts_status");
     while ($row = $stmt->fetch()) {
-        if (isset($status_breakdown[$row['status']])) $status_breakdown[$row['status']] = (int)$row['count'];
+        if (isset($status_breakdown[$row['Alerts_status']])) $status_breakdown[$row['Alerts_status']] = (int)$row['count'];
     }
 } catch (Exception $e) {
     error_log($e->getMessage());
@@ -103,13 +110,9 @@ include __DIR__ . '/../includes/header.php';
         <!-- Sidebar -->
         <?php include __DIR__ . '/../includes/sidebar.php'; ?>
 
-
-
         <!-- Main Content -->
         <main class="col-lg-10 bg-light min-vh-100">
             <div class="p-4 p-lg-5">
-
-
 
                 <!-- Top Header Bar -->
                 <div class="d-flex justify-content-between align-items-center mb-5">
@@ -124,18 +127,15 @@ include __DIR__ . '/../includes/header.php';
 
                         <!-- 1. Notification Bell (Admin Only) -->
                         <?php if ($_SESSION['role_id'] == 1): ?>
-                            <!-- Notification Bell -->
                             <div class="dropdown me-3">
                                 <button class="btn btn-danger border shadow-sm position-relative rounded-circle p-0 d-flex align-items-center justify-content-center"
                                     type="button" id="notifBell" data-bs-toggle="dropdown" aria-expanded="false"
                                     style="width: 50px; height: 50px; transition: all 0.2s ease;">
 
-                                    <!-- Updated SVG: Heroicon Bell with explicit Indigo color -->
                                     <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" fill="none" viewBox="0 0 24 24" stroke="#4f46e5" stroke-width="2">
                                         <path stroke-linecap="round" stroke-linejoin="round" d="M14.857 17.082a23.848 23.848 0 005.454-1.31A8.967 8.967 0 0118 9.75V9A6 6 0 006 9v.75a8.967 8.967 0 01-2.312 6.022c1.733.64 3.56 1.085 5.455 1.31m5.714 0a24.255 24.255 0 01-5.714 0m5.714 0a3 3 0 11-5.714 0" />
                                     </svg>
 
-                                    <!-- Count Badge -->
                                     <span id="pendingCountBadge" class="position-absolute badge rounded-pill bg-danger d-none border border-white"
                                         style="top: 2px; right: -2px; font-size: 0.6rem; padding: 0.35em 0.5em;">
                                         0
@@ -151,7 +151,6 @@ include __DIR__ . '/../includes/header.php';
                                         </div>
                                     </li>
                                     <div id="pendingNotifList" style="max-height: 350px; overflow-y: auto;">
-                                        <!-- Pending items injected via JS -->
                                         <li class="p-4 text-center text-muted small">No pending verifications</li>
                                     </div>
                                     <li class="p-2 border-top text-center bg-slate-50">
@@ -161,15 +160,13 @@ include __DIR__ . '/../includes/header.php';
                             </div>
                         <?php endif; ?>
 
-                        <!-- 2. The User Profile Card (Moved to Top Right) -->
+                        <!-- 2. The User Profile Card -->
                         <div class="bg-white border rounded-3 p-2 shadow-sm" style="min-width: 200px;">
                             <div class="d-flex align-items-center">
-                                <!-- Initial Circle -->
                                 <div class="rounded-circle d-flex align-items-center justify-content-center text-white fw-bold shadow-sm"
                                     style="width: 36px; height: 36px; font-size: 0.85rem; background: var(--primary); flex-shrink: 0;">
                                     <?php echo strtoupper(substr($_SESSION['username'] ?? 'U', 0, 1)); ?>
                                 </div>
-                                <!-- Name and Role -->
                                 <div class="ms-3 overflow-hidden">
                                     <p class="mb-0 text-truncate fw-bold text-dark" style="font-size: 0.9rem; line-height: 1.2;">
                                         <?php echo htmlspecialchars($_SESSION['username'] ?? 'User'); ?>
@@ -180,14 +177,12 @@ include __DIR__ . '/../includes/header.php';
                                 </div>
                             </div>
                         </div>
-
                     </div>
                 </div>
 
                 <!-- Stats Grid -->
                 <div class="row g-4 mb-5">
                     <?php if ($role_id == 1): ?>
-                        <!-- Admin Stats -->
                         <div class="col-md-3">
                             <div class="card border-0 shadow-sm p-3">
                                 <div class="d-flex align-items-center">
@@ -249,7 +244,6 @@ include __DIR__ . '/../includes/header.php';
                             </div>
                         </div>
                     <?php else: ?>
-                        <!-- Responder Stats -->
                         <div class="col-md-4">
                             <div class="card border-0 shadow-sm p-4">
                                 <h3 class="fw-bold text-primary mb-1"><?= $stats['personal_responses'] ?></h3>
@@ -303,18 +297,22 @@ include __DIR__ . '/../includes/header.php';
                                         <div class="list-group-item border-0 px-4 py-3">
                                             <div class="d-flex justify-content-between align-items-center">
                                                 <div>
-                                                    <p class="mb-0 fw-bold" style="font-size: 0.9rem;"><?= htmlspecialchars($alert['title']) ?></p>
-                                                    <small class="text-muted"><?= htmlspecialchars($alert['alert_type']) ?> • <?= date('H:i', strtotime($alert['created_at'])) ?></small>
+                                                    <!-- UPDATED: Alerts_title -->
+                                                    <p class="mb-0 fw-bold" style="font-size: 0.9rem;"><?= htmlspecialchars($alert['Alerts_title']) ?></p>
+                                                    <!-- UPDATED: alert_type (Alias) and Alerts_created_at -->
+                                                    <small class="text-muted"><?= htmlspecialchars($alert['alert_type']) ?> • <?= date('H:i', strtotime($alert['Alerts_created_at'])) ?></small>
                                                 </div>
                                                 <?php
-                                                $statusClass = match ($alert['status']) {
+                                                // UPDATED: Alerts_status
+                                                $statusClass = match ($alert['Alerts_status']) {
                                                     'pending' => 'bg-warning-subtle text-warning',
                                                     'verified' => 'bg-info-subtle text-info',
                                                     'resolved' => 'bg-success-subtle text-success',
                                                     default => 'bg-secondary-subtle text-secondary'
                                                 };
                                                 ?>
-                                                <span class="badge <?= $statusClass ?>"><?= ucfirst($alert['status']) ?></span>
+                                                <!-- UPDATED: Alerts_status -->
+                                                <span class="badge <?= $statusClass ?>"><?= ucfirst($alert['Alerts_status']) ?></span>
                                             </div>
                                         </div>
                                     <?php endforeach; ?>
@@ -349,6 +347,10 @@ include __DIR__ . '/../includes/header.php';
         </main>
     </div>
 </div>
+
+
+
+
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
@@ -392,8 +394,9 @@ include __DIR__ . '/../includes/header.php';
             .then(res => res.json())
             .then(data => {
                 if (document.getElementById('stat-active')) {
-                    document.getElementById('stat-active').innerText = data.alerts;
-                    document.getElementById('stat-pending').innerText = data.pending;
+                    // UPDATED: Assuming API keys match new column naming (e.g. Alerts_count)
+                    document.getElementById('stat-active').innerText = data.active_alerts;
+                    document.getElementById('stat-pending').innerText = data.pending_alerts;
                 }
             });
     }
@@ -402,8 +405,6 @@ include __DIR__ . '/../includes/header.php';
     let lastNotifiedId = 0;
 
     async function checkNotifications() {
-        // Determine the correct path to the API
-        // If you are in /public/dashboard.php, the API is at ../api/
         const apiPath = '../api/check-pending.php';
 
         try {
@@ -439,11 +440,10 @@ include __DIR__ . '/../includes/header.php';
             }
 
             // 4. Update our tracker to the highest ID found
+            // UPDATED: Accessing Alerts_id instead of id
             if (data.all_pending.length > 0) {
-                lastNotifiedId = data.all_pending[0].id;
+                lastNotifiedId = data.all_pending[0].Alerts_id;
             } else if (lastNotifiedId === 0) {
-                // If it's the first run and nothing is pending, 
-                // set it to a dummy value so the next one triggers a toast
                 lastNotifiedId = 1;
             }
 
@@ -463,16 +463,17 @@ include __DIR__ . '/../includes/header.php';
 
         let html = '';
         alerts.forEach(alert => {
-            const sevColor = alert.severity === 'High' ? 'text-danger' : 'text-warning';
+            // UPDATED: Using Alerts_severity, Alerts_title, and Users_full_name
+            const sevColor = alert.Alerts_severity === 'High' ? 'text-danger' : 'text-warning';
             html += `
         <li class="dropdown-item p-3 border-bottom d-flex align-items-start" style="white-space: normal; cursor: pointer;" onclick="location.href='alerts.php?filter=pending'">
             <div class="bg-light p-2 rounded-3 me-3">
                 <svg class="text-primary" width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M12 9v3.75m9-.75a9 9 0 1 1-18 0 9 9 0 0 1 18 0Zm-9 3.75h.008v.008H12v-.008Z" /></svg>
             </div>
             <div class="flex-grow-1">
-                <div class="fw-bold small text-dark">${alert.title}</div>
+                <div class="fw-bold small text-dark">${alert.Alerts_title}</div>
                 <div class="text-muted" style="font-size: 0.7rem;">
-                    <span class="${sevColor} fw-bold">● ${alert.severity}</span> • ${alert.responder}
+                    <span class="${sevColor} fw-bold">● ${alert.Alerts_severity}</span> • ${alert.Users_full_name || 'System'}
                 </div>
             </div>
         </li>`;
@@ -486,7 +487,8 @@ include __DIR__ . '/../includes/header.php';
             position: 'top-end',
             icon: 'warning',
             title: 'New Verification Alert',
-            text: alert.title,
+            // UPDATED: Alerts_title
+            text: alert.Alerts_title,
             showConfirmButton: false,
             timer: 8000,
             timerProgressBar: true
@@ -502,9 +504,6 @@ include __DIR__ . '/../includes/header.php';
         checkNotifications();
         setInterval(checkNotifications, 10000);
     });
-
-
-    
 </script>
 
 <?php

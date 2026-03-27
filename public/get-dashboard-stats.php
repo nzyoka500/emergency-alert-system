@@ -7,17 +7,20 @@ try {
 
     $pdo = getPDO();
 
-    $alerts = $pdo->query("SELECT COUNT(*) FROM alerts")->fetchColumn();
+    // UPDATED: Table Name 'Alerts'
+    $alerts = $pdo->query("SELECT COUNT(*) FROM Alerts")->fetchColumn();
 
-    $pending = $pdo->query("SELECT COUNT(*) FROM alerts WHERE status='pending'")->fetchColumn();
+    // UPDATED: Column 'Alerts_status'
+    $pending = $pdo->query("SELECT COUNT(*) FROM Alerts WHERE Alerts_status='pending'")->fetchColumn();
 
-    $verified = $pdo->query("SELECT COUNT(*) FROM alerts WHERE status='verified'")->fetchColumn();
+    $verified = $pdo->query("SELECT COUNT(*) FROM Alerts WHERE Alerts_status='verified'")->fetchColumn();
 
-    $resolved = $pdo->query("SELECT COUNT(*) FROM alerts WHERE status='resolved'")->fetchColumn();
+    $resolved = $pdo->query("SELECT COUNT(*) FROM Alerts WHERE Alerts_status='resolved'")->fetchColumn();
 
+    // The keys below match the JavaScript 'updateStats' function for the dashboard
     echo json_encode([
-        "alerts" => $alerts,
-        "pending" => $pending,
+        "active_alerts" => $alerts, 
+        "pending_alerts" => $pending,
         "verified" => $verified,
         "resolved" => $resolved
     ]);
@@ -29,3 +32,4 @@ try {
     ]);
 
 }
+?>
