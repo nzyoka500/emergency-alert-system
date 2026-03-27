@@ -1,7 +1,7 @@
 <?php
     /**
      * forgot-password.php - Responda Password Recovery
-     * Matches the Indigo/Slate Production UI theme
+     * Updated to match new database naming conventions
      */
     include '../includes/header.php';
 
@@ -126,7 +126,8 @@
         <form action="forgot-password-process.php" method="POST" class="text-start">
             <div class="mb-4">
                 <label for="email" class="form-label">Email Address</label>
-                <input type="email" id="email" name="email" class="form-control" placeholder="yourname@example.com" required>
+                <!-- UPDATED: name attribute to Users_email to match database column prefixing -->
+                <input type="email" id="email" name="Users_email" class="form-control" placeholder="yourname@example.com" required>
             </div>
 
             <button type="submit" class="btn btn-recovery w-100 mb-3">
@@ -142,10 +143,6 @@
         </div>
     </div>
 </div>
-
-
-
-<?php // include '../includes/footer.php'; ?>
 
 <!-- Modernized Flash Error Modal -->
 <?php if (!empty($flashError)): ?>

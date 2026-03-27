@@ -19,21 +19,26 @@ if (empty($_SESSION['logged_in']) || $_SESSION['logged_in'] !== true) {
 $pdo = getPDO();
 
 // 1. Overview Stats for the Top Row
-$total_alerts = $pdo->query("SELECT COUNT(*) FROM alerts")->fetchColumn();
-$resolved_alerts = $pdo->query("SELECT COUNT(*) FROM alerts WHERE status='resolved'")->fetchColumn();
+// UPDATED: Table 'Alerts'
+$total_alerts = $pdo->query("SELECT COUNT(*) FROM Alerts")->fetchColumn();
+
+// UPDATED: Column 'Alerts_status'
+$resolved_alerts = $pdo->query("SELECT COUNT(*) FROM Alerts WHERE Alerts_status='resolved'")->fetchColumn();
 $response_rate = $total_alerts > 0 ? round(($resolved_alerts / $total_alerts) * 100) : 0;
 
 // 2. Data for Category Pie Chart
-$type_stats = $pdo->query("SELECT at.name, COUNT(a.id) as count 
-                           FROM alert_types at 
-                           LEFT JOIN alerts a ON at.id = a.alert_type_id 
-                           GROUP BY at.name")->fetchAll();
+// UPDATED: Table names and prefixed column names
+$type_stats = $pdo->query("SELECT at.AlertTypes_name as name, COUNT(a.Alerts_id) as count 
+                           FROM AlertTypes at 
+                           LEFT JOIN Alerts a ON at.AlertTypes_id = a.Alerts_AlertTypes_id 
+                           GROUP BY at.AlertTypes_name")->fetchAll();
 
 // 3. Data for Monthly Trend Line Chart
-$monthly_stats = $pdo->query("SELECT DATE_FORMAT(created_at, '%b') as month, COUNT(id) as count 
-                              FROM alerts 
+// UPDATED: Column 'Alerts_created_at' and 'Alerts_id'
+$monthly_stats = $pdo->query("SELECT DATE_FORMAT(Alerts_created_at, '%b') as month, COUNT(Alerts_id) as count 
+                              FROM Alerts 
                               GROUP BY month 
-                              ORDER BY created_at ASC LIMIT 6")->fetchAll();
+                              ORDER BY Alerts_created_at ASC LIMIT 6")->fetchAll();
 
 include __DIR__ . '/../includes/header.php';
 ?>
@@ -67,9 +72,9 @@ include __DIR__ . '/../includes/header.php';
                 <div class="row g-4 mb-5">
                     <div class="col-md-4">
                         <div class="card border-0 shadow-sm p-4 bg-primary text-white">
-                            <small class="text-muted text-uppercase fw-bold opacity-75" style="font-size: 0.65rem; letter-spacing: 1px;">Lifetime Incidents</small>
+                            <small class="text-white text-uppercase fw-bold opacity-75" style="font-size: 0.65rem; letter-spacing: 1px;">Lifetime Incidents</small>
                             <h2 class="fw-bold text-warning mb-0 mt-1"><?= $total_alerts ?></h2>
-                            <div class="mt-3 small text-muted opacity-75">Total emergencies logged</div>
+                            <div class="mt-3 small text-white opacity-75">Total emergencies logged</div>
                         </div>
                     </div>
                     <div class="col-md-4">
@@ -126,14 +131,13 @@ include __DIR__ . '/../includes/header.php';
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
-    // Configuration for Charts
     const brandColors = {
-        primary: '#4f46e5',   // Indigo
-        success: '#10b981',   // Emerald
-        warning: '#f59e0b',   // Amber
-        danger: '#f43f5e',    // Rose
-        info: '#0ea5e9',      // Sky
-        slate: '#64748b'      // Slate
+        primary: '#4f46e5',
+        success: '#10b981',
+        warning: '#f59e0b',
+        danger: '#f43f5e',
+        info: '#0ea5e9',
+        slate: '#64748b'
     };
 
     // 1. Monthly Trend Line Chart
@@ -155,9 +159,7 @@ include __DIR__ . '/../includes/header.php';
         },
         options: {
             maintainAspectRatio: false,
-            plugins: {
-                legend: { display: false }
-            },
+            plugins: { legend: { display: false } },
             scales: {
                 y: { beginAtZero: true, border: { display: false }, grid: { color: '#f1f5f9' } },
                 x: { border: { display: false }, grid: { display: false } }
@@ -172,13 +174,7 @@ include __DIR__ . '/../includes/header.php';
             labels: <?= json_encode(array_column($type_stats, 'name')) ?>,
             datasets: [{
                 data: <?= json_encode(array_column($type_stats, 'count')) ?>,
-                backgroundColor: [
-                    brandColors.danger, 
-                    brandColors.info, 
-                    brandColors.warning, 
-                    brandColors.success, 
-                    brandColors.slate
-                ],
+                backgroundColor: [brandColors.danger, brandColors.info, brandColors.warning, brandColors.success, brandColors.slate],
                 borderWidth: 0,
                 hoverOffset: 15
             }]

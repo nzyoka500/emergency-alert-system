@@ -14,6 +14,7 @@ if (!isset($_SESSION['role_id']) || $_SESSION['role_id'] != 1) {
 }
 
 // 2. Input Validation
+// The 'id' key comes from the FormData object in your JavaScript
 $id = filter_input(INPUT_POST, 'id', FILTER_VALIDATE_INT);
 if (!$id) {
     echo json_encode(["success" => false, "message" => "Invalid Alert ID."]);
@@ -23,8 +24,8 @@ if (!$id) {
 try {
     $pdo = getPDO();
     
-    // Check if alert exists
-    $check = $pdo->prepare("SELECT id FROM alerts WHERE id = ?");
+    // UPDATED: Table 'Alerts' and Column 'Alerts_id'
+    $check = $pdo->prepare("SELECT Alerts_id FROM Alerts WHERE Alerts_id = ?");
     $check->execute([$id]);
     
     if (!$check->fetch()) {
@@ -32,7 +33,8 @@ try {
     }
 
     // 3. Execution
-    $stmt = $pdo->prepare("DELETE FROM alerts WHERE id = ?");
+    // UPDATED: Table 'Alerts' and Column 'Alerts_id'
+    $stmt = $pdo->prepare("DELETE FROM Alerts WHERE Alerts_id = ?");
     $stmt->execute([$id]);
 
     echo json_encode([
@@ -47,5 +49,4 @@ try {
         "message" => "Server Error: " . $e->getMessage()
     ]);
 }
-
 ?>

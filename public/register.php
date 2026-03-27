@@ -52,23 +52,28 @@ if (!empty($_SESSION['error'])) {
         <form action="register-process.php" method="POST">
             <div class="mb-3">
                 <label class="form-label fw-600" style="color: #2d3748;">Full Name</label>
-                <input type="text" name="full_name" class="form-control" placeholder="Enter your full name" required style="padding: 12px 14px; border: 2px solid #e8ebf2; border-radius: 8px; transition: all 0.3s ease;">
+                <!-- UPDATED: name="Users_full_name" -->
+                <input type="text" name="Users_full_name" class="form-control" placeholder="Enter your full name" required style="padding: 12px 14px; border: 2px solid #e8ebf2; border-radius: 8px; transition: all 0.3s ease;">
             </div>
             <div class="mb-3">
                 <label class="form-label fw-600" style="color: #2d3748;">Email Address</label>
-                <input type="email" name="email" class="form-control" placeholder="Enter your email" required style="padding: 12px 14px; border: 2px solid #e8ebf2; border-radius: 8px; transition: all 0.3s ease;">
+                <!-- UPDATED: name="Users_email" -->
+                <input type="email" name="Users_email" class="form-control" placeholder="Enter your email" required style="padding: 12px 14px; border: 2px solid #e8ebf2; border-radius: 8px; transition: all 0.3s ease;">
             </div>
             <div class="mb-3">
                 <label class="form-label fw-600" style="color: #2d3748;">Phone</label>
-                <input type="text" name="phone" class="form-control" placeholder="Enter your phone number" style="padding: 12px 14px; border: 2px solid #e8ebf2; border-radius: 8px; transition: all 0.3s ease;">
+                <!-- UPDATED: name="Users_phone" -->
+                <input type="text" name="Users_phone" class="form-control" placeholder="Enter your phone number" style="padding: 12px 14px; border: 2px solid #e8ebf2; border-radius: 8px; transition: all 0.3s ease;">
             </div>
             <div class="mb-3">
                 <label class="form-label fw-600" style="color: #2d3748;">Password</label>
-                <input type="password" name="password" class="form-control" placeholder="Create a password" required style="padding: 12px 14px; border: 2px solid #e8ebf2; border-radius: 8px; transition: all 0.3s ease;">
+                <!-- UPDATED: name="Users_password" -->
+                <input type="password" name="Users_password" class="form-control" placeholder="Create a password" required style="padding: 12px 14px; border: 2px solid #e8ebf2; border-radius: 8px; transition: all 0.3s ease;">
             </div>
             <div class="mb-4">
                 <label class="form-label fw-600" style="color: #2d3748;">Confirm Password</label>
-                <input type="password" name="password_confirm" class="form-control" placeholder="Confirm your password" required style="padding: 12px 14px; border: 2px solid #e8ebf2; border-radius: 8px; transition: all 0.3s ease;">
+                <!-- UPDATED: name="Users_password_confirm" -->
+                <input type="password" name="Users_password_confirm" class="form-control" placeholder="Confirm your password" required style="padding: 12px 14px; border: 2px solid #e8ebf2; border-radius: 8px; transition: all 0.3s ease;">
             </div>
             <button type="submit" class="btn btn-primary w-100" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border: none; padding: 12px; font-weight: 600; border-radius: 8px; transition: all 0.3s ease;">Create Account</button>
         </form>

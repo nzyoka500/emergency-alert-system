@@ -7,11 +7,12 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     exit;
 }
 
-$full_name = isset($_POST['full_name']) ? trim($_POST['full_name']) : '';
-$email = isset($_POST['email']) ? trim($_POST['email']) : '';
-$phone = isset($_POST['phone']) ? trim($_POST['phone']) : null;
-$password = isset($_POST['password']) ? $_POST['password'] : '';
-$password_confirm = isset($_POST['password_confirm']) ? $_POST['password_confirm'] : '';
+// UPDATED: Post keys to match the new naming convention (Users_ prefix)
+$full_name = isset($_POST['Users_full_name']) ? trim($_POST['Users_full_name']) : '';
+$email = isset($_POST['Users_email']) ? trim($_POST['Users_email']) : '';
+$phone = isset($_POST['Users_phone']) ? trim($_POST['Users_phone']) : null;
+$password = isset($_POST['Users_password']) ? $_POST['Users_password'] : '';
+$password_confirm = isset($_POST['Users_password_confirm']) ? $_POST['Users_password_confirm'] : '';
 
 if ($full_name === '' || $email === '' || $password === '' || $password_confirm === '') {
     $_SESSION['error'] = 'Please fill all required fields.';
@@ -37,8 +38,8 @@ require_once __DIR__ . '/../includes/config.php';
 try {
     $pdo = getPDO();
 
-    // Check if email already exists
-    $stmt = $pdo->prepare('SELECT id FROM users WHERE email = :email LIMIT 1');
+    // UPDATED: Table 'Users' and column 'Users_email'
+    $stmt = $pdo->prepare('SELECT Users_id FROM Users WHERE Users_email = :email LIMIT 1');
     $stmt->execute([':email' => $email]);
     if ($stmt->fetch()) {
         $_SESSION['error'] = 'An account with that email already exists.';
@@ -49,17 +50,22 @@ try {
     // Hash password
     $hash = password_hash($password, PASSWORD_DEFAULT);
 
-    // Default role for registered users -> Responder (role_id = 2)
+    // Default role for registered users -> Responder (Users_Roles_id = 2)
     $defaultRole = 2;
 
-    $insert = $pdo->prepare('INSERT INTO users (full_name, email, phone, password, role_id, status) VALUES (:full_name, :email, :phone, :password, :role_id, :status)');
+    // UPDATED: Table 'Users' and prefixed column names
+    $insert = $pdo->prepare('
+        INSERT INTO Users (Users_full_name, Users_email, Users_phone, Users_password, Users_Roles_id, Users_status) 
+        VALUES (:full_name, :email, :phone, :password, :role_id, :status)
+    ');
+    
     $insert->execute([
         ':full_name' => $full_name,
-        ':email' => $email,
-        ':phone' => $phone,
-        ':password' => $hash,
-        ':role_id' => $defaultRole,
-        ':status' => 'active'
+        ':email'     => $email,
+        ':phone'     => $phone,
+        ':password'  => $hash,
+        ':role_id'   => $defaultRole,
+        ':status'    => 'active'
     ]);
 
     $userId = $pdo->lastInsertId();
@@ -82,5 +88,4 @@ try {
     header('Location: register.php');
     exit;
 }
-
 ?>
