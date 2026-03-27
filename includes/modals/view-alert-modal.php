@@ -25,7 +25,7 @@
 
             <div class="modal-body p-4 p-lg-5">
                 <form id="alertCrudForm">
-                    <!-- Hidden input for ID -->
+                    <!-- Hidden input for ID (represents Alerts_id) -->
                     <input type="hidden" name="alert_id" id="alertId">
 
                     <!-- Basic Info Section -->
@@ -50,10 +50,10 @@
                             <label class="form-label small fw-bold text-uppercase text-muted" style="letter-spacing: 0.5px;">Alert Status</label>
                             <?php if ($_SESSION['role_id'] == 1): ?>
                                 <select class="form-select border-slate-200 shadow-sm fw-bold" id="alertStatus" name="status">
-                                    <option value="pending text-warning">Pending</option>
-                                    <option value="verified text-info">Verified</option>
-                                    <option value="broadcasted text-primary">Broadcasted</option>
-                                    <option value="resolved text-success">Resolved</option>
+                                    <option value="pending">Pending</option>
+                                    <option value="verified">Verified</option>
+                                    <option value="broadcasted">Broadcasted</option>
+                                    <option value="resolved">Resolved</option>
                                 </select>
                             <?php else: ?>
                                 <input type="text" class="form-control border-slate-200 shadow-sm bg-light fw-bold" id="alertStatusView" readonly>
@@ -86,28 +86,23 @@
                             <select class="form-select border-start-0 ps-0" name="assigned_to" id="alertRespondent">
                                 <option value="">No responder assigned</option>
                                 <?php 
-                                    // Assuming $responders is pre-fetched in the main page
                                     if(isset($responders)) {
                                         foreach ($responders as $resp): 
                                 ?>
-                                    <option value="<?= $resp['id'] ?>"><?= htmlspecialchars($resp['full_name']) ?></option>
+                                    <!-- UPDATED: Users_id and Users_full_name -->
+                                    <option value="<?= $resp['Users_id'] ?>"><?= htmlspecialchars($resp['Users_full_name']) ?></option>
                                 <?php endforeach; } ?>
                             </select>
                         </div>
-                        <small class="form-text text-muted mt-2 d-block">Select a primary responder to handle this incident.</small>
                     </div>
                     <?php endif; ?>
                 </form>
             </div>
 
-            <!-- Unified Action Footer -->
             <div class="modal-footer border-top-0 p-4 d-flex justify-content-between" style="background-color: #f8fafc;">
                 <div>
                     <?php if ($_SESSION['role_id'] == 1): ?>
                         <button type="button" class="btn btn-outline-danger border-0 fw-bold px-3" id="deleteAlert">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" class="me-1">
-                                <path stroke-linecap="round" stroke-linejoin="round" d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0" />
-                            </svg>
                             Delete
                         </button>
                     <?php endif; ?>
@@ -115,16 +110,12 @@
 
                 <div class="d-flex gap-2">
                     <button type="button" class="btn btn-white border shadow-sm px-4" data-bs-dismiss="modal">Close</button>
-                    
                     <?php if ($_SESSION['role_id'] == 1): ?>
-                        <div id="adminActionButtons" class="d-inline-block">
-                            <!-- Injected via JavaScript -->
-                        </div>
+                        <div id="adminActionButtons" class="d-inline-block"></div>
                         <button type="button" class="btn btn-primary shadow px-4" id="editAlert">Update</button>
                     <?php endif; ?>
                 </div>
             </div>
-
         </div>
     </div>
 </div>
@@ -135,17 +126,15 @@
  */
 document.querySelectorAll(".view-alert").forEach(btn => {
     btn.addEventListener("click", function() {
-        const data = this.dataset;
+        const data = this.dataset; // These keys (id, title, description, etc.) match the data- attributes in alerts.php
         
-        // Map data to fields
         document.getElementById("alertId").value = data.id;
         document.getElementById("alertTitle").value = data.title;
         document.getElementById("alertDescription").value = data.description;
         document.getElementById("alertType").value = data.type;
-        // Inside document.querySelectorAll(".view-alert").forEach...
-        document.getElementById("alertSeverity").value = data.severity; // For Admin
-        // OR
-        document.getElementById("alertSeverityView").value = data.severity; // For Responder
+        
+        if(document.getElementById("alertSeverity")) document.getElementById("alertSeverity").value = data.severity;
+        if(document.getElementById("alertSeverityView")) document.getElementById("alertSeverityView").value = data.severity;
                 
         const statusField = document.getElementById("alertStatus");
         const statusViewField = document.getElementById("alertStatusView");
@@ -160,9 +149,6 @@ document.querySelectorAll(".view-alert").forEach(btn => {
                 actionContainer.innerHTML = `
                     <button type="button" class="btn btn-success shadow-sm px-4 me-2 d-flex align-items-center" 
                             onclick="verifyAndBroadcast(${data.id})">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" class="me-2">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12c0 1.268-.63 2.39-1.593 3.068a3.745 3.745 0 01-1.043 3.296 3.745 3.745 0 01-3.296 1.043A3.745 3.745 0 0112 21c-1.268 0-2.39-.63-3.068-1.593a3.746 3.746 0 01-3.296-1.043 3.745 3.745 0 01-1.043-3.296A3.745 3.745 0 013 12c0-1.268.63-2.39 1.593-3.068a3.745 3.745 0 011.043-3.296 3.746 3.746 0 013.296-1.043A3.746 3.746 0 0112 3c1.268 0 2.39.63 3.068 1.593a3.746 3.746 0 013.296 1.043 3.746 3.746 0 011.043 3.296A3.745 3.745 0 0121 12z" />
-                        </svg>
                         Verify & Broadcast
                     </button>`;
             } else {
@@ -205,91 +191,44 @@ if (editBtn) {
     });
 }
 
-
 /**
- * Unified Alert Deletion Handler
+ * Alert Deletion Handler
  */
 document.addEventListener('click', function (e) {
-    // 1. Detect if the clicked element is an Alert Delete button (table or modal)
     const alertDeleteBtn = e.target.closest('.delete-alert, #deleteAlert');
 
     if (alertDeleteBtn) {
         e.preventDefault();
-
-        let alertId;
-        
-        // 2. Extract ID based on context
-        if (alertDeleteBtn.id === 'deleteAlert') {
-            // Context: Inside the "View Alert" Modal
-            alertId = document.getElementById('alertId').value;
-        } else {
-            // Context: Directly from the table row
-            alertId = alertDeleteBtn.dataset.id;
-        }
+        let alertId = (alertDeleteBtn.id === 'deleteAlert') ? document.getElementById('alertId').value : alertDeleteBtn.dataset.id;
 
         if (!alertId) {
             Swal.fire("Error", "Could not identify the incident ID.", "error");
             return;
         }
 
-        // 3. Professional Confirmation Dialog
         Swal.fire({
             title: 'Purge Incident Record?',
-            text: "This will permanently remove this alert and all associated responder responses. This action is irreversible.",
+            text: "Irreversible action.",
             icon: 'warning',
             showCancelButton: true,
-            confirmButtonColor: '#ef4444', // Danger Red
-            cancelButtonColor: '#64748b',  // Slate Gray
-            confirmButtonText: 'Yes, Delete Permanently',
-            reverseButtons: true,
-            background: '#ffffff',
-            customClass: {
-                popup: 'rounded-4 shadow-lg border-0'
-            }
+            confirmButtonColor: '#ef4444',
+            confirmButtonText: 'Yes, Delete Permanently'
         }).then((result) => {
             if (result.isConfirmed) {
-                // Show Processing State
-                Swal.fire({
-                    title: 'De-registering Incident...',
-                    allowOutsideClick: false,
-                    didOpen: () => { Swal.showLoading(); }
-                });
-
-                // 4. AJAX Deletion
                 const formData = new FormData();
                 formData.append('id', alertId);
 
-                fetch('delete-alert.php', {
-                    method: 'POST',
-                    body: formData
-                })
+                fetch('delete-alert.php', { method: 'POST', body: formData })
                 .then(res => res.json())
                 .then(data => {
                     if (data.success) {
-                        Swal.fire({
-                            icon: 'success',
-                            title: 'Removed!',
-                            text: data.message,
-                            timer: 1500,
-                            showConfirmButton: false
-                        }).then(() => {
-                            // Reload to update stats and table
-                            location.reload();
-                        });
+                        Swal.fire({ icon: 'success', title: 'Removed!', timer: 1500 }).then(() => location.reload());
                     } else {
-                        Swal.fire("Access Denied", data.message, "error");
+                        Swal.fire("Error", data.message, "error");
                     }
-                })
-                .catch(err => {
-                    console.error("Delete Error:", err);
-                    Swal.fire("Connection Failed", "Unable to reach the server. Please check your internet.", "error");
                 });
             }
         });
     }
 });
-
-
-
-
 </script>

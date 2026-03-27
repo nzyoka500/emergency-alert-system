@@ -12,11 +12,12 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     exit;
 }
 
-$full_name = trim($_POST['full_name'] ?? '');
-$email = trim($_POST['email'] ?? '');
-$phone = trim($_POST['phone'] ?? '');
-$password = $_POST['password'] ?? '';
-$role_id = $_POST['role_id'] ?? 3;
+// UPDATED: Post keys to match the new Users_ prefix used in the HTML form
+$full_name = trim($_POST['Users_full_name'] ?? '');
+$email = trim($_POST['Users_email'] ?? '');
+$phone = trim($_POST['Users_phone'] ?? '');
+$password = $_POST['Users_password'] ?? '';
+$role_id = $_POST['Users_Roles_id'] ?? 3;
 
 if ($full_name === '' || $email === '' || $password === '') {
     echo json_encode([
@@ -38,8 +39,8 @@ try {
 
     $pdo = getPDO();
 
-    // check email
-    $check = $pdo->prepare("SELECT id FROM users WHERE email = :email LIMIT 1");
+    // UPDATED: Table 'Users' and column 'Users_email'
+    $check = $pdo->prepare("SELECT Users_id FROM Users WHERE Users_email = :email LIMIT 1");
     $check->execute([':email' => $email]);
 
     if ($check->fetch()) {
@@ -52,19 +53,20 @@ try {
 
     $passwordHash = password_hash($password, PASSWORD_DEFAULT);
 
+    // UPDATED: Table 'Users' and prefixed columns
     $stmt = $pdo->prepare("
-        INSERT INTO users
-        (full_name,email,phone,password,role_id,status)
+        INSERT INTO Users
+        (Users_full_name, Users_email, Users_phone, Users_password, Users_Roles_id, Users_status)
         VALUES
-        (:full_name,:email,:phone,:password,:role_id,'active')
+        (:full_name, :email, :phone, :password, :role_id, 'active')
     ");
 
     $stmt->execute([
         ':full_name' => $full_name,
-        ':email' => $email,
-        ':phone' => $phone,
-        ':password' => $passwordHash,
-        ':role_id' => $role_id
+        ':email'     => $email,
+        ':phone'     => $phone,
+        ':password'  => $passwordHash,
+        ':role_id'   => $role_id
     ]);
 
     echo json_encode([
@@ -82,9 +84,4 @@ try {
         "message" => "Failed to create user."
     ]);
 }
-
 ?>
-
-
-
-

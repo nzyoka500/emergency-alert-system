@@ -30,36 +30,42 @@ $status_counts = ['pending' => 0, 'verified' => 0, 'broadcasted' => 0, 'resolved
 try {
     $pdo = getPDO();
 
-    // 1. Fetch Summary Data
-    $stmt = $pdo->query("SELECT status, COUNT(*) as count FROM alerts GROUP BY status");
+    // 1. Fetch Summary Data 
+    // UPDATED: Table 'Alerts', Column 'Alerts_status'
+    $stmt = $pdo->query("SELECT Alerts_status, COUNT(*) as count FROM Alerts GROUP BY Alerts_status");
     while ($row = $stmt->fetch()) {
-        if (isset($status_counts[$row['status']])) $status_counts[$row['status']] = (int)$row['count'];
+        if (isset($status_counts[$row['Alerts_status']])) {
+            $status_counts[$row['Alerts_status']] = (int)$row['count'];
+        }
     }
     $status_counts['all'] = array_sum($status_counts);
 
     // 2. Build Intelligent Query
+    // UPDATED: Prefixed columns and Title Case tables
     $query = "
-        SELECT a.*, at.name as alert_type, u.full_name as creator,
-        (SELECT COUNT(*) FROM alert_responses WHERE alert_id = a.id) as response_count
-        FROM alerts a
-        LEFT JOIN alert_types at ON a.alert_type_id = at.id
-        LEFT JOIN users u ON a.created_by = u.id
+        SELECT a.*, at.AlertTypes_name as alert_type, u.Users_full_name as creator,
+        (SELECT COUNT(*) FROM AlertResponses WHERE AlertResponses_Alerts_id = a.Alerts_id) as response_count
+        FROM Alerts a
+        LEFT JOIN AlertTypes at ON a.Alerts_AlertTypes_id = at.AlertTypes_id
+        LEFT JOIN Users u ON a.Alerts_Users_id = u.Users_id
         WHERE 1=1
     ";
 
     if ($status_filter !== 'all') {
-        $query .= " AND a.status = " . $pdo->quote($status_filter);
+        $query .= " AND a.Alerts_status = " . $pdo->quote($status_filter);
     }
 
     if (!empty($search_query)) {
         $search_term = "%$search_query%";
-        $query .= " AND (a.title LIKE " . $pdo->quote($search_term) . " OR at.name LIKE " . $pdo->quote($search_term) . ")";
+        // UPDATED: Search against Alerts_title and AlertTypes_name
+        $query .= " AND (a.Alerts_title LIKE " . $pdo->quote($search_term) . " OR at.AlertTypes_name LIKE " . $pdo->quote($search_term) . ")";
     }
 
+    // UPDATED: Sort using Alerts_created_at and Alerts_status
     $query .= match($sort_by) {
-        'oldest' => " ORDER BY a.created_at ASC",
-        'status' => " ORDER BY FIELD(a.status, 'pending', 'verified', 'broadcasted', 'resolved'), a.created_at DESC",
-        default => " ORDER BY a.created_at DESC"
+        'oldest' => " ORDER BY a.Alerts_created_at ASC",
+        'status' => " ORDER BY FIELD(a.Alerts_status, 'pending', 'verified', 'broadcasted', 'resolved'), a.Alerts_created_at DESC",
+        default => " ORDER BY a.Alerts_created_at DESC"
     };
 
     $alerts = $pdo->query($query)->fetchAll();
@@ -195,25 +201,29 @@ include __DIR__ . '/../includes/header.php';
                                 <?php if(empty($alerts)): ?>
                                     <tr><td colspan="6" class="text-center p-5 text-muted small">No incidents found matching your current filters.</td></tr>
                                 <?php else: foreach ($alerts as $alert): 
-                                    $sev_color = match($alert['severity']) { 'High' => 'danger', 'Medium' => 'warning', 'Low' => 'success', default => 'secondary' };
-                                    $stat_color = match($alert['status']) { 'pending' => 'warning', 'verified' => 'info', 'broadcasted' => 'primary', 'resolved' => 'success', default => 'secondary' };
+                                    // UPDATED: Alerts_severity and Alerts_status prefixes
+                                    $sev_color = match($alert['Alerts_severity']) { 'High' => 'danger', 'Medium' => 'warning', 'Low' => 'success', default => 'secondary' };
+                                    $stat_color = match($alert['Alerts_status']) { 'pending' => 'warning', 'verified' => 'info', 'broadcasted' => 'primary', 'resolved' => 'success', default => 'secondary' };
                                 ?>
                                 <tr>
                                     <td class="ps-4">
-                                        <div class="fw-bold text-dark" style="font-size: 0.95rem;"><?= htmlspecialchars($alert['title']) ?></div>
+                                        <!-- UPDATED: Alerts_title prefix -->
+                                        <div class="fw-bold text-dark" style="font-size: 0.95rem;"><?= htmlspecialchars($alert['Alerts_title']) ?></div>
                                         <small class="text-muted d-block" style="font-size: 0.75rem;">
                                             <span class="fw-bold text-uppercase"><?= htmlspecialchars($alert['alert_type']) ?></span> • By <?= htmlspecialchars($alert['creator'] ?? 'System') ?>
                                         </small>
                                     </td>
                                     <td>
+                                        <!-- UPDATED: Alerts_status prefix -->
                                         <span class="badge bg-<?= $stat_color ?>-subtle text-<?= $stat_color ?> px-2 py-1">
-                                            <?php if($alert['status'] === 'pending'): ?><span class="status-pulse-pending"></span><?php endif; ?>
-                                            <?= ucfirst($alert['status']) ?>
+                                            <?php if($alert['Alerts_status'] === 'pending'): ?><span class="status-pulse-pending"></span><?php endif; ?>
+                                            <?= ucfirst($alert['Alerts_status']) ?>
                                         </span>
                                     </td>
                                     <td>
+                                        <!-- UPDATED: Alerts_severity prefix -->
                                         <span class="badge border border-<?= $sev_color ?> text-<?= $sev_color ?> bg-white fw-bold" style="font-size: 0.65rem;">
-                                            ● <?= strtoupper($alert['severity']) ?>
+                                            ● <?= strtoupper($alert['Alerts_severity']) ?>
                                         </span>
                                     </td>
                                     <td>
@@ -222,25 +232,28 @@ include __DIR__ . '/../includes/header.php';
                                         </div>
                                     </td>
                                     <td>
-                                        <div class="small text-dark fw-semibold"><?= date('M d, Y', strtotime($alert['created_at'])) ?></div>
-                                        <div class="small text-muted" style="font-size: 0.7rem;"><?= date('H:i', strtotime($alert['created_at'])) ?></div>
+                                        <!-- UPDATED: Alerts_created_at prefix -->
+                                        <div class="small text-dark fw-semibold"><?= date('M d, Y', strtotime($alert['Alerts_created_at'])) ?></div>
+                                        <div class="small text-muted" style="font-size: 0.7rem;"><?= date('H:i', strtotime($alert['Alerts_created_at'])) ?></div>
                                     </td>
                                     <td class="text-end pe-4">
                                         <div class="btn-group">
+                                            <!-- UPDATED: data- attributes to match new column names (Alerts_desc, Alerts_id, etc.) -->
                                             <button class="btn btn-sm btn-white border shadow-sm view-alert me-3" 
-                                                data-id="<?= $alert['id'] ?>"
-                                                data-title="<?= htmlspecialchars($alert['title']) ?>"
-                                                data-description="<?= htmlspecialchars($alert['description']) ?>"
+                                                data-id="<?= $alert['Alerts_id'] ?>"
+                                                data-title="<?= htmlspecialchars($alert['Alerts_title']) ?>"
+                                                data-description="<?= htmlspecialchars($alert['Alerts_desc']) ?>"
                                                 data-type="<?= htmlspecialchars($alert['alert_type']) ?>"
-                                                data-status="<?= $alert['status'] ?>"
-                                                data-severity="<?= $alert['severity'] ?>"
-                                                data-latitude="<?= $alert['latitude'] ?>"
-                                                data-longitude="<?= $alert['longitude'] ?>"
+                                                data-status="<?= $alert['Alerts_status'] ?>"
+                                                data-severity="<?= $alert['Alerts_severity'] ?>"
+                                                data-latitude="<?= $alert['Alerts_latitude'] ?>"
+                                                data-longitude="<?= $alert['Alerts_longitude'] ?>"
                                                 data-bs-toggle="modal" data-bs-target="#viewAlertModal">
                                                 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M2.036 12.322a1.012 1.012 0 0 1 0-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178Z" /><path d="M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" /></svg>
                                             </button>
                                             <?php if($role_id == 1): ?>
-                                            <button class="btn btn-sm btn-white border text-danger shadow-sm delete-alert" data-id="<?= $alert['id'] ?>">
+                                            <!-- UPDATED: Alerts_id prefix -->
+                                            <button class="btn btn-sm btn-white border text-danger shadow-sm delete-alert" data-id="<?= $alert['Alerts_id'] ?>">
                                                 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="m14.74 9-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 0 1-2.244 2.077H8.084a2.25 2.25 0 0 1-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 0 0-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 0 1 3.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 0 0-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 0 0-7.5 0" /></svg>
                                             </button>
                                             <?php endif; ?>
@@ -257,6 +270,7 @@ include __DIR__ . '/../includes/header.php';
     </div>
 </div>
 
+
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script>
 /**
@@ -264,22 +278,27 @@ include __DIR__ . '/../includes/header.php';
  */
 document.addEventListener('click', function (e) {
     // 1. Modal View Population
+    // These 'd' (dataset) keys correspond to the 'data-' attributes in the HTML template
     const viewBtn = e.target.closest('.view-alert');
     if (viewBtn) {
         const d = viewBtn.dataset;
-        document.getElementById("alertId").value = d.id;
-        document.getElementById("alertTitle").value = d.title;
-        document.getElementById("alertDescription").value = d.description;
-        document.getElementById("alertType").value = d.type;
         
-        if(document.getElementById("alertSeverity")) document.getElementById("alertSeverity").value = d.severity;
+        // Populate inputs (Ensure these element IDs match your modal form IDs)
+        if(document.getElementById("alertId")) document.getElementById("alertId").value = d.id; // Alerts_id
+        if(document.getElementById("alertTitle")) document.getElementById("alertTitle").value = d.title; // Alerts_title
+        if(document.getElementById("alertDescription")) document.getElementById("alertDescription").value = d.description; // Alerts_desc
+        if(document.getElementById("alertType")) document.getElementById("alertType").value = d.type; // AlertTypes_name
+        
+        if(document.getElementById("alertSeverity")) document.getElementById("alertSeverity").value = d.severity; // Alerts_severity
         if(document.getElementById("alertSeverityView")) document.getElementById("alertSeverityView").value = d.severity;
-        if(document.getElementById("alertStatus")) document.getElementById("alertStatus").value = d.status;
+        
+        if(document.getElementById("alertStatus")) document.getElementById("alertStatus").value = d.status; // Alerts_status
         if(document.getElementById("alertStatusView")) document.getElementById("alertStatusView").value = d.status;
         
         // Handle Action Buttons visibility (Verify button)
         const actionContainer = document.getElementById('adminActionButtons');
         if (actionContainer) {
+            // Status check matches new 'pending' logic
             actionContainer.innerHTML = d.status === 'pending' ? 
                 `<button class="btn btn-success btn-sm px-4 me-2 shadow-sm" onclick="verifyAndBroadcast(${d.id})">Verify & Broadcast</button>` : '';
         }
@@ -288,7 +307,9 @@ document.addEventListener('click', function (e) {
     // 2. Deletion Logic
     const deleteBtn = e.target.closest('.delete-alert, #deleteAlert');
     if (deleteBtn) {
+        // Grab the ID from either the modal hidden field or the button's data attribute
         const id = deleteBtn.id === 'deleteAlert' ? document.getElementById('alertId').value : deleteBtn.dataset.id;
+        
         Swal.fire({
             title: 'Delete record?',
             text: "This operation cannot be reversed.",
@@ -298,7 +319,9 @@ document.addEventListener('click', function (e) {
             confirmButtonText: 'Yes, Delete Permanently'
         }).then((result) => {
             if (result.isConfirmed) {
-                const fd = new FormData(); fd.append('id', id);
+                const fd = new FormData(); 
+                fd.append('id', id); // Sends the Alerts_id
+                
                 fetch('delete-alert.php', { method: 'POST', body: fd })
                 .then(res => res.json())
                 .then(data => {
@@ -318,11 +341,13 @@ if(updateBtn) {
         this.disabled = true;
         this.innerHTML = '<span class="spinner-border spinner-border-sm"></span>';
         
+        // Ensure update-alert.php is updated to handle prefixed column names
         fetch('update-alert.php', { method: 'POST', body: new FormData(form) })
         .then(res => res.json())
         .then(data => {
-            if(data.success) Swal.fire('Success', data.message, 'success').then(() => location.reload());
-            else { 
+            if(data.success) {
+                Swal.fire('Success', data.message, 'success').then(() => location.reload());
+            } else { 
                 Swal.fire('Error', data.message, 'error');
                 this.disabled = false;
                 this.innerHTML = 'Update Details';
@@ -331,6 +356,7 @@ if(updateBtn) {
     });
 }
 </script>
+
 
 <?php 
     include __DIR__ . '/../includes/modals/create-alert-modal.html'; 

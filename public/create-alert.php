@@ -54,18 +54,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             throw new Exception('Longitude must be between -180 and 180.');
         }
 
-        // Validate alert type exists
-        $stmt = $pdo->prepare('SELECT id, name FROM alert_types WHERE id = ?');
+        // UPDATED: Query AlertTypes table with prefixed columns
+        $stmt = $pdo->prepare('SELECT AlertTypes_id, AlertTypes_name FROM AlertTypes WHERE AlertTypes_id = ?');
         $stmt->execute([$alert_type_id]);
         $alert_type = $stmt->fetch();
         if (!$alert_type) {
             throw new Exception('Invalid alert type selected.');
         }
 
-        // Insert alert record into database
-        // Note: 'severity' column must exist in the 'alerts' table for this to work
+        // UPDATED: Insert into Alerts table with prefixed columns and desc suffix
         $stmt = $pdo->prepare('
-            INSERT INTO alerts (alert_type_id, title, description, latitude, longitude, created_by, status, severity)
+            INSERT INTO Alerts (Alerts_AlertTypes_id, Alerts_title, Alerts_desc, Alerts_latitude, Alerts_longitude, Alerts_Users_id, Alerts_status, Alerts_severity)
             VALUES (?, ?, ?, ?, ?, ?, ?, ?)
         ');
 
@@ -77,7 +76,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $longitude,
             $user_id,
             'pending',
-            $severity // Added this line
+            $severity 
         ]);
 
         $alert_id = $pdo->lastInsertId();
@@ -88,7 +87,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 'success' => true,
                 'message' => 'Alert created successfully!',
                 'alert_id' => $alert_id,
-                'alert_type' => $alert_type['name']
+                'alert_type' => $alert_type['AlertTypes_name'] // UPDATED key
             ]);
             exit;
         }
@@ -110,9 +109,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
 // For AJAX GET requests, return alert types JSON
 if ($_SERVER['REQUEST_METHOD'] === 'GET' && $is_ajax) {
-    $stmt = $pdo->query('SELECT id, name, description FROM alert_types ORDER BY name');
+    // UPDATED: Table 'AlertTypes' and column prefixes/desc suffix
+    $stmt = $pdo->query('SELECT AlertTypes_id, AlertTypes_name, AlertTypes_desc FROM AlertTypes ORDER BY AlertTypes_name');
     $alert_types = $stmt->fetchAll();
     echo json_encode(['alert_types' => $alert_types]);
     exit;
 }
-

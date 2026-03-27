@@ -18,17 +18,19 @@ if (empty($_SESSION['logged_in']) || $_SESSION['logged_in'] !== true || $_SESSIO
 }
 
 $pdo = getPDO();
-// Optimized query with role names
+
+// UPDATED: Table names to Title Case and column names with TablePrefix_
 $stmt = $pdo->query('
-    SELECT u.id, u.full_name, u.email, u.phone, u.status, r.name AS role 
-    FROM users u 
-    LEFT JOIN roles r ON u.role_id = r.id 
-    ORDER BY u.created_at DESC
+    SELECT u.Users_id, u.Users_full_name, u.Users_email, u.Users_phone, u.Users_status, r.Roles_name AS role 
+    FROM Users u 
+    LEFT JOIN Roles r ON u.Users_Roles_id = r.Roles_id 
+    ORDER BY u.Users_created_at DESC
 ');
 $users = $stmt->fetchAll();
 
 include __DIR__ . '/../includes/header.php';
 ?>
+
 
 <div class="container-fluid p-0">
     <div class="row g-0">
@@ -56,6 +58,7 @@ include __DIR__ . '/../includes/header.php';
                 <!-- Stats Grid -->
                 <div class="row g-4 mb-5">
                     <?php
+                    // Note: 'role' key remains because of the 'AS role' alias in your users.php query
                     $roles_count = [
                         'Total' => ['count' => count($users), 'color' => 'indigo', 'icon' => 'M15 19.128a9.38 9.38 0 0 0 2.625.372 9.337 9.337 0 0 0 4.121-.952 4.125 4.125 0 0 0-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 0 1 8.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0 1 11.964-3.07M12 6.375a3.375 3.375 0 1 1-6.75 0 3.375 3.375 0 0 1 6.75 0Zm8.25 2.25a2.625 2.625 0 1 1-5.25 0 2.625 2.625 0 0 1 5.25 0Z'],
                         'Admin' => ['count' => count(array_filter($users, fn($u) => $u['role'] === 'Admin')), 'color' => 'danger', 'icon' => 'M9 12.75 11.25 15 15 9.75m-3-7.036A11.959 11.959 0 0 1 3.598 6 11.99 11.99 0 0 0 3 9.749c0 5.592 3.824 10.29 9 11.623 5.176-1.333 9-6.03 9-11.622 0-1.31-.21-2.571-.598-3.751h-.152c-3.196 0-6.1-1.248-8.25-3.285Z'],
@@ -124,11 +127,13 @@ include __DIR__ . '/../includes/header.php';
                                     <tr>
                                         <td class="ps-4 text-muted small"><?= $index + 1 ?></td>
                                         <td>
-                                            <div class="fw-bold text-dark"><?= htmlspecialchars($user['full_name']) ?></div>
-                                            <div class="text-muted small"><?= htmlspecialchars($user['email']) ?></div>
+                                            <!-- UPDATED: Users_full_name and Users_email -->
+                                            <div class="fw-bold text-dark"><?= htmlspecialchars($user['Users_full_name']) ?></div>
+                                            <div class="text-muted small"><?= htmlspecialchars($user['Users_email']) ?></div>
                                         </td>
                                         <td>
-                                            <div class="small text-dark"><?= htmlspecialchars($user['phone'] ?: '--') ?></div>
+                                            <!-- UPDATED: Users_phone -->
+                                            <div class="small text-dark"><?= htmlspecialchars($user['Users_phone'] ?: '--') ?></div>
                                         </td>
                                         <td>
                                             <span class="badge bg-<?= $roleColor ?>-subtle text-<?= $roleColor ?>">
@@ -136,8 +141,9 @@ include __DIR__ . '/../includes/header.php';
                                             </span>
                                         </td>
                                         <td>
+                                            <!-- UPDATED: Users_status (if mapped directly) -->
                                             <span class="badge bg-success-subtle text-success">
-                                                Active
+                                                <?= ucfirst($user['Users_status'] ?? 'Active') ?>
                                             </span>
                                         </td>
                                         <td class="text-end pe-4">
@@ -148,17 +154,19 @@ include __DIR__ . '/../includes/header.php';
                                                     </svg>
                                                 </button>
                                                 <ul class="dropdown-menu dropdown-menu-end shadow-sm border-0">
+                                                    <!-- UPDATED: dataset mapping with Users_ prefixed keys -->
                                                     <li><a class="dropdown-item view-user" href="#"
-                                                            data-name="<?= htmlspecialchars($user['full_name']) ?>"
-                                                            data-email="<?= htmlspecialchars($user['email']) ?>"
-                                                            data-phone="<?= htmlspecialchars($user['phone']) ?>"
+                                                            data-name="<?= htmlspecialchars($user['Users_full_name']) ?>"
+                                                            data-email="<?= htmlspecialchars($user['Users_email']) ?>"
+                                                            data-phone="<?= htmlspecialchars($user['Users_phone']) ?>"
                                                             data-role="<?= htmlspecialchars($user['role']) ?>"
                                                             data-bs-toggle="modal" data-bs-target="#viewUserModal">View Details</a></li>
                                                     <li>
                                                         <hr class="dropdown-divider">
                                                     </li>
-                                                    <?php if ($user['id'] != $_SESSION['user_id']): ?>
-                                                        <li><a class="dropdown-item text-danger delete-user" href="#" data-id="<?= $user['id'] ?>">Delete User</a></li>
+                                                    <!-- UPDATED: User comparison using Users_id -->
+                                                    <?php if ($user['Users_id'] != $_SESSION['user_id']): ?>
+                                                        <li><a class="dropdown-item text-danger delete-user" href="#" data-id="<?= $user['Users_id'] ?>">Delete User</a></li>
                                                     <?php endif; ?>
                                                 </ul>
                                             </div>
@@ -192,25 +200,30 @@ include __DIR__ . '/../includes/header.php';
                 <form id="createUserForm">
                     <div class="mb-3">
                         <label class="form-label small fw-bold">Full Name</label>
-                        <input type="text" name="full_name" class="form-control" placeholder="Full Name" required>
+                        <!-- UPDATED: Users_full_name -->
+                        <input type="text" name="Users_full_name" class="form-control" placeholder="Full Name" required>
                     </div>
                     <div class="row">
                         <div class="col-md-6 mb-3">
                             <label class="form-label small fw-bold">Email Address</label>
-                            <input type="email" name="email" class="form-control" placeholder="example@email.com" required>
+                            <!-- UPDATED: Users_email -->
+                            <input type="email" name="Users_email" class="form-control" placeholder="example@email.com" required>
                         </div>
                         <div class="col-md-6 mb-3">
                             <label class="form-label small fw-bold">Phone Number</label>
-                            <input type="text" name="phone" class="form-control" placeholder="+254...">
+                            <!-- UPDATED: Users_phone -->
+                            <input type="text" name="Users_phone" class="form-control" placeholder="+254...">
                         </div>
                     </div>
                     <div class="mb-3">
                         <label class="form-label small fw-bold">Initial Password</label>
-                        <input type="password" name="password" class="form-control" placeholder="••••••••" required>
+                        <!-- UPDATED: Users_password -->
+                        <input type="password" name="Users_password" class="form-control" placeholder="••••••••" required>
                     </div>
                     <div class="mb-4">
                         <label class="form-label small fw-bold">System Role</label>
-                        <select name="role_id" class="form-select" required>
+                        <!-- UPDATED: Users_Roles_id -->
+                        <select name="Users_Roles_id" class="form-select" required>
                             <option value="1">Administrator</option>
                             <option value="2">Responder</option>
                             <option value="3">Community Member</option>
@@ -246,28 +259,33 @@ include __DIR__ . '/../includes/header.php';
 
                 <!-- Update Form -->
                 <form id="editUserForm">
-                    <input type="hidden" name="user_id" id="editUserId">
+                    <!-- UPDATED: Users_id -->
+                    <input type="hidden" name="Users_id" id="editUserId">
 
                     <div class="mb-3">
                         <label class="form-label small fw-bold text-muted text-uppercase">Full Name</label>
-                        <input type="text" name="full_name" id="editName" class="form-control border-slate-200 shadow-sm" required>
+                        <!-- UPDATED: Users_full_name -->
+                        <input type="text" name="Users_full_name" id="editName" class="form-control border-slate-200 shadow-sm" required>
                     </div>
 
                     <div class="row g-3 mb-3">
                         <div class="col-md-6">
                             <label class="form-label small fw-bold text-muted text-uppercase">Email Address</label>
-                            <input type="email" name="email" id="editEmail" class="form-control border-slate-200 shadow-sm" required>
+                            <!-- UPDATED: Users_email -->
+                            <input type="email" name="Users_email" id="editEmail" class="form-control border-slate-200 shadow-sm" required>
                         </div>
                         <div class="col-md-6">
                             <label class="form-label small fw-bold text-muted text-uppercase">Phone Number</label>
-                            <input type="text" name="phone" id="editPhone" class="form-control border-slate-200 shadow-sm">
+                            <!-- UPDATED: Users_phone -->
+                            <input type="text" name="Users_phone" id="editPhone" class="form-control border-slate-200 shadow-sm">
                         </div>
                     </div>
 
                     <div class="row g-3 mb-4">
                         <div class="col-md-6">
                             <label class="form-label small fw-bold text-muted text-uppercase">System Role</label>
-                            <select name="role_id" id="editRole" class="form-select border-slate-200 shadow-sm fw-bold">
+                            <!-- UPDATED: Users_Roles_id -->
+                            <select name="Users_Roles_id" id="editRole" class="form-select border-slate-200 shadow-sm fw-bold">
                                 <option value="1">Administrator</option>
                                 <option value="2">Responder</option>
                                 <option value="3">Community</option>
@@ -275,7 +293,8 @@ include __DIR__ . '/../includes/header.php';
                         </div>
                         <div class="col-md-6">
                             <label class="form-label small fw-bold text-muted text-uppercase">Account Status</label>
-                            <select name="status" id="editStatus" class="form-select border-slate-200 shadow-sm fw-bold">
+                            <!-- UPDATED: Users_status -->
+                            <select name="Users_status" id="editStatus" class="form-select border-slate-200 shadow-sm fw-bold">
                                 <option value="active">Active</option>
                                 <option value="inactive">Inactive / Suspended</option>
                             </select>
@@ -287,9 +306,6 @@ include __DIR__ . '/../includes/header.php';
             <!-- Action Footer -->
             <div class="modal-footer border-top-0 p-4 d-flex justify-content-between" style="background-color: #f8fafc;">
                 <button type="button" class="btn btn-outline-danger border-0 fw-bold px-3" id="modalDeleteBtn">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" class="me-1">
-                        <path d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0" />
-                    </svg>
                     Delete User
                 </button>
                 <div class="d-flex gap-2">
@@ -303,7 +319,7 @@ include __DIR__ . '/../includes/header.php';
 
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script>
-    // Search Functionality
+    // Search Functionality (Remains logic-heavy, no naming changes required as it parses innerText)
     document.getElementById("userSearch").addEventListener("keyup", function() {
         let filter = this.value.toLowerCase();
         let rows = document.querySelectorAll("#usersTable tbody tr");
@@ -344,19 +360,20 @@ include __DIR__ . '/../includes/header.php';
 
     /**
      * 1. Populate Modal with existing data
+     * Updated to handle data- attributes populated from Users_ prefixed columns
      */
     document.querySelectorAll(".view-user").forEach(btn => {
         btn.addEventListener("click", function() {
             const d = this.dataset;
 
-            // Map to Form
-            document.getElementById("editUserId").value = d.id;
-            document.getElementById("editName").value = d.name;
-            document.getElementById("editEmail").value = d.email;
-            document.getElementById("editPhone").value = d.phone || '';
-            document.getElementById("editStatus").value = d.status || 'active';
+            // Map to Form fields (These IDs correspond to the Modal inputs)
+            document.getElementById("editUserId").value = d.id; // Map to Users_id
+            document.getElementById("editName").value = d.name; // Map to Users_full_name
+            document.getElementById("editEmail").value = d.email; // Map to Users_email
+            document.getElementById("editPhone").value = d.phone || ''; // Map to Users_phone
+            document.getElementById("editStatus").value = d.status || 'active'; // Map to Users_status
 
-            // Map Role ID (Logic to convert name back to ID)
+            // Map Role ID (Logic to convert alias name back to Roles_id)
             const roleMap = {
                 'Admin': 1,
                 'Responder': 2,
@@ -364,7 +381,7 @@ include __DIR__ . '/../includes/header.php';
             };
             document.getElementById("editRole").value = roleMap[d.role] || 3;
 
-            // Map Header Profile
+            // Map Header Profile UI
             document.getElementById("viewInitial").innerText = d.name.charAt(0).toUpperCase();
             document.getElementById("headerName").innerText = d.name;
             document.getElementById("headerRole").innerText = d.role;
@@ -376,6 +393,7 @@ include __DIR__ . '/../includes/header.php';
 
     /**
      * 2. Handle Update (AJAX)
+     * FormData will now automatically include Users_full_name, Users_email, etc.
      */
     document.getElementById("saveUserBtn").addEventListener("click", async function() {
         const btn = this;
@@ -414,48 +432,42 @@ include __DIR__ . '/../includes/header.php';
 
     /**
      * Global Delete Controller
-     * Uses Event Delegation to ensure it works on dynamic elements and modals
      */
     document.addEventListener('click', function(e) {
-        // Look for elements with .delete-user or .delete-alert class (or closest parent)
         const deleteBtn = e.target.closest('.delete-user, .delete-alert, #modalDeleteBtn');
 
         if (deleteBtn) {
             e.preventDefault();
 
-            // 1. Determine Type and ID
-            // If it's the modal button, we get ID from a hidden input, otherwise from dataset
             const isModalDelete = deleteBtn.id === 'modalDeleteBtn';
+            // Accessing Users_id or Alerts_id stored in the 'id' dataset or hidden input
             const id = isModalDelete ? document.getElementById('editUserId').value : deleteBtn.dataset.id;
             const isUser = deleteBtn.classList.contains('delete-user') || isModalDelete;
 
-            const typeLabel = isUser ? 'User' : 'Alert';
+            const typeLabel = isUser ? 'User Account' : 'Incident Alert';
             const targetUrl = isUser ? 'delete-user.php' : 'delete-alert.php';
 
             if (!id) return;
 
-            // 2. SweetAlert Confirmation
             Swal.fire({
                 title: `Delete ${typeLabel}?`,
                 text: "This action is permanent and cannot be undone.",
                 icon: "warning",
                 showCancelButton: true,
-                confirmButtonColor: "#ef4444", // Red
-                cancelButtonColor: "#64748b", // Slate
+                confirmButtonColor: "#ef4444", 
+                cancelButtonColor: "#64748b", 
                 confirmButtonText: "Yes, Delete Permanently",
                 reverseButtons: true
             }).then((result) => {
                 if (result.isConfirmed) {
 
-                    // Show loading state
                     Swal.fire({
-                        title: 'Processing...',
+                        title: 'Processing Request...',
                         didOpen: () => {
                             Swal.showLoading();
                         }
                     });
 
-                    // 3. AJAX Request
                     const formData = new FormData();
                     formData.append('id', id);
 
@@ -468,13 +480,11 @@ include __DIR__ . '/../includes/header.php';
                             if (data.success) {
                                 Swal.fire({
                                     icon: 'success',
-                                    title: 'Deleted!',
+                                    title: 'Success!',
                                     text: data.message,
                                     timer: 1500,
                                     showConfirmButton: false
                                 }).then(() => {
-                                    // If we deleted from a modal, we must refresh or remove the row
-                                    // Simply reloading is safest to update all counters
                                     location.reload();
                                 });
                             } else {
@@ -490,7 +500,10 @@ include __DIR__ . '/../includes/header.php';
         }
     });
 
-    // Form Submission
+    /**
+     * 3. Create User Submission
+     * FormData will include Users_full_name, Users_email, Users_password, Users_Roles_id
+     */
     document.getElementById("createUserForm").addEventListener("submit", async function(e) {
         e.preventDefault();
         const response = await fetch("create-user.php", {
