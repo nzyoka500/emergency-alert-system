@@ -36,7 +36,7 @@ function is_active($pages, $required_filter = null) {
         <div class="p-4 mb-2">
             <div class="d-flex align-items-center">
                 <div class="bg-primary rounded-3 d-flex align-items-center justify-content-center shadow-sm" style="width: 60px; height: 60px; background-color: #4e46e515 !important;">
-                    <img class="img-fluid" src="/assets/images/logo-white.png" alt="Logo" style="width: 22px; height: 22px; border-radius: 50%;">
+                    <img class="img-fluid" src="./assets/images/logo-white.png" alt="Logo" style="width: 22px; height: 22px; border-radius: 50%;">
                 </div>
                 <div class="ms-3">
                     <h5 class="text-white fw-bold mb-0" style="letter-spacing: -0.2px; font-size: 1.1rem;">Responda</h5>
