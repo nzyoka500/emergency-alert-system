@@ -29,6 +29,7 @@ INSERT INTO `Roles` (`Roles_id`, `Roles_name`, `Roles_created_at`) VALUES
 (3, 'Community', '2026-03-07 05:04:28');
 
 -- --------------------------------------------------------
+------------------------
 
 --
 -- Table structure for table `Users`
