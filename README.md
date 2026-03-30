@@ -11,7 +11,7 @@
 
 The platform enables citizens to submit emergency alerts while allowing responders and administrators to verify, monitor, and coordinate responses more efficiently through a centralized digital system.
 
-This project was built to demonstrate how technology can improve **public safety communication**, **incident reporting**, and **emergency coordination**.
+This project is built to demonstrate how technology can improve **public safety communication**, **incident reporting**, and **emergency coordination**.
 
 
 ## Project Highlights
