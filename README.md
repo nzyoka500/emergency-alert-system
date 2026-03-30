@@ -1,4 +1,4 @@
-# Responda – `Community Emergency Alert & Response System`
+# Responda – ``Community Emergency Alert & Response System``
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Backend](https://img.shields.io/badge/Backend-PHP-blue.svg)]()
