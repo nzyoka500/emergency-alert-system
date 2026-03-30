@@ -180,7 +180,7 @@ http://localhost/responda
 ├── screenshots/        # Project preview images
 ├── inc/                # Reusable components
 ├── api/                # API endpoints 
-├── mobile/             # React Native integration files (if separated)
+├── mobile/             # React Native integration files
 └── *.php               # Core application modules
 ```
 
