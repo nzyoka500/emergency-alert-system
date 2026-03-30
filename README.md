@@ -179,7 +179,7 @@ http://localhost/responda
 ├── database/           # SQL files
 ├── screenshots/        # Project preview images
 ├── inc/                # Reusable components
-├── api/                # API endpoints (if available)
+├── api/                # API endpoints 
 ├── mobile/             # React Native integration files (if separated)
 └── *.php               # Core application modules
 ```
