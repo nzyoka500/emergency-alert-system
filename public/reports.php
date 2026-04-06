@@ -66,6 +66,9 @@ $monthly_stats = $pdo->query("
     ORDER BY Alerts_created_at DESC LIMIT 12
 ")->fetchAll();
 
+// Keep monthly stats chronological left-to-right in the chart
+$monthly_stats = array_reverse($monthly_stats);
+
 // 6. Alert Type Distribution
 $type_stats = $pdo->query("
     SELECT at.AlertTypes_name as name, COUNT(a.Alerts_id) as count,
@@ -137,16 +140,16 @@ include __DIR__ . '/../includes/header.php';
                         <p class="text-muted mb-0">Statistical analysis of emergency trends and response efficiency.</p>
                     </div>
                     <div class="btn-group shadow-sm" role="group">
-                        <button class="btn btn-white border px-4 py-2 small fw-bold" id="downloadPdfBtn">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" class="me-2">
+                        <button class="btn btn btn-white border px-4 py-2 me-2 small fw-bold" id="downloadPdfBtn">
+                            <!-- <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" class="me-2">
                                 <path d="M6.72 13.829c-.24.03-.48.062-.72.096m.72-.096a42.415 42.415 0 0 1 10.56 0m-10.56 0L6.34 18m10.94-4.171c.24.03.48.062.72.096m-.72-.096L17.66 18m0 0 .229 2.523a1.125 1.125 0 0 1-1.12 1.227H7.231a1.125 1.125 0 0 1-1.12-1.227L6.34 18m11.318-8.318a4.5 4.5 0 1 1-6.364 0m6.364 0a4.5 4.5 0 0 1-6.364 0m6.364 0h.008v.008h-.008V10.5h.008v.008h-.008V10.5Z" />
-                            </svg>
+                            </svg> -->
                             Export PDF
                         </button>
                         <button class="btn btn-white border px-4 py-2 small fw-bold" id="downloadExcelBtn">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" class="me-2">
+                            <!-- <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" class="me-2">
                                 <path d="M5 3h14a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2Zm2 4h6m-6 4h6m-6 4h6" />
-                            </svg>
+                            </svg> -->
                             Export Excel
                         </button>
                     </div>
@@ -317,14 +320,16 @@ include __DIR__ . '/../includes/header.php';
                                 <div class="mt-3 small text-muted">
                                     <strong>Key Insights:</strong>
                                     <?php
-                                    $current_month = date('M Y');
-                                    $last_month_count = end($monthly_stats)['count'] ?? 0;
-                                    $prev_month_count = prev($monthly_stats)['count'] ?? 0;
-                                    $trend = $prev_month_count > 0 ? (($last_month_count - $prev_month_count) / $prev_month_count) * 100 : 0;
-                                    ?>
-                                    <span class="badge bg-<?= $trend > 0 ? 'danger' : ($trend < 0 ? 'success' : 'secondary') ?>-subtle text-<?= $trend > 0 ? 'danger' : ($trend < 0 ? 'success' : 'secondary') ?> me-2">
-                                        <?= $trend > 0 ? '+' : '' ?><?= round($trend, 1) ?>% vs last month
-                                    </span>
+                                    $trend = 0;
+                                    if (count($monthly_stats) > 1) {
+                                        $latest = $monthly_stats[count($monthly_stats) - 1]['total'];
+                                        $previous = $monthly_stats[count($monthly_stats) - 2]['total'];
+                                        $trend = $previous > 0 ? (($latest - $previous) / $previous) * 100 : 0;
+                                    }
+                                ?>
+                                <span class="badge bg-<?= $trend > 0 ? 'danger' : ($trend < 0 ? 'success' : 'secondary') ?>-subtle text-<?= $trend > 0 ? 'danger' : ($trend < 0 ? 'success' : 'secondary') ?> me-2">
+                                    <?= $trend > 0 ? '+' : '' ?><?= round($trend, 1) ?>% vs last month
+                                </span>
                                     Peak activity typically indicates system stress points requiring additional resources.
                                 </div>
                             </div>
@@ -454,7 +459,7 @@ include __DIR__ . '/../includes/header.php';
             labels: <?= json_encode(array_column($monthly_stats, 'month')) ?>,
             datasets: [{
                 label: 'New Alerts',
-                data: <?= json_encode(array_column($monthly_stats, 'count')) ?>,
+                data: <?= json_encode(array_column($monthly_stats, 'total')) ?>,
                 borderColor: brandColors.primary,
                 backgroundColor: 'rgba(79, 70, 229, 0.1)',
                 fill: true,
