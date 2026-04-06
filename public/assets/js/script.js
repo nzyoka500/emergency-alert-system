@@ -571,6 +571,89 @@ function exportToCSV(data, filename = 'export.csv') {
     showToast('Data exported successfully', 'success');
 }
 
+function exportReportExcel(reportData, filename = 'responda-report.xlsx') {
+    if (!window.XLSX) {
+        showToast('Excel export library is not loaded.', 'danger');
+        return;
+    }
+
+    const wb = XLSX.utils.book_new();
+    const overviewRows = [
+        { Metric: 'Total Alerts', Value: reportData.summary.total_alerts },
+        { Metric: 'Resolved Alerts', Value: reportData.summary.resolved_alerts },
+        { Metric: 'Resolution Rate', Value: reportData.summary.response_rate + '%' }
+    ];
+
+    const overviewSheet = XLSX.utils.json_to_sheet(overviewRows);
+    XLSX.utils.book_append_sheet(wb, overviewSheet, 'Overview');
+
+    if (reportData.typeStats && reportData.typeStats.length) {
+        const typeSheet = XLSX.utils.json_to_sheet(reportData.typeStats.map(row => ({ Category: row.name, Count: row.count })));
+        XLSX.utils.book_append_sheet(wb, typeSheet, 'Category Breakdown');
+    }
+
+    if (reportData.monthlyStats && reportData.monthlyStats.length) {
+        const monthlySheet = XLSX.utils.json_to_sheet(reportData.monthlyStats.map(row => ({ Month: row.month, Count: row.count })));
+        XLSX.utils.book_append_sheet(wb, monthlySheet, 'Monthly Trend');
+    }
+
+    XLSX.writeFile(wb, filename);
+    showToast('Excel report downloaded successfully.', 'success');
+}
+
+function exportReportPdf(reportData, filename = 'responda-report.pdf') {
+    const jsPDFLib = window.jspdf?.jsPDF || window.jsPDF;
+    if (!jsPDFLib) {
+        showToast('PDF export library is not loaded.', 'danger');
+        return;
+    }
+
+    const doc = new jsPDFLib({ orientation: 'landscape', unit: 'pt', format: 'a4' });
+    doc.setFontSize(18);
+    doc.text('Responda Alert Report', 40, 40);
+    doc.setFontSize(11);
+    doc.text(`Total Alerts: ${reportData.summary.total_alerts}`, 40, 70);
+    doc.text(`Resolved Alerts: ${reportData.summary.resolved_alerts}`, 40, 86);
+    doc.text(`Resolution Rate: ${reportData.summary.response_rate}%`, 40, 102);
+
+    const addChart = (chartId, x, y, width) => {
+        const canvas = document.getElementById(chartId);
+        if (!canvas || typeof canvas.toDataURL !== 'function') return;
+        const imgData = canvas.toDataURL('image/png');
+        doc.addImage(imgData, 'PNG', x, y, width, 140);
+    };
+
+    addChart('monthlyReportChart', 40, 130, 320);
+    addChart('typeReportChart', 380, 130, 320);
+
+    let lineY = 292;
+    if (reportData.typeStats && reportData.typeStats.length) {
+        doc.setFontSize(12);
+        doc.text('Alert Category Breakdown', 40, lineY);
+        lineY += 16;
+        reportData.typeStats.forEach(row => {
+            doc.setFontSize(10);
+            doc.text(`${row.name}: ${row.count}`, 40, lineY);
+            lineY += 14;
+        });
+        lineY += 6;
+    }
+
+    if (reportData.monthlyStats && reportData.monthlyStats.length) {
+        doc.setFontSize(12);
+        doc.text('Monthly Trend', 40, lineY);
+        lineY += 16;
+        reportData.monthlyStats.forEach(row => {
+            doc.setFontSize(10);
+            doc.text(`${row.month}: ${row.count}`, 40, lineY);
+            lineY += 14;
+        });
+    }
+
+    doc.save(filename);
+    showToast('PDF report created successfully.', 'success');
+}
+
 /**
  * Print page
  */

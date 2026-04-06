@@ -26,9 +26,22 @@ $sort_by = $_GET['sort'] ?? 'recent';
 
 $alerts = [];
 $status_counts = ['pending' => 0, 'verified' => 0, 'broadcasted' => 0, 'resolved' => 0, 'all' => 0];
+$responders = [];
+$hasAssignedToColumn = false;
 
 try {
     $pdo = getPDO();
+    // Determine whether the Alerts table supports assigned responder mapping
+    try {
+        $columnCheck = $pdo->query("SHOW COLUMNS FROM Alerts LIKE 'Alerts_AssignedTo_id'")->fetch();
+        $hasAssignedToColumn = !empty($columnCheck);
+    } catch (Exception $inner) {
+        $hasAssignedToColumn = false;
+    }
+
+    // Load available responders for the assignment dropdown
+    $respondersStmt = $pdo->query("SELECT Users_id, Users_full_name FROM Users WHERE Users_Roles_id = 2 AND Users_status = 'active' ORDER BY Users_full_name ASC");
+    $responders = $respondersStmt->fetchAll();
 
     // 1. Fetch Summary Data 
     // UPDATED: Table 'Alerts', Column 'Alerts_status'
@@ -43,12 +56,15 @@ try {
     // 2. Build Intelligent Query
     // UPDATED: Prefixed columns and Title Case tables
     $query = "
-        SELECT a.*, at.AlertTypes_name as alert_type, u.Users_full_name as creator,
-        (SELECT COUNT(*) FROM AlertResponses WHERE AlertResponses_Alerts_id = a.Alerts_id) as response_count
+        SELECT a.*, at.AlertTypes_name as alert_type, u.Users_full_name as creator, ".
+        ($hasAssignedToColumn ? "ar.Users_full_name as assigned_to_name, a.Alerts_AssignedTo_id, " : "") .
+        "(SELECT COUNT(*) FROM AlertResponses WHERE AlertResponses_Alerts_id = a.Alerts_id) as response_count
         FROM Alerts a
         LEFT JOIN AlertTypes at ON a.Alerts_AlertTypes_id = at.AlertTypes_id
         LEFT JOIN Users u ON a.Alerts_Users_id = u.Users_id
-        WHERE 1=1
+        " .
+        ($hasAssignedToColumn ? "LEFT JOIN Users ar ON a.Alerts_AssignedTo_id = ar.Users_id\n" : "") .
+        "WHERE 1=1
     ";
 
     if ($status_filter !== 'all') {
@@ -212,6 +228,9 @@ include __DIR__ . '/../includes/header.php';
                                         <small class="text-muted d-block" style="font-size: 0.75rem;">
                                             <span class="fw-bold text-uppercase"><?= htmlspecialchars($alert['alert_type']) ?></span> • By <?= htmlspecialchars($alert['creator'] ?? 'System') ?>
                                         </small>
+                                        <?php if (!empty($alert['assigned_to_name'])): ?>
+                                            <small class="text-muted d-block" style="font-size: 0.70rem;">Assigned to <?= htmlspecialchars($alert['assigned_to_name']) ?></small>
+                                        <?php endif; ?>
                                     </td>
                                     <td>
                                         <!-- UPDATED: Alerts_status prefix -->
@@ -246,11 +265,25 @@ include __DIR__ . '/../includes/header.php';
                                                 data-type="<?= htmlspecialchars($alert['alert_type']) ?>"
                                                 data-status="<?= $alert['Alerts_status'] ?>"
                                                 data-severity="<?= $alert['Alerts_severity'] ?>"
+                                                data-created-at="<?= htmlspecialchars($alert['Alerts_created_at']) ?>"
+                                                data-assigned-to="<?= $alert['Alerts_AssignedTo_id'] ?? '' ?>"
+                                                data-assigned-to-name="<?= htmlspecialchars($alert['assigned_to_name'] ?? '') ?>"
                                                 data-latitude="<?= $alert['Alerts_latitude'] ?>"
                                                 data-longitude="<?= $alert['Alerts_longitude'] ?>"
                                                 data-bs-toggle="modal" data-bs-target="#viewAlertModal">
                                                 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M2.036 12.322a1.012 1.012 0 0 1 0-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178Z" /><path d="M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" /></svg>
                                             </button>
+                                            <?php if($role_id == 2 && in_array($alert['Alerts_status'], ['pending', 'verified'])): ?>
+                                                <button class="btn btn-sm btn-info border text-white shadow-sm respond-alert me-3"
+                                                    data-id="<?= $alert['Alerts_id'] ?>"
+                                                    data-title="<?= htmlspecialchars($alert['Alerts_title']) ?>"
+                                                    data-description="<?= htmlspecialchars($alert['Alerts_desc']) ?>"
+                                                    data-type="<?= htmlspecialchars($alert['alert_type']) ?>"
+                                                    data-status="<?= $alert['Alerts_status'] ?>"
+                                                    data-created-at="<?= htmlspecialchars($alert['Alerts_created_at']) ?>">
+                                                    Respond
+                                                </button>
+                                            <?php endif; ?>
                                             <?php if($role_id == 1): ?>
                                             <!-- UPDATED: Alerts_id prefix -->
                                             <button class="btn btn-sm btn-white border text-danger shadow-sm delete-alert" data-id="<?= $alert['Alerts_id'] ?>">
@@ -294,6 +327,7 @@ document.addEventListener('click', function (e) {
         
         if(document.getElementById("alertStatus")) document.getElementById("alertStatus").value = d.status; // Alerts_status
         if(document.getElementById("alertStatusView")) document.getElementById("alertStatusView").value = d.status;
+        if(document.getElementById("alertRespondent")) document.getElementById("alertRespondent").value = d.assignedTo || '';
         
         // Handle Action Buttons visibility (Verify button)
         const actionContainer = document.getElementById('adminActionButtons');
@@ -304,7 +338,15 @@ document.addEventListener('click', function (e) {
         }
     }
 
-    // 2. Deletion Logic
+    // 2. Respond Action
+    const respondBtn = e.target.closest('.respond-alert');
+    if (respondBtn) {
+        const d = respondBtn.dataset;
+        openRespondModal(d.id, d.title, d.description, d.type, d.status, d.createdAt);
+        return;
+    }
+
+    // 3. Deletion Logic
     const deleteBtn = e.target.closest('.delete-alert, #deleteAlert');
     if (deleteBtn) {
         // Grab the ID from either the modal hidden field or the button's data attribute
@@ -332,6 +374,23 @@ document.addEventListener('click', function (e) {
         });
     }
 });
+
+function verifyAndBroadcast(alertId) {
+    const fd = new FormData();
+    fd.append('alert_id', alertId);
+    fd.append('status', 'verified');
+
+    fetch('update-alert.php', { method: 'POST', body: fd })
+        .then(res => res.json())
+        .then(data => {
+            if (data.success) {
+                Swal.fire('Success', data.message, 'success').then(() => location.reload());
+            } else {
+                Swal.fire('Error', data.message, 'error');
+            }
+        })
+        .catch(() => Swal.fire('Error', 'Unable to change alert status.', 'error'));
+}
 
 // 3. Update Logic
 const updateBtn = document.getElementById('editAlert');

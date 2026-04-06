@@ -58,12 +58,18 @@ include __DIR__ . '/../includes/header.php';
                         <h1 class="h3 fw-bold mb-1">Alert Insights</h1>
                         <p class="text-muted mb-0">Statistical analysis of emergency trends and response efficiency.</p>
                     </div>
-                    <div class="btn-group shadow-sm">
-                        <button class="btn btn-white border px-4 py-2 small fw-bold" onclick="window.print()">
+                    <div class="btn-group shadow-sm" role="group">
+                        <button class="btn btn-white border px-4 py-2 small fw-bold" id="downloadPdfBtn">
                             <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" class="me-2">
-                                <path stroke-linecap="round" stroke-linejoin="round" d="M6.72 13.829c-.24.03-.48.062-.72.096m.72-.096a42.415 42.415 0 0 1 10.56 0m-10.56 0L6.34 18m10.94-4.171c.24.03.48.062.72.096m-.72-.096L17.66 18m0 0 .229 2.523a1.125 1.125 0 0 1-1.12 1.227H7.231a1.125 1.125 0 0 1-1.12-1.227L6.34 18m11.318-8.318a4.5 4.5 0 1 1-6.364 0m6.364 0a4.5 4.5 0 0 1-6.364 0m6.364 0h.008v.008h-.008V10.5h.008v.008h-.008V10.5Z" />
+                                <path d="M6.72 13.829c-.24.03-.48.062-.72.096m.72-.096a42.415 42.415 0 0 1 10.56 0m-10.56 0L6.34 18m10.94-4.171c.24.03.48.062.72.096m-.72-.096L17.66 18m0 0 .229 2.523a1.125 1.125 0 0 1-1.12 1.227H7.231a1.125 1.125 0 0 1-1.12-1.227L6.34 18m11.318-8.318a4.5 4.5 0 1 1-6.364 0m6.364 0a4.5 4.5 0 0 1-6.364 0m6.364 0h.008v.008h-.008V10.5h.008v.008h-.008V10.5Z" />
                             </svg>
-                            Export Report
+                            Export PDF
+                        </button>
+                        <button class="btn btn-white border px-4 py-2 small fw-bold" id="downloadExcelBtn">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" class="me-2">
+                                <path d="M5 3h14a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2Zm2 4h6m-6 4h6m-6 4h6" />
+                            </svg>
+                            Export Excel
                         </button>
                     </div>
                 </div>
@@ -130,7 +136,30 @@ include __DIR__ . '/../includes/header.php';
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js" integrity="sha512-xsrs4p1Z0v9mHJyi5NBHh9s6gTfNT5+y7IuSQU7+icla1m5zXKMqf6gF1br2FQEAbqZzS8/Cd1G8oaxQD8ViHQ==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+<script src="https://cdn.sheetjs.com/xlsx-latest/package/dist/xlsx.full.min.js"></script>
 <script>
+    window.reportData = {
+        summary: {
+            total_alerts: <?= json_encode($total_alerts) ?>,
+            resolved_alerts: <?= json_encode($resolved_alerts) ?>,
+            response_rate: <?= json_encode($response_rate) ?>
+        },
+        typeStats: <?= json_encode($type_stats) ?>,
+        monthlyStats: <?= json_encode($monthly_stats) ?>
+    };
+
+    document.addEventListener('DOMContentLoaded', function() {
+        const pdfBtn = document.getElementById('downloadPdfBtn');
+        const excelBtn = document.getElementById('downloadExcelBtn');
+        if (pdfBtn) pdfBtn.addEventListener('click', function() {
+            if (window.exportReportPdf) window.exportReportPdf(window.reportData);
+        });
+        if (excelBtn) excelBtn.addEventListener('click', function() {
+            if (window.exportReportExcel) window.exportReportExcel(window.reportData);
+        });
+    });
+
     const brandColors = {
         primary: '#4f46e5',
         success: '#10b981',

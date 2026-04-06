@@ -141,6 +141,7 @@ document.querySelectorAll(".view-alert").forEach(btn => {
 
         if (statusField) statusField.value = data.status;
         if (statusViewField) statusViewField.value = data.status.charAt(0).toUpperCase() + data.status.slice(1);
+        if (document.getElementById('alertRespondent')) document.getElementById('alertRespondent').value = data.assignedTo || '';
 
         // Handle Admin Verification Buttons
         const actionContainer = document.getElementById('adminActionButtons');

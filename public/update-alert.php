@@ -21,6 +21,7 @@ $title = $_POST['title'] ?? '';
 $desc = $_POST['description'] ?? '';
 $status = $_POST['status'] ?? 'pending';
 $severity = $_POST['severity'] ?? 'Medium';
+$assigned_to = isset($_POST['assigned_to']) && $_POST['assigned_to'] !== '' ? (int) $_POST['assigned_to'] : null;
 
 if (!$id) {
     echo json_encode(['success' => false, 'message' => 'Missing Alert ID']);

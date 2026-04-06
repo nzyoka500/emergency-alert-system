@@ -29,7 +29,6 @@ INSERT INTO `Roles` (`Roles_id`, `Roles_name`, `Roles_created_at`) VALUES
 (3, 'Community', '2026-03-07 05:04:28');
 
 -- --------------------------------------------------------
-------------------------
 
 --
 -- Table structure for table `Users`
@@ -88,6 +87,7 @@ CREATE TABLE `Alerts` (
   `Alerts_status` enum('pending','verified','broadcasted','resolved') DEFAULT 'pending',
   `Alerts_severity` enum('Low','Medium','High') DEFAULT 'Medium',
   `Alerts_Users_id` int(11) DEFAULT NULL,
+  `Alerts_AssignedTo_id` int(11) DEFAULT NULL,
   `Alerts_created_at` timestamp NOT NULL DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
@@ -179,7 +179,8 @@ INSERT INTO `SystemLogs` (`SystemLogs_id`, `SystemLogs_Users_id`, `SystemLogs_ac
 ALTER TABLE `Alerts`
   ADD PRIMARY KEY (`Alerts_id`),
   ADD KEY `Alerts_AlertTypes_id` (`Alerts_AlertTypes_id`),
-  ADD KEY `Alerts_Users_id` (`Alerts_Users_id`);
+  ADD KEY `Alerts_Users_id` (`Alerts_Users_id`),
+  ADD KEY `Alerts_AssignedTo_id` (`Alerts_AssignedTo_id`);
 
 ALTER TABLE `AlertBroadcasts`
   ADD PRIMARY KEY (`AlertBroadcasts_id`),
@@ -237,7 +238,8 @@ ALTER TABLE `Users` MODIFY `Users_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCR
 
 ALTER TABLE `Alerts`
   ADD CONSTRAINT `Alerts_FK_Types` FOREIGN KEY (`Alerts_AlertTypes_id`) REFERENCES `AlertTypes` (`AlertTypes_id`) ON UPDATE CASCADE,
-  ADD CONSTRAINT `Alerts_FK_Users` FOREIGN KEY (`Alerts_Users_id`) REFERENCES `Users` (`Users_id`) ON DELETE SET NULL ON UPDATE CASCADE;
+  ADD CONSTRAINT `Alerts_FK_Users` FOREIGN KEY (`Alerts_Users_id`) REFERENCES `Users` (`Users_id`) ON DELETE SET NULL ON UPDATE CASCADE,
+  ADD CONSTRAINT `Alerts_FK_AssignedTo` FOREIGN KEY (`Alerts_AssignedTo_id`) REFERENCES `Users` (`Users_id`) ON DELETE SET NULL ON UPDATE CASCADE;
 
 ALTER TABLE `AlertBroadcasts`
   ADD CONSTRAINT `Broadcasts_FK_Alerts` FOREIGN KEY (`AlertBroadcasts_Alerts_id`) REFERENCES `Alerts` (`Alerts_id`) ON DELETE CASCADE ON UPDATE CASCADE;
