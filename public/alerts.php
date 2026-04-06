@@ -58,7 +58,8 @@ try {
     $query = "
         SELECT a.*, at.AlertTypes_name as alert_type, u.Users_full_name as creator, ".
         ($hasAssignedToColumn ? "ar.Users_full_name as assigned_to_name, a.Alerts_AssignedTo_id, " : "") .
-        "(SELECT COUNT(*) FROM AlertResponses WHERE AlertResponses_Alerts_id = a.Alerts_id) as response_count
+        "(SELECT COUNT(*) FROM AlertResponses WHERE AlertResponses_Alerts_id = a.Alerts_id) as response_count,
+        (SELECT u2.Users_full_name FROM AlertResponses ar2 LEFT JOIN Users u2 ON ar2.AlertResponses_Users_id = u2.Users_id WHERE ar2.AlertResponses_Alerts_id = a.Alerts_id ORDER BY ar2.AlertResponses_responded_at DESC LIMIT 1) as responder_name
         FROM Alerts a
         LEFT JOIN AlertTypes at ON a.Alerts_AlertTypes_id = at.AlertTypes_id
         LEFT JOIN Users u ON a.Alerts_Users_id = u.Users_id
@@ -236,7 +237,11 @@ include __DIR__ . '/../includes/header.php';
                                         <!-- UPDATED: Alerts_status prefix -->
                                         <span class="badge bg-<?= $stat_color ?>-subtle text-<?= $stat_color ?> px-2 py-1">
                                             <?php if($alert['Alerts_status'] === 'pending'): ?><span class="status-pulse-pending"></span><?php endif; ?>
-                                            <?= ucfirst($alert['Alerts_status']) ?>
+                                            <?php if($alert['Alerts_status'] === 'resolved' && !empty($alert['responder_name'])): ?>
+                                                Resolved by <?= htmlspecialchars($alert['responder_name']) ?>
+                                            <?php else: ?>
+                                                <?= ucfirst($alert['Alerts_status']) ?>
+                                            <?php endif; ?>
                                         </span>
                                     </td>
                                     <td>
@@ -268,6 +273,7 @@ include __DIR__ . '/../includes/header.php';
                                                 data-created-at="<?= htmlspecialchars($alert['Alerts_created_at']) ?>"
                                                 data-assigned-to="<?= $alert['Alerts_AssignedTo_id'] ?? '' ?>"
                                                 data-assigned-to-name="<?= htmlspecialchars($alert['assigned_to_name'] ?? '') ?>"
+                                                data-responder-name="<?= htmlspecialchars($alert['responder_name'] ?? '') ?>"
                                                 data-latitude="<?= $alert['Alerts_latitude'] ?>"
                                                 data-longitude="<?= $alert['Alerts_longitude'] ?>"
                                                 data-bs-toggle="modal" data-bs-target="#viewAlertModal">

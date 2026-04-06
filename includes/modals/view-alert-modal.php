@@ -73,6 +73,24 @@
                         </div>
                     </div>
 
+                    <!-- Responder Info Section (for resolved alerts) -->
+                    <div id="responderInfoSection" class="mb-4" style="display: none;">
+                        <div class="p-3 rounded-3 bg-success-subtle border border-success">
+                            <label class="form-label small fw-bold text-uppercase text-success" style="letter-spacing: 0.5px;">Resolved By</label>
+                            <div class="d-flex align-items-center">
+                                <div class="bg-success text-white rounded-circle d-flex align-items-center justify-content-center me-3" style="width: 40px; height: 40px;">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                    </svg>
+                                </div>
+                                <div>
+                                    <div class="fw-bold text-dark" id="resolvedByName"></div>
+                                    <small class="text-muted">Emergency Responder</small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
                     <?php if ($_SESSION['role_id'] == 1): ?>
                     <!-- Assignment Section (Admin Only) -->
                     <div class="p-4 rounded-4 bg-slate-50 border border-slate-200">
@@ -142,6 +160,18 @@ document.querySelectorAll(".view-alert").forEach(btn => {
         if (statusField) statusField.value = data.status;
         if (statusViewField) statusViewField.value = data.status.charAt(0).toUpperCase() + data.status.slice(1);
         if (document.getElementById('alertRespondent')) document.getElementById('alertRespondent').value = data.assignedTo || '';
+
+        // Handle Responder Info Section
+        const responderSection = document.getElementById('responderInfoSection');
+        const responderName = document.getElementById('resolvedByName');
+        if (responderSection && responderName) {
+            if (data.status === 'resolved' && data.responderName) {
+                responderName.textContent = data.responderName;
+                responderSection.style.display = 'block';
+            } else {
+                responderSection.style.display = 'none';
+            }
+        }
 
         // Handle Admin Verification Buttons
         const actionContainer = document.getElementById('adminActionButtons');

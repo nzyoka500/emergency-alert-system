@@ -749,3 +749,7 @@ window.AlertApp = {
     handleApiError,
     StorageManager
 };
+
+// Expose export functions globally for reports page
+window.exportReportPdf = exportReportPdf;
+window.exportReportExcel = exportReportExcel;
